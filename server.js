@@ -1,75 +1,55 @@
-// Sample data for posts
-let posts = [
-    { id: 1, title: "First post", content: "This is the content of the first post.", votes: 10, comments: ["Comment 1", "Comment 2"] },
-    { id: 2, title: "Second post", content: "This is the content of the second post.", votes: 5, comments: ["Comment 1", "Comment 2", "Comment 3"] },
-    { id: 3, title: "Third post", content: "This is the content of the third post.", votes: 15, comments: ["Comment 1"] }
-];
+// Load environment variables
+require('dotenv').config();
 
-// Function to render posts
-function renderPosts() {
-    const postsContainer = document.getElementById("posts");
-    postsContainer.innerHTML = "";
+const express = require('express'); // Importing express
+const session = require('express-session'); // Importing express-session
+const sequelize = require('./src/config/db'); // Importing sequelize instance
+const User = require('./src/models/userModel'); // Importing User model
+const Post = require('./src/models/postModel'); // Importing Post model
+const userRoutes = require('./src/routes/userRoutes'); // Importing user routes
+const postRoutes = require('./src/routes/postRoutes'); // Importing post routes
+const cors = require('cors'); // Importing CORS
+const morgan = require('morgan'); // Importing morgan for logging
 
-    posts.forEach(post => {
-        const postDiv = document.createElement("div");
-        postDiv.classList.add("post");
+const app = express(); // Creating express app
+const PORT = process.env.PORT || 3000; // Setting port
 
-        const title = document.createElement("h2");
-        title.classList.add("post-title");
-        title.textContent = post.title;
+// Middleware for logging
+app.use(morgan('dev'));
 
-        const content = document.createElement("p");
-        content.textContent = post.content;
+// Middleware to parse JSON bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-        const votes = document.createElement("div");
-        votes.classList.add("post-votes");
-        votes.textContent = `Votes: ${post.votes}`;
+// Enable CORS
+app.use(cors());
 
-        const comments = document.createElement("div");
-        comments.classList.add("post-comments");
-        comments.innerHTML = `<strong>Comments:</strong>`;
-        post.comments.forEach(comment => {
-            const commentDiv = document.createElement("div");
-            commentDiv.classList.add("comment");
-            commentDiv.textContent = comment;
-            comments.appendChild(commentDiv);
-        });
+// Session management
+app.use(session({
+    secret: process.env.SESSION_SECRET, // Ensure you have SESSION_SECRET in your .env file
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: process.env.NODE_ENV === 'production' } // Use secure cookies in production
+}));
 
-        postDiv.appendChild(title);
-        postDiv.appendChild(content);
-        postDiv.appendChild(votes);
-        postDiv.appendChild(comments);
+// Middleware to serve static files
+app.use(express.static('public'));
 
-        postsContainer.appendChild(postDiv);
-    });
-}
+// API routes
+app.use('/api/users', userRoutes); // Using user routes
+app.use('/api/posts', postRoutes); // Using post routes
 
-// Function to handle submitting a post
-function submitPost() {
-    const title = document.getElementById("post-title").value;
-    const content = document.getElementById("post-content").value;
+// Sync all defined models to the database
+sequelize.sync().then(() => {
+    console.log('Models are synchronized');
+    // Start the server only after the models are synchronized
+    app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+}).catch(err => {
+    console.error('Failed to synchronize models:', err);
+});
 
-    // Generate a unique ID for the new post
-    const id = posts.length + 1;
-
-    // Create the new post object
-    const newPost = {
-        id: id,
-        title: title,
-        content: content,
-        votes: 0,
-        comments: []
-    };
-
-    // Add the new post to the posts array
-    posts.push(newPost);
-
-    // Render the updated list of posts
-    renderPosts();
-}
-
-// Event listener for submitting a post
-document.getElementById("submit-post").addEventListener("click", submitPost);
-
-// Initial rendering of posts
-renderPosts();
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});

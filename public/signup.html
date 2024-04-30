@@ -1,0 +1,24 @@
+<!DOCTYPE html> <!-- Declares the document type and the version of HTML (HTML5) -->
+<html lang="en"> <!-- Begins the HTML document, specifying English as the primary language -->
+
+<head>
+    <meta charset="UTF-8"> <!-- Sets the character encoding to UTF-8 which includes most characters from all known languages -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures the page is responsive and scales correctly on different devices -->
+    <link rel="stylesheet" href="css/style.css"> <!-- Links the HTML document to an external CSS file for styling -->
+    <title>Sign Up - Q&A Forum</title> <!-- Sets the title of the web page as it will appear in the browser tab -->
+</head>
+
+<body>
+    <h1>Sign Up for Q&A Forum</h1> <!-- Main heading of the page, clearly stating the purpose of the page -->
+
+    <form id="registerForm">
+        <input type="text" id="registerUsername" placeholder="Username" required> <!-- Input field for the username, marked as required -->
+        <input type="email" id="registerEmail" placeholder="Email" required> <!-- Input field for the email, marked as required and expects an email format -->
+        <input type="password" id="registerPassword" placeholder="Password" required> <!-- Input field for the password, marked as required -->
+        <button type="submit">Register</button> <!-- Submit button for the form -->
+    </form>
+
+    <a href="index.html">Back to Home</a> <!-- Provides a link back to the homepage of the site -->
+    <script src="js/signup.js"></script> <!-- Links to an external JavaScript file that handles the functionality of the sign-up form -->
+</body>
+</html>

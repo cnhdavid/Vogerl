@@ -1,0 +1,54 @@
+/* Basic style settings for the entire page */
+body {
+    font-family: Arial, sans-serif; /* Sets the font for the entire content of the page */
+    margin: 20px; /* Sets a 20px margin around the entire content of the page */
+    padding: 0; /* No padding inside the body tag */
+    background-color: #f4f4f4; /* Background color of the entire page content */
+}
+
+/* Style settings for <section> elements */
+section {
+    margin-bottom: 20px; /* 20px margin at the bottom */
+    padding: 10px; /* 10px padding in all directions */
+    background: white; /* Background color set to white */
+    border-radius: 5px; /* Rounded corners with a radius of 5px */
+}
+
+/* Styles for text, email, password input fields, and text areas */
+input[type=text], input[type=email], input[type=password], textarea {
+    width: 100%; /* Sets the element's width to 100% of its parent element */
+    padding: 8px; /* Padding of 8px on all sides */
+    margin: 10px 0; /* 10px margin on the top and bottom, no horizontal margin */
+    box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+}
+
+/* Style for buttons */
+button {
+    background-color: #007BFF; /* Button background color set to a bright blue */
+    color: white; /* Text color set to white */
+    border: none; /* No border */
+    padding: 10px 20px; /* Padding inside the button */
+    cursor: pointer; /* Changes the mouse cursor to a pointer when hovered over the button */
+    border-radius: 5px; /* Rounded corners with a radius of 5px */
+}
+
+/* Style for button hover state */
+button:hover {
+    background-color: #0056b3; /* Changes the button background color to a darker blue when hovered */
+}
+
+/* Styles for dropdown content */
+.dropdown-content {
+    display: none; /* Hidden by default */
+    position: absolute; /* Positioned absolutely relative to its positioned ancestor */
+    background-color: #f9f9f9; /* Light grey background color */
+    min-width: 160px; /* Minimum width of 160px */
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); /* Box shadow for 3D effect */
+    padding: 12px 16px; /* Padding inside the dropdown */
+    z-index: 1; /* Stack order, makes sure the dropdown appears on top of other content */
+}
+
+/* Specific style to remove top margin for forms inside dropdown content */
+.dropdown-content form {
+    margin-top: 0; /* Removes the top margin */
+}
