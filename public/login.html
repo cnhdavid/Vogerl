@@ -1,30 +1,84 @@
-<!DOCTYPE html> <!-- Declares the document type and the version of HTML (HTML5) -->
-<html lang="en"> <!-- Begins the HTML document, specifying English as the primary language -->
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Sets the character encoding to UTF-8 which includes most characters from all known languages -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Ensures the page is responsive and scales correctly on different devices -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
-    <title>Sign Up - Q&A Forum</title> <!-- Sets the title of the web page as it will appear in the browser tab -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <title>Log In - Q&A Forum</title>
+    <style>
+        html {
+            font-size: 16px;
+        }
+        .box {
+            box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+        }
+        .back-link {
+            margin-top: 20px;
+            display: inline-block;
+            background: #3273dc;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .back-link:hover {
+            background-color: #2366b1;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Sign Up for Q&A Forum</h1> <!-- Main heading of the page, clearly stating the purpose of the page -->
+    <section class="section">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column is-5-tablet is-4-desktop is-3-widescreen">
+                    <form action="#" class="box">
+                        <h1 class="title has-text-centered">Log In for Q&A Forum</h1>
 
-    <form id="registerForm">
-        <input class="input is-link" type="text" placeholder="Link input" type="text" id="registerUsername"
-            placeholder="Username" required> <!-- Input field for the username, marked as required -->
-        <input type="email" id="registerEmail" placeholder="Email" required>
-        <!-- Input field for the email, marked as required and expects an email format -->
-        <input type="password" id="registerPassword" placeholder="Password" required>
-        <!-- Input field for the password, marked as required -->
-        <button type="submit">Register</button> <!-- Submit button for the form -->
-    </form>
+                        <div class="field">
+                            <label class="label" for="registerUsername">Username</label>
+                            <div class="control has-icons-left">
+                                <input class="input is-medium" type="text" id="registerUsername" placeholder="Username" required>
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                            </div>
+                        </div>
 
-    <a href="index.html">Back to Home</a> <!-- Provides a link back to the homepage of the site -->
+                        <div class="field">
+                            <label class="label" for="registerEmail">Email</label>
+                            <div class="control has-icons-left">
+                                <input class="input is-medium" type="email" id="registerEmail" placeholder="Email" required>
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label" for="registerPassword">Password</label>
+                            <div class="control has-icons-left">
+                                <input class="input is-medium" type="password" id="registerPassword" placeholder="Password" required>
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="control">
+                                <button class="button is-link is-medium" type="submit">Register</button>
+                            </div>
+                        </div>
+                    </form>
+                    <p class="has-text-centered">
+                        <a href="index.html" class="back-link">Back to Home</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
     <script src="js/signup.js"></script>
-    <!-- Links to an external JavaScript file that handles the functionality of the sign-up form -->
 </body>
 </html>
