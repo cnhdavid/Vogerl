@@ -1,43 +1,50 @@
-<!DOCTYPE html> <!-- Declares the document type and version of HTML -->
-<html lang="en"> <!-- Begins the HTML document with English as the primary language -->
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8"> <!-- Specifies the character encoding for the document -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures the page is responsive on different devices -->
-    <link rel="stylesheet" href="css/style.css"> <!-- Links to the external CSS file for styling -->
-    <title>Vogerl</title> <!-- Sets the title of the web page that appears in the browser tab -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Vogerl</title>
 </head>
-
 <body>
-    <h1>Vogerl</h1> <!-- Main heading of the webpage -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/explore">Explore</a></li>
+                <li><button id="loginBtn">Sign In</button></li>
+                <li><a href="signup.html">Sign Up</a></li>
+            </ul>
+        </nav>
+    </header>
 
-    <nav>
-        <button id="loginBtn">Sign In</button> <!-- Button for signing in, triggers dropdown -->
-        <a href="signup.html" class="signupBtn">Sign Up</a> <!-- Link to the signup page -->
-    </nav>
+    <aside>
+        <div class="sidebar">
+            <h3>Categories</h3>
+            <ul>
+                <li><a href="#">Math</a></li>
+                <li><a href="#">Programming</a></li>
+                <li><a href="#">German</a></li>
+            </ul>
+        </div>
+    </aside>
 
-    <div id="loginDropdown" class="dropdown-content">
-        <form id="loginForm">
-            <input type="email" id="loginEmail" placeholder="Email" required> <!-- Input field for email -->
-            <input type="password" id="loginPassword" placeholder="Password" required> <!-- Input field for password -->
-            <button type="submit">Login</button> <!-- Submit button for the login form -->
-        </form>
-    </div>
+    <main>
+        <section id="postQuestion">
+            <h2>Post a Question</h2>
+            <form id="postForm">
+                <input type="text" id="postTitle" placeholder="Title" required>
+                <textarea id="postContent" placeholder="Content" required></textarea>
+                <button type="submit">Post</button>
+            </form>
+        </section>
 
-    <section id="postQuestion">
-        <h2>Post a Question</h2> <!-- Section heading -->
-        <form id="postForm">
-            <input type="text" id="postTitle" placeholder="Title" required> <!-- Input field for question title -->
-            <textarea id="postContent" placeholder="Content" required></textarea> <!-- Textarea for question content -->
-            <button type="submit">Post</button> <!-- Submit button for posting a question -->
-        </form>
-    </section>
+        <section id="postsDisplay">
+            <h2>Questions</h2>
+            <div id="postsContainer"></div>
+        </section>
+    </main>
 
-    <section id="postsDisplay">
-        <h2>Questions</h2> <!-- Section heading for displayed questions -->
-        <div id="postsContainer"></div> <!-- Container where questions will be dynamically added -->
-    </section>
-
-    <script src="js/app.js"></script> <!-- Link to the external JavaScript file that contains interactivity -->
+    <script src="js/app.js"></script>
 </body>
 </html>
