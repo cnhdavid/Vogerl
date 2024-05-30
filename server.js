@@ -1,55 +1,109 @@
-// Load environment variables
 require('dotenv').config();
 
-const express = require('express'); // Importing express
-const session = require('express-session'); // Importing express-session
-const sequelize = require('./src/config/db'); // Importing sequelize instance
-const User = require('./src/models/userModel'); // Importing User model
-const Post = require('./src/models/postModel'); // Importing Post model
-const userRoutes = require('./src/routes/userRoutes'); // Importing user routes
-const postRoutes = require('./src/routes/postRoutes'); // Importing post routes
-const cors = require('cors'); // Importing CORS
-const morgan = require('morgan'); // Importing morgan for logging
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-const app = express(); // Creating express app
-const PORT = process.env.PORT || 3000; // Setting port
+const app = express();
+const port = 3000;
 
-// Middleware for logging
-app.use(morgan('dev'));
-
-// Middleware to parse JSON bodies
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Enable CORS
 app.use(cors());
+app.use(bodyParser.json());
 
-// Session management
-app.use(session({
-    secret: process.env.SESSION_SECRET, // Ensure you have SESSION_SECRET in your .env file
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === 'production' } // Use secure cookies in production
-}));
-
-// Middleware to serve static files
-app.use(express.static('public'));
-
-// API routes
-app.use('/api/users', userRoutes); // Using user routes
-app.use('/api/posts', postRoutes); // Using post routes
-
-// Sync all defined models to the database
-sequelize.sync().then(() => {
-    console.log('Models are synchronized');
-    // Start the server only after the models are synchronized
-    app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-}).catch(err => {
-    console.error('Failed to synchronize models:', err);
+const pool = new Pool({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
+});
+// Check Cpnnection
+app.get('/check-db-connection', async (req, res) => {
+    try {
+        await pool.query('SELECT 1');
+        res.status(200).json({ success: true, message: 'Database connection is successful' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Database connection failed', error: error.message });
+    }
 });
 
-// Global error handler
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
+// User registration
+app.post('/signup', async (req, res) => {
+    const { username, email, password, date_of_birth, first_name, last_name } = req.body;
+    console.log("tryinggg")
+    const dob = new Date(date_of_birth);
+    const formattedDOB = dob.toISOString().split('T')[0];
+    console.log(formattedDOB)
+    
+    try {
+        // Check if username or email already exists
+        const userCheckQuery = 'SELECT * FROM users WHERE username = $1 OR email = $2';
+        const userCheckResult = await pool.query(userCheckQuery, [username, email]);
+
+        if (userCheckResult.rows.length > 0) {
+            return res.status(400).json({ message: 'Username or email already exists' });
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert new user into the database
+        const insertQuery = 'INSERT INTO users (username, email, password, date_of_birth, first_name, last_name) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
+        const insertResult = await pool.query(insertQuery, [username, email, hashedPassword,formattedDOB , first_name, last_name]);
+
+        res.status(201).json(insertResult.rows[0]);
+    } catch (error) {
+        console.error('Error:', error);
+        console.error('Error inserting user:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// User login
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        const user = result.rows[0];
+        if (user && await bcrypt.compare(password, user.password_hash)) {
+            const token = jwt.sign({ userId: user.id }, 'your_jwt_secret', { expiresIn: '1h' });
+            res.json({ token });
+        } else {
+            res.status(401).json({ error: 'Invalid credentials' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Create a post
+app.post('/posts', async (req, res) => {
+    const { title, content, userId } = req.body;
+    try {
+        const result = await pool.query(
+            'INSERT INTO posts (title, content, user_id) VALUES ($1, $2, $3) RETURNING id',
+            [title, content, userId]
+        );
+        res.status(201).json({ postId: result.rows[0].id });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Fetch posts
+app.get('/posts', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM posts');
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
 });
