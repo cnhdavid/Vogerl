@@ -1,23 +1,33 @@
-document.getElementById('check-connection').addEventListener('click', async () => {
-  const statusElement = document.getElementById('check-connection');
-  statusElement.textContent = 'Checking...';
+document.addEventListener('DOMContentLoaded', () => {
+  const navbarEnd = document.getElementById('navbar-end');
 
-  try {
-      const response = await fetch('http://localhost:3000/check-db-connection');
-      const result = await response.json();
+  const token = localStorage.getItem('token');
 
-      if (result.success) {
-          statusElement.textContent = 'Database connection is successful';
-          statusElement.className = 'has-text-success';
-      } else {
-          statusElement.textContent = 'Database connection failed: ' + result.message;
-          statusElement.className = 'has-text-danger';
-          console.log(result.message)
-      }
-  } catch (error) {
-      statusElement.textContent = 'Error: ' + error.message;
-      statusElement.className = 'has-text-danger';
-      console.log(error.message)
+  if (token) {
+      // Decode token to get the username
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const username = payload.username;
+
+      // Create welcome message
+      const welcomeMessage = document.createElement('div');
+      welcomeMessage.classList.add('navbar-item');
+      welcomeMessage.innerHTML = `<span>Welcome, ${username}</span>`;
+
+      // Create logout button
+      const logoutButton = document.createElement('button');
+      logoutButton.classList.add('button', 'is-danger');
+      logoutButton.textContent = 'Logout';
+      logoutButton.addEventListener('click', logout);
+
+      // Clear existing content and append welcome message and logout button
+      navbarEnd.innerHTML = '';
+      navbarEnd.appendChild(welcomeMessage);
+      navbarEnd.appendChild(logoutButton);
   }
 });
 
+// Logout functionality
+function logout() {
+  localStorage.removeItem('token');
+  window.location.href = 'login.html';
+}

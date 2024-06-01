@@ -6,6 +6,7 @@ const cors = require('cors');
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const app = express();
 const port = 3000;
@@ -63,18 +64,41 @@ app.post('/signup', async (req, res) => {
 // User login
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
+
     try {
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-        const user = result.rows[0];
-        if (user && await bcrypt.compare(password, user.password_hash)) {
-            const token = jwt.sign({ userId: user.id }, 'your_jwt_secret', { expiresIn: '1h' });
-            res.json({ token });
-        } else {
-            res.status(401).json({ error: 'Invalid credentials' });
+        // Check if the email exists
+        const userCheckQuery = 'SELECT * FROM users WHERE email = $1';
+        const userCheckResult = await pool.query(userCheckQuery, [email]);
+
+        if (userCheckResult.rows.length === 0) {
+            return res.status(400).json({ message: 'Invalid email or password' });
         }
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Database error' });
+
+        const user = userCheckResult.rows[0];
+
+        // Compare the provided password with the hashed password
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (!passwordMatch) {
+            return res.status(400).json({ message: 'Invalid email or password' });
+        }
+
+        const jwtSecretKey = crypto.randomBytes(64).toString('hex');
+        console.log('Generated JWT Secret Key:', jwtSecretKey);
+
+
+        // Save the JWT secret key in the database
+
+        const token = jwt.sign({ username: user.username }, jwtSecretKey, { expiresIn: '1h' });
+        console.log('Generated Token:', token);
+        
+        
+
+        console.log('hiii')
+        res.json({ token });
+    } catch (error) {
+        console.error('Error logging in user:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
 
