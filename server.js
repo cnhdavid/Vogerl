@@ -7,6 +7,7 @@ const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const authenticateToken = require('./authenticate');
 
 const app = express();
 const port = 3000;
@@ -83,18 +84,15 @@ app.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid email or password' });
         }
 
-        const jwtSecretKey = crypto.randomBytes(64).toString('hex');
-        console.log('Generated JWT Secret Key:', jwtSecretKey);
+        // Generate and store JWT secret key if not already present
+        let jwtSecretKey = user.jwt_secret_key;
+        if (!jwtSecretKey) {
+            jwtSecretKey = crypto.randomBytes(64).toString('hex');
+            const updateQuery = 'UPDATE users SET jwt_secret_key = $1 WHERE email = $2';
+            await pool.query(updateQuery, [jwtSecretKey, email]);
+        }
 
-
-        // Save the JWT secret key in the database
-
-        const token = jwt.sign({ username: user.username }, jwtSecretKey, { expiresIn: '1h' });
-        console.log('Generated Token:', token);
-        
-        
-
-        console.log('hiii')
+        const token = jwt.sign({ username: user.username }, jwtSecretKey, { expiresIn: '1h' });        
         res.json({ token });
     } catch (error) {
         console.error('Error logging in user:', error);
@@ -103,31 +101,34 @@ app.post('/login', async (req, res) => {
 });
 
 // Create a post
-app.post('/posts', async (req, res) => {
-    const { title, content, userId } = req.body;
+
+app.post('/api/post', authenticateToken, async (req, res) => {
+    const { title, content, subject } = req.body;
+    const username = req.user.username; // Extract username from the token
+
     try {
         const result = await pool.query(
-            'INSERT INTO posts (title, content, user_id) VALUES ($1, $2, $3) RETURNING id',
-            [title, content, userId]
+            'INSERT INTO posts (title, content, subject, username) VALUES ($1, $2, $3, $4) RETURNING *',
+            [title, content, subject, username]
         );
-        res.status(201).json({ postId: result.rows[0].id });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Database error' });
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error('Error inserting data into database:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-// Fetch posts
-app.get('/posts', async (req, res) => {
+app.get('/api/posts', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM posts');
+        console.log(result)
         res.json(result.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Database error' });
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 });
 
 app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    console.log(`Server running at http://localhost:${port}/`);
 });
