@@ -8,9 +8,19 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const authenticateToken = require('./authenticate');
+const fs = require('fs');
+const multer = require('multer');
+const upload = multer();
+const path = require('path');
+
 
 const app = express();
 const port = 3000;
+app.use(cors());
+app.use(express.json());
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ limit: '20mb', extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -22,6 +32,10 @@ const pool = new Pool({
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
 });
+
+
+
+
 // Check Cpnnection
 app.get('/check-db-connection', async (req, res) => {
     try {
@@ -100,16 +114,20 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Create a post
-
-app.post('/api/post', authenticateToken, async (req, res) => {
+app.post('/api/post', authenticateToken, upload.single('image'), async (req, res) => {
     const { title, content, subject } = req.body;
     const username = req.user.username; // Extract username from the token
+    let image = null;
+
+    // If image is uploaded, convert it to Base64 string
+    if (req.file) {
+        image = req.file.buffer.toString('base64');
+    }
 
     try {
         const result = await pool.query(
-            'INSERT INTO posts (title, content, subject, username) VALUES ($1, $2, $3, $4) RETURNING *',
-            [title, content, subject, username]
+            'INSERT INTO posts (title, content, subject, username, image) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [title, content, subject, username, image]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -117,6 +135,10 @@ app.post('/api/post', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+
+
+
 
 app.get('/api/posts', async (req, res) => {
     try {
@@ -128,6 +150,88 @@ app.get('/api/posts', async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
+// Function to get comments by post ID
+async function getCommentsByPostId(postId) {
+    const query = 'SELECT * FROM comments WHERE post_id = $1';
+    const values = [postId];
+    
+    try {
+        const result = await pool.query(query, values);
+        return result.rows;
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        throw error;
+    }
+}
+
+// Function to get a post by ID
+async function getPostById(postId) {
+    const query = 'SELECT * FROM posts WHERE id = $1';
+    const values = [postId];
+    
+    try {
+        const result = await pool.query(query, values);
+        if (result.rows.length === 0) {
+            console.error(`Post with ID ${postId} not found.`);
+            return null;
+        }
+        return result.rows[0];
+    } catch (error) {
+        console.error('Error fetching post:', error);
+        throw error;
+    }
+}
+// Endpoint to get comments based on post ID
+app.get('/api/posts/:postId/comments', async (req, res) => {
+    const postId = req.params.postId;
+    
+    try {
+        const comments = await getCommentsByPostId(postId);
+        res.status(200).json(comments);
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred while fetching comments' });
+    }
+});
+
+app.get('/api/posts/:postId', async (req, res) => {
+    const postId = req.params.postId;
+    
+    try {
+        const post = await getPostById(postId);
+        if (post) {
+            res.status(200).json(post);
+        } else {
+            res.status(404).json({ error: 'Post not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred while fetching the post' });
+    }
+});
+
+app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
+    const { postId } = req.params;
+    const { content } = req.body;
+    const username = req.user.username; // Extract username from the token
+
+    // Log incoming data for debugging
+    console.log('Received postId:', postId);
+    console.log('Received content:', content);
+    console.log('Received username:', username);
+
+    try {
+        const result = await pool.query(
+            `INSERT INTO comments (username, post_id, content, created_at, updated_at)
+             VALUES ($1, $2, $3, NOW(), NOW()) RETURNING *`,
+            [username, postId, content]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error('Error inserting comment into database:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);

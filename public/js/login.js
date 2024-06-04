@@ -16,6 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ email, password }),
             });
 
+            if (response.status === 401 || response.status === 403) {
+                // Token is invalid or expired
+                alert('Session expired or token invalid. Redirecting to login page...');
+                window.location.href = 'login.html'; // Redirect to login page
+                return;
+            }
+
             if (response.ok) {
                 const data = await response.json();
                 

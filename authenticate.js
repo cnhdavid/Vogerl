@@ -14,7 +14,7 @@ const authenticateToken = async (req, res, next) => {
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-        return res.sendStatus(401); // Unauthorized
+        return res.status(401).json({ message: 'No token provided' }); // Unauthorized
     }
 
     try {
@@ -25,21 +25,24 @@ const authenticateToken = async (req, res, next) => {
         const userResult = await pool.query(userQuery, [username]);
 
         if (userResult.rows.length === 0) {
-            return res.sendStatus(403); // Forbidden 
+            return res.status(403).json({ message: 'User not found' }); // Forbidden
         }
 
         const jwtSecretKey = userResult.rows[0].jwt_secret_key;
 
         jwt.verify(token, jwtSecretKey, (err, user) => {
             if (err) {
-                return res.sendStatus(403); // Forbidden
+                if (err.name === 'TokenExpiredError') {
+                    return res.status(401).json({ message: 'Token expired' }); // Unauthorized
+                }
+                return res.status(403).json({ message: 'Token is not valid' }); // Forbidden
             }
             req.user = user;
             next();
         });
     } catch (error) {
         console.error('Error authenticating token:', error);
-        res.sendStatus(500); // Internal Server Error
+        res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
     }
 };
 
