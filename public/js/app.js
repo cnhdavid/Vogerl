@@ -292,14 +292,15 @@ function loadComments(postId) {
             const commentsContainer = document.getElementById('commentsContainer');
             commentsContainer.innerHTML = '';
 
-            const renderComments = (comments, parentElement, level = 0) => {
+            const renderComments = (comments, parentElement, level = 0, replyTo = null) => {
                 comments.forEach(comment => {
                     const commentElement = document.createElement('div');
                     commentElement.classList.add('comment');
                     commentElement.style.marginLeft = `${level * 20}px`;
+                    const replyText = replyTo ? `<span class="replying-to-text">Replying to ${replyTo}</span>` : '';
                     commentElement.innerHTML = `
                         <p>
-                            <strong>${comment.username}</strong>
+                            <strong>${comment.username}</strong> ${replyText}
                             <br>
                             ${comment.content}
                         </p>
@@ -307,26 +308,31 @@ function loadComments(postId) {
                         <div class="reply-input" style="display: none;">
                             <textarea class="textarea" placeholder="Reply to comment"></textarea>
                             <button class="button is-primary is-small submit-reply">Submit</button>
+                            <button class="button is-danger is-small submit-close">close</button>
                         </div>
                     `;
-
+            
                     const replyButton = commentElement.querySelector('.reply-button');
                     const replyInput = commentElement.querySelector('.reply-input');
                     const submitReplyButton = commentElement.querySelector('.submit-reply');
-
+                    const submitCloseButton = commentElement.querySelector('.submit-close');
+            
                     replyButton.addEventListener('click', () => {
                         replyInput.style.display = 'block';
                     });
-
+            
                     submitReplyButton.addEventListener('click', () => {
                         const replyContent = replyInput.querySelector('textarea').value;
                         submitComment(postId, replyContent, comment.id);
                     });
-
+                    submitCloseButton.addEventListener('click', () => {
+                        replyInput.style.display = 'none';
+                    });
+            
                     parentElement.appendChild(commentElement);
-
+            
                     if (comment.replies) {
-                        renderComments(comment.replies, parentElement, level + 1);
+                        renderComments(comment.replies, parentElement, level + 1, comment.username);
                     }
                 });
             };

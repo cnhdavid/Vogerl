@@ -5,3 +5,7 @@
     cursor: pointer;
     float: right;
 }
+
+*{
+    margin-block: 10px;
+}
