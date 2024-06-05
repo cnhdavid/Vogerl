@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: formData
         });
+        
 
         if (response.ok) {
             const data = await response.json();
@@ -81,78 +82,108 @@ function logout() {
   localStorage.removeItem('token');
   window.location.href = 'login.html';
 }
-async function fetchAndDisplayPosts() {
+async function fetchPosts() {
     try {
         const response = await fetch('http://localhost:3000/api/posts');
-        const data = await response.json();
+        if (!response.ok) {
+            throw new Error('Failed to fetch posts');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        return [];
+    }
+}
 
+async function fetchComments(postId) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/posts/${postId}/comments`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch comments for post ${postId}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(`Error fetching comments for post ${postId}:`, error);
+        return [];
+    }
+}
+async function fetchAndDisplayPosts() {
+    try {
+        const posts = await fetchPosts();
         const postsContainer = document.getElementById('postsContainer');
         postsContainer.innerHTML = '';
 
-        for (const post of data) {
-            const postElement = document.createElement('div');
-            postElement.classList.add('box');
+        const commentsPromises = posts.map(post => fetchComments(post.id));
+        const allComments = await Promise.all(commentsPromises);
 
-            let imageData = '';
-            if (post.image) {
-                // Check for prefix
-                if (post.image.startsWith('data:image/jpeg;base64,')) {
-                    // If prefix exists, remove it
-                    imageData = post.image.replace('data:image/jpeg;base64,', '');
-                } else {
-                    // If no prefix, use image data as is
-                    imageData = post.image;
-                }
-            }
-
-            postElement.innerHTML = `
-                <article class="media">
-                    <div class="media-content">
-                        <div class="content">
-                            <p>
-                                <strong>${post.title}</strong> <small>@${post.username}</small>
-                                <br>
-                                <em>${post.subject}</em>
-                                <br>
-                                ${post.content}
-                            </p>
-                            ${imageData ? `<img src="data:image/jpeg;base64,${imageData}" alt="Post Image" />` : ''}
-                        </div>
-                    </div>
-                </article>
-            `;
-
-            const commentsResponse = await fetch(`http://localhost:3000/api/posts/${post.id}/comments`);
-            const comments = await commentsResponse.json();
-
-            if (comments.length > 0) {
-                const commentsList = document.createElement('ul');
-                commentsList.classList.add('comments-list');
-                comments.forEach(comment => {
-                    const commentItem = document.createElement('li');
-                    commentItem.textContent = `${comment.username}: "${comment.content}"`;
-                    commentsList.appendChild(commentItem);
-                });
-                postElement.querySelector('.content').appendChild(commentsList);
-            }
-
-            postElement.addEventListener('click', () => openPost(post.id));
+        posts.forEach((post, index) => {
+            const postElement = createPostElement(post, allComments[index]);
             postsContainer.appendChild(postElement);
-        }
+        });
     } catch (error) {
-        console.error('Error fetching and displaying posts:', error);
+        console.error('Error displaying posts:', error);
     }
 }
+function createPostElement(post, comments) {
+    const postElement = document.createElement('div');
+    postElement.classList.add('box');
+
+    let imageData = '';
+    if (post.image) {
+        imageData = `data:image/jpeg;base64,${post.image}`;
+    }
+
+    postElement.innerHTML = `
+        <article class="media">
+            <div class="media-content">
+                <div class="content">
+                    <p>
+                        <strong>${post.title}</strong> <small>@${post.username}</small>
+                        <br>
+                        <em>${post.subject}</em>
+                        <br>
+                        ${post.content}
+                    </p>
+                    ${imageData ? `<img src="${imageData}" alt="Post Image" class="post-image" />` : ''}
+                </div>
+            </div>
+        </article>
+    `;
+
+    if (comments.length > 0) {
+        const commentsList = document.createElement('ul');
+        commentsList.classList.add('comments-list');
+        comments.forEach(comment => {
+            const commentItem = document.createElement('li');
+            commentItem.textContent = `${comment.username}: "${comment.content}"`;
+            commentsList.appendChild(commentItem);
+        });
+        postElement.querySelector('.content').appendChild(commentsList);
+    }
+
+    if (imageData) {
+        const imageElement = postElement.querySelector('.post-image');
+        imageElement.addEventListener('click', () => {
+            const newTab = window.open();
+            newTab.document.body.innerHTML = `<img src="${imageData}" alt="Post Image" style="max-width: 100%; height: auto;" />`;
+        });
+    }
+
+    postElement.addEventListener('click', () => openPost(post.id));
+
+    return postElement;
+}
+
 function openPost(postId) {
-    // Update the URL with the post ID
-    window.history.pushState(null, null, `?post=${postId}`);
-    
-    // Fetch and display the post details
     fetch(`http://localhost:3000/api/posts/${postId}`)
         .then(response => response.json())
         .then(post => {
             const modalContent = document.querySelector('#postModal .modal-content');
-            
+            const token = localStorage.getItem('token'); 
+            let imageData = '';
+            if (post.image) {
+                imageData = `data:image/jpeg;base64,${post.image}`;
+            }
             modalContent.innerHTML = `
                 <article class="media">
                     <div class="media-content">
@@ -164,28 +195,94 @@ function openPost(postId) {
                                 <br>
                                 ${post.content}
                             </p>
+                            ${imageData ? `<img src="${imageData}" alt="Post Image" class="post-image" />` : ''}
                         </div>
                     </div>
                 </article>
                 <div>
                     <h4>Comments</h4>
                     <div id="commentsContainer">
-                        <!-- Comments will be loaded here -->
                     </div>
+                    ${token ? `
                     <textarea id="commentInput" class="textarea" placeholder="Add a comment"></textarea>
                     <button id="submitComment" class="button is-primary">Submit</button>
+                    ` : `
+                    <p>Please log in to add a comment.</p>
+                    `}
+                    ${token && post.username === getUserIdFromToken(token) ? `<button id="deletePostButton" class="button is-danger">Delete Post</button>` : ''}
                 </div>
             `;
-            
-            document.getElementById('postModal').classList.add('is-active');
+
+            if (token && post.userId === getUserIdFromToken(token)) {
+                document.getElementById('deletePostButton').addEventListener('click', () => {
+                    deletePost(postId);
+                });
+            }
+
+            if (token) {
+                document.getElementById('submitComment').addEventListener('click', function() {
+                    const commentInput = document.getElementById('commentInput').value;
+                    submitComment(postId, commentInput, null);
+                });
+            }
+
             loadComments(postId);
-            
-            // Add event listener to submit comment button
-            document.getElementById('submitComment').addEventListener('click', () => submitComment(postId));
+            document.getElementById('postModal').classList.add('is-active');
+
+            if (imageData) {
+                const imageElement = modalContent.querySelector('.post-image');
+                imageElement.addEventListener('click', () => {
+                    const newTab = window.open();
+                    newTab.document.body.innerHTML = `<img src="${imageData}" alt="Post Image" style="max-width: 100%; height: auto;" />`;
+                });
+            }
         })
-        .catch(error => {
-            console.error('Error fetching post:', error);
-        });
+        .catch(error => console.error('Error fetching post:', error));
+}
+
+function getUserIdFromToken(token) {
+    // Implement this function to extract and return the user ID from the token
+    // For example:
+     
+     const payload = JSON.parse(atob(token.split('.')[1]));
+      const username = payload.username;
+     return username;
+}
+
+function deletePost(postId) {
+    // Implement the logic to delete the post
+}
+
+async function fetchComments(postId) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/posts/${postId}/comments`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch comments for post ${postId}`);
+        }
+        const comments = await response.json();
+        return organizeComments(comments);
+    } catch (error) {
+        console.error(`Error fetching comments for post ${postId}:`, error);
+        return [];
+    }
+}
+function organizeComments(comments) {
+    const commentMap = {};
+    comments.forEach(comment => {
+        comment.replies = [];
+        commentMap[comment.id] = comment;
+    });
+
+    const organizedComments = [];
+    comments.forEach(comment => {
+        if (comment.parent_id) {
+            commentMap[comment.parent_id].replies.push(comment);
+        } else {
+            organizedComments.push(comment);
+        }
+    });
+
+    return organizedComments;
 }
 
 function loadComments(postId) {
@@ -195,46 +292,77 @@ function loadComments(postId) {
             const commentsContainer = document.getElementById('commentsContainer');
             commentsContainer.innerHTML = '';
 
-            comments.forEach(comment => {
-                const commentElement = document.createElement('div');
-                commentElement.classList.add('comment');
-                commentElement.innerHTML = `
-                    <p>
-                        <strong>${comment.username}</strong>
-                        <br>
-                        ${comment.content}
-                    </p>
-                `;
-                commentsContainer.appendChild(commentElement);
-            });
+            const renderComments = (comments, parentElement, level = 0) => {
+                comments.forEach(comment => {
+                    const commentElement = document.createElement('div');
+                    commentElement.classList.add('comment');
+                    commentElement.style.marginLeft = `${level * 20}px`;
+                    commentElement.innerHTML = `
+                        <p>
+                            <strong>${comment.username}</strong>
+                            <br>
+                            ${comment.content}
+                        </p>
+                        <button class="button is-small is-light reply-button">Reply</button>
+                        <div class="reply-input" style="display: none;">
+                            <textarea class="textarea" placeholder="Reply to comment"></textarea>
+                            <button class="button is-primary is-small submit-reply">Submit</button>
+                        </div>
+                    `;
+
+                    const replyButton = commentElement.querySelector('.reply-button');
+                    const replyInput = commentElement.querySelector('.reply-input');
+                    const submitReplyButton = commentElement.querySelector('.submit-reply');
+
+                    replyButton.addEventListener('click', () => {
+                        replyInput.style.display = 'block';
+                    });
+
+                    submitReplyButton.addEventListener('click', () => {
+                        const replyContent = replyInput.querySelector('textarea').value;
+                        submitComment(postId, replyContent, comment.id);
+                    });
+
+                    parentElement.appendChild(commentElement);
+
+                    if (comment.replies) {
+                        renderComments(comment.replies, parentElement, level + 1);
+                    }
+                });
+            };
+
+            renderComments(organizeComments(comments), commentsContainer);
         })
         .catch(error => {
             console.error('Error fetching comments:', error);
         });
 }
 
-function submitComment(postId) {
-    const commentInput = document.getElementById('commentInput');
-    const commentContent = commentInput.value;
+
+function submitComment(postId, content, parentId = null) {
+    const authToken = localStorage.getItem('token'); 
 
     fetch(`http://localhost:3000/api/posts/${postId}/comments`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
         },
-        body: JSON.stringify({ content: commentContent })
+        body: JSON.stringify({ content, parentId })
     })
-        .then(response => response.json())
-        .then(comment => {
-            // Clear the comment input
-            commentInput.value = '';
-            // Reload comments
-            loadComments(postId);
-        })
-        .catch(error => {
-            console.error('Error submitting comment:', error);
-        });
+    .then(response => response.json())
+    .then(comment => {
+        if (!parentId) {
+            document.getElementById('commentInput').value = '';
+        }
+        loadComments(postId);
+        fetchAndDisplayPosts();
+    })
+    .catch(error => {
+        console.error('Error submitting comment:', error);
+    });
 }
+
 
 
 // No need to modify fetchImage() function, as we are directly setting src attribute
@@ -244,31 +372,7 @@ function submitComment(postId) {
 
 
 
-function submitComment(postId) {
-    const commentInput = document.getElementById('commentInput');
-    const commentContent = commentInput.value;
-    const authToken = localStorage.getItem('token'); // Retrieve the token from localStorage
 
-    fetch(`http://localhost:3000/api/posts/${postId}/comments`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
-        },
-        body: JSON.stringify({ content: commentContent })
-    })
-    .then(response => response.json())
-    .then(comment => {
-        // Clear the comment input
-        commentInput.value = '';
-        // Reload comments
-        loadComments(postId);
-        fetchAndDisplayPosts();
-    })
-    .catch(error => {
-        console.error('Error submitting comment:', error);
-    });
-}
 
 
 // Event listener to close the modal

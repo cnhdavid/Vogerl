@@ -142,14 +142,14 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
 
 app.get('/api/posts', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM posts');
-        console.log(result)
-        res.json(result.rows);
+        const result = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
+        res.status(200).json(result.rows);
     } catch (error) {
-        console.error('Error fetching posts:', error);
-        res.status(500).json({ message: 'Internal Server Error' });
+        console.error('Error fetching posts from database:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 // Function to get comments by post ID
 async function getCommentsByPostId(postId) {
     const query = 'SELECT * FROM comments WHERE post_id = $1';
@@ -210,19 +210,14 @@ app.get('/api/posts/:postId', async (req, res) => {
 
 app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
     const { postId } = req.params;
-    const { content } = req.body;
+    const { content, parentId } = req.body; // Include parentId in the request body
     const username = req.user.username; // Extract username from the token
-
-    // Log incoming data for debugging
-    console.log('Received postId:', postId);
-    console.log('Received content:', content);
-    console.log('Received username:', username);
 
     try {
         const result = await pool.query(
-            `INSERT INTO comments (username, post_id, content, created_at, updated_at)
-             VALUES ($1, $2, $3, NOW(), NOW()) RETURNING *`,
-            [username, postId, content]
+            `INSERT INTO comments (username, post_id, content, parent_id, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *`,
+            [username, postId, content, parentId]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -230,6 +225,7 @@ app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 
 
 

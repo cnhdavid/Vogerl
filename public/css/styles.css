@@ -1,0 +1,7 @@
+.box .post-image {
+    max-width: 150px;
+    max-height: 150px;
+    margin-left: 20px;
+    cursor: pointer;
+    float: right;
+}

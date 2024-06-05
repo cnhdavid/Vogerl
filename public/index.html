@@ -74,6 +74,12 @@
                                 </div>
                             </div>
                             <div class="field">
+                                <label class="label">Image</label>
+                                <div class="control">
+                                    <input class="input" type="file" id="postImage" accept="image/*">
+                                </div>
+                            </div>
+                            <div class="field">
                                 <label class="label">Content</label>
                                 <div class="control">
                                     <textarea class="textarea" id="postContent" placeholder="Content" required></textarea>
@@ -83,16 +89,15 @@
                                 <div class="field">
                                     <label class="label">Subject</label>
                                     <div class="control">
-                                        <div class="select">
-                                            <select>
+                                        <div class="select" id="postSubject">
+                                            <select id="postMenu">
                                                 <option>Select Subject</option>
                                                 <option>Maths</option>
                                                 <option>Science</option>
                                                 <option>Biology</option>
                                                 <option>English</option>
                                                 <option>German</option>
-                                                <option >Computer Science</option>
-                                                
+                                                <option>Computer Science</option>
                                             </select>
                                         </div>
                                     </div>
@@ -108,6 +113,14 @@
                         <h2 class="title">Questions</h2>
                         <div id="postsContainer"></div>
                     </section>
+                    <div id="postModal" class="modal">
+                        <div class="modal-background"></div>
+                        <div class="modal-content">
+                            <!-- Post details will be injected here -->
+                        </div>
+                        <button class="modal-close is-large" aria-label="close"></button>
+                    </div>
+                    
                 </main>
             </div>
         </div>

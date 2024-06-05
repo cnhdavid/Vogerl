@@ -33,7 +33,10 @@ const authenticateToken = async (req, res, next) => {
         jwt.verify(token, jwtSecretKey, (err, user) => {
             if (err) {
                 if (err.name === 'TokenExpiredError') {
+                     // Redirect to login page
                     return res.status(401).json({ message: 'Token expired' }); // Unauthorized
+
+
                 }
                 return res.status(403).json({ message: 'Token is not valid' }); // Forbidden
             }
