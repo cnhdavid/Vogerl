@@ -4,18 +4,31 @@ import { fetchComments } from './comment.js';
 import { openPost } from './modal.js';
 import sidebarSubjects from './subjects.js';
 
-export async function fetchPosts() {
+async function fetchPosts(subject = null) {
+  const url = subject
+    ? `http://localhost:3000/api/posts?subject=${encodeURIComponent(subject)}`
+    : 'http://localhost:3000/api/posts';
+
   try {
-    const response = await fetch('http://localhost:3000/api/posts');
-    if (!response.ok) {
-      throw new Error('Failed to fetch posts');
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    if (response.ok) {
+      return await response.json();
+    } else {
+      console.error('Error fetching posts:', response.status);
+      return [];
     }
-    return await response.json();
   } catch (error) {
     console.error('Error fetching posts:', error);
     return [];
   }
 }
+
 export function populateMenu(){
   const selectElement = document.getElementById('postMenu');
 
@@ -27,24 +40,30 @@ export function populateMenu(){
             selectElement.appendChild(option);
         });
 }
-export function populateSidebar(){
+export function populateSidebar() {
   const sidebarMenu = document.getElementById('sidebarMenu');
 
-        // Loop through the sidebarSubjects array and create options
-        sidebarSubjects.forEach(subject => {
-          const listItem = document.createElement('li');
-          const link = document.createElement('a');
-          link.textContent = subject.title;
-          link.href = subject.link;
-          listItem.appendChild(link);
-          sidebarMenu.appendChild(listItem);
-      });
+  // Clear existing sidebar menu items
+  sidebarMenu.innerHTML = '';
+
+  // Loop through the sidebarSubjects array and create options
+  sidebarSubjects.forEach(subject => {
+    const listItem = document.createElement('li');
+    const link = document.createElement('a');
+    link.textContent = subject.title;
+    link.href = '#'; // Prevent default link behavior
+    link.addEventListener('click', () => {
+      fetchAndDisplayPosts(subject.title);
+    });
+    listItem.appendChild(link);
+    sidebarMenu.appendChild(listItem);
+  });
 }
 
 
-export async function fetchAndDisplayPosts() {
+export async function fetchAndDisplayPosts(subject = null) {
   try {
-    const posts = await fetchPosts();
+    const posts = await fetchPosts(subject);
     const postsContainer = document.getElementById('postsContainer');
     postsContainer.innerHTML = '';
 
@@ -59,6 +78,7 @@ export async function fetchAndDisplayPosts() {
     console.error('Error displaying posts:', error);
   }
 }
+
 
 export function createPostElement(post, comments) {
   const postElement = document.createElement('div');

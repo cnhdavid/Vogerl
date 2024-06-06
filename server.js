@@ -169,12 +169,28 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
 
 
 
-app.get('/api/posts', async (req, res) => {
+app.get('/api/posts', authenticateToken, async (req, res) => {
+    const subject = req.query.subject;
+
     try {
-        const result = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
+        let result;
+        if (subject) {
+            result = await pool.query(
+                'SELECT * FROM posts WHERE subject = $1',
+                [subject]
+            );
+        }
+        if (subject=="All") {
+            result = await pool.query(
+                'SELECT * FROM posts');
+        } else if (!subject) {
+            result = await pool.query(
+                'SELECT * FROM posts');
+            
+        }
         res.status(200).json(result.rows);
     } catch (error) {
-        console.error('Error fetching posts from database:', error);
+        console.error('Error fetching posts:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
