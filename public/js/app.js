@@ -1,7 +1,8 @@
 // js/app.js
 
 import { checkToken, logout } from './modules/auth.js';
-import { fetchAndDisplayPosts } from './modules/post.js';
+import { fetchAndDisplayPosts } from './modules/posts.js';
+import { populateMenu, populateSidebar } from './modules/posts.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const navbarEnd = document.getElementById('navbar-end');
@@ -73,4 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   fetchAndDisplayPosts();
+  populateMenu()
+  populateSidebar();
 });

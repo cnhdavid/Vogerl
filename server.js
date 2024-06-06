@@ -22,6 +22,7 @@ app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ limit: '20mb', extended: true }));
 app.use(express.urlencoded({ extended: true }));
 
+
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -208,6 +209,31 @@ app.get('/api/posts/:postId', async (req, res) => {
     }
 });
 
+app.get('/api/posts/:postId/comments', async (req, res) => {
+    const { postId } = req.params;
+
+    try {
+        const result = await pool.query(
+            `WITH RECURSIVE comment_tree AS (
+                SELECT id, username, post_id, content, parent_id, created_at
+                FROM comments
+                WHERE post_id = $1 AND parent_id IS NULL
+                UNION ALL
+                SELECT c.id, c.username, c.post_id, c.content, c.parent_id, c.created_at
+                FROM comments c
+                INNER JOIN comment_tree ct ON ct.id = c.parent_id
+            )
+            SELECT * FROM comment_tree ORDER BY created_at`,
+            [postId]
+        );
+
+        const comments = nestComments(result.rows);
+        res.json(comments);
+    } catch (error) {
+        console.error('Error fetching comments from database:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
     const { postId } = req.params;
     const { content, parentId } = req.body; // Include parentId in the request body
@@ -225,6 +251,24 @@ app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+function nestComments(comments) {
+    const map = {};
+    const roots = [];
+
+    comments.forEach(comment => {
+        comment.replies = [];
+        map[comment.id] = comment;
+
+        if (comment.parent_id) {
+            map[comment.parent_id].replies.push(comment);
+        } else {
+            roots.push(comment);
+        }
+    });
+
+    return roots;
+}
 
 
 

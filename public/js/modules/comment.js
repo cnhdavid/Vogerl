@@ -1,6 +1,6 @@
 // js/modules/comment.js
 
-import { fetchAndDisplayPosts } from './post.js';
+import { fetchAndDisplayPosts } from './posts.js';
 export async function fetchComments(postId) {
     try {
       const response = await fetch(`http://localhost:3000/api/posts/${postId}/comments`);
