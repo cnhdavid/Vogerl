@@ -38,13 +38,13 @@ fetch(`http://localhost:3000/api/posts/${postId}`)
 
     // Fetch and display the comments
     fetch(`http://localhost:3000/api/posts/${postId}/comments`)
-  .then(response => response.json())
-  .then(comments => {
-    const commentsContainer = document.getElementById('comments-container');
-    comments.forEach(comment => {
-      const commentElement = document.createElement('div');
-      commentElement.classList.add('box');
-      commentElement.innerHTML = `
+      .then(response => response.json())
+      .then(comments => {
+        const commentsContainer = document.getElementById('comments-container');
+        comments.forEach(comment => {
+          const commentElement = document.createElement('div');
+          commentElement.classList.add('box');
+          commentElement.innerHTML = `
         <h4 class="title is-6">${comment.username}</h4>
         <p class="content">${comment.content}</p>
         <button id="replyButton" class="button is-primary"">Reply</button>
@@ -55,40 +55,40 @@ fetch(`http://localhost:3000/api/posts/${postId}`)
         </div>
       `;
 
-      const replyButton = commentElement.querySelector('#replyButton');
-      replyButton.addEventListener('click', () => {
-        const replyInput = commentElement.querySelector('.reply-input');
-        replyInput.style.display = 'block';
-      });
+          const replyButton = commentElement.querySelector('#replyButton');
+          replyButton.addEventListener('click', () => {
+            const replyInput = commentElement.querySelector('.reply-input');
+            replyInput.style.display = 'block';
+          });
 
-      const submitCloseButton = commentElement.querySelector('.submit-close');
-      submitCloseButton.addEventListener('click', () => {
-        const replyInput = commentElement.querySelector('.reply-input');
-        replyInput.style.display = 'none';
-      });
+          const submitCloseButton = commentElement.querySelector('.submit-close');
+          submitCloseButton.addEventListener('click', () => {
+            const replyInput = commentElement.querySelector('.reply-input');
+            replyInput.style.display = 'none';
+          });
 
-      const submitReplyButton = commentElement.querySelector('.submit-reply');
-      submitReplyButton.addEventListener('click', () => {
-        const replyContent = commentElement.querySelector('.reply-input textarea').value;
-        submitComment(postId, replyContent, comment.id);
-      });
-      commentsContainer.appendChild(commentElement);
-    });
-  })
-  .catch(error => console.error('Error fetching comments:', error));
-  
+          const submitReplyButton = commentElement.querySelector('.submit-reply');
+          submitReplyButton.addEventListener('click', () => {
+            const replyContent = commentElement.querySelector('.reply-input textarea').value;
+            submitComment(postId, replyContent, comment.id);
+          });
+          commentsContainer.appendChild(commentElement);
+        });
+      })
+      .catch(error => console.error('Error fetching comments:', error));
+
   })
   .catch(error => console.error('Error fetching post:', error));
 
-  
-  
-  const renderComments = (comments, parentElement, level = 0, replyTo = null) => {
-    comments.forEach(comment => {
-      const commentElement = document.createElement('div');
-      commentElement.classList.add('comment');
-      commentElement.style.marginLeft = `${level * 20}px`;
-      const replyText = replyTo ? `<span class="replying-to-text">Replying to ${replyTo}</span>` : '';
-      commentElement.innerHTML = `
+
+
+const renderComments = (comments, parentElement, level = 0, replyTo = null) => {
+  comments.forEach(comment => {
+    const commentElement = document.createElement('div');
+    commentElement.classList.add('comment');
+    commentElement.style.marginLeft = `${level * 20}px`;
+    const replyText = replyTo ? `<span class="replying-to-text">Replying to ${replyTo}</span>` : '';
+    commentElement.innerHTML = `
         <p>
           <strong>${comment.username}</strong> ${replyText}
           <br>
@@ -101,59 +101,103 @@ fetch(`http://localhost:3000/api/posts/${postId}`)
           <button class="button is-danger is-small submit-close">Close</button>
         </div>
       `;
-  
-      const replyButton = commentElement.querySelector('.reply-button');
-      const replyInput = commentElement.querySelector('.reply-input');
-      const submitReplyButton = commentElement.querySelector('.submit-reply');
-      const submitCloseButton = commentElement.querySelector('.submit-close');
-  
-      replyButton.addEventListener('click', () => {
-        replyInput.style.display = 'block';
-      });
-  
-      submitReplyButton.addEventListener('click', () => {
-        const replyContent = replyInput.querySelector('textarea').value;
-        submitComment(postId, replyContent, comment.id);
-      });
-  
-      submitCloseButton.addEventListener('click', () => {
-        replyInput.style.display = 'none';
-      });
-  
-      parentElement.appendChild(commentElement);
-  
-      if (comment.replies) {
-        renderReplies(comment.replies, commentElement, level + 1, comment.username);
+
+    const replyButton = commentElement.querySelector('.reply-button');
+    const replyInput = commentElement.querySelector('.reply-input');
+    const submitReplyButton = commentElement.querySelector('.submit-reply');
+    const submitCloseButton = commentElement.querySelector('.submit-close');
+
+    replyButton.addEventListener('click', () => {
+      replyInput.style.display = 'block';
+    });
+
+    submitReplyButton.addEventListener('click', () => {
+      const replyContent = replyInput.querySelector('textarea').value;
+      submitComment(postId, replyContent, comment.id);
+    });
+
+    submitCloseButton.addEventListener('click', () => {
+      replyInput.style.display = 'none';
+    });
+
+    parentElement.appendChild(commentElement);
+
+    if (comment.replies) {
+      renderReplies(comment.replies, commentElement, level + 1, comment.username);
+    }
+  });
+};
+
+
+const submitComment = async (postId, content, parentId = null) => {
+  try {
+    const token = localStorage.getItem('token');
+    const userId = getUserIdFromToken(token);
+
+    const response = await fetch(`http://localhost:3000/api/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ content, userId, parentId }),
+    });
+
+    if (response.ok) {
+
+      location.reload();
+      const comment = await response.json();
+      const commentsContainer = document.getElementById('comments-container');
+      renderComments([comment], commentsContainer);
+
+    } else {
+      console.error('Error submitting comment:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error submitting comment:', error);
+  }
+};
+
+async function deletePost(postId) {
+  try {
+    const token = localStorage.getItem('token');
+    const userId = getUserIdFromToken(token);
+
+    // Show modal
+    toggleModal();
+
+    // Wait for user confirmation
+    document.getElementById('confirmDelete').addEventListener('click', async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/post/${postId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          // Delete the post from the UI
+          // For example, remove the post element from the DOM
+          const postElement = document.getElementById(`post-${postId}`);
+          if (postElement) {
+            postElement.remove();
+          }
+          alert('Post deleted successfully');
+          window.location.href = 'dashboard.html';
+        } else {
+          console.error('Error deleting post:', response.status);
+        }
+      } catch (error) {
+        console.error('Error deleting post:', error);
       }
     });
-  };
-  
-  
-  const submitComment = async (postId, content, parentId = null) => {
-    try {
-      const token = localStorage.getItem('token');
-      const userId = getUserIdFromToken(token);
-  
-      const response = await fetch(`http://localhost:3000/api/posts/${postId}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ content, userId, parentId }),
-      });
-  
-      if (response.ok) {
-        
-        location.reload();
-        const comment = await response.json();
-        const commentsContainer = document.getElementById('comments-container');
-        renderComments([comment], commentsContainer);
-        
-      } else {
-        console.error('Error submitting comment:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error submitting comment:', error);
-    }
-  };
+
+    
+
+  } catch (error) {
+    console.error('Error deleting post:', error);
+  }
+}
+

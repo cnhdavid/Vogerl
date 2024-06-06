@@ -137,6 +137,34 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
     }
 });
 
+app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
+    const postId = req.params.postId;
+    const username = req.user.username; // Extract username from the token
+
+    try {
+        // Check if the post exists and belongs to the authenticated user
+        const postQuery = await pool.query(
+            'SELECT * FROM posts WHERE id = $1 AND username = $2',
+            [postId, username]
+        );
+        const post = postQuery.rows[0];
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found or unauthorized' });
+        }
+
+        // Delete the post
+        await pool.query(
+            'DELETE FROM posts WHERE id = $1',
+            [postId]
+        );
+        
+        // Respond with success message
+        res.json({ message: 'Post deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 
 
@@ -165,6 +193,37 @@ async function getCommentsByPostId(postId) {
     }
 }
 
+app.delete('/api/post/:postId', authenticateToken, async (req, res) => {
+    const postId = req.params.postId;
+    const username = req.user.username; // Extract username from the token
+    try {
+        // Check if the post exists and belongs to the authenticated user
+        const postQuery = await pool.query(
+            'SELECT * FROM posts WHERE id = $1 AND username = $2',
+            [postId, username]
+        );
+        const post = postQuery.rows[0];
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found or unauthorized' });
+        }
+        await pool.query(
+            'DELETE FROM comments WHERE post_id = $1',
+            [postId]
+        );
+
+        // Delete the post
+        await pool.query(
+            'DELETE FROM posts WHERE id = $1',
+            [postId]
+        );
+        
+        // Respond with success message
+        res.json({ message: 'Post deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 // Function to get a post by ID
 async function getPostById(postId) {
     const query = 'SELECT * FROM posts WHERE id = $1';
