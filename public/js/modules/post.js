@@ -21,21 +21,34 @@ fetch(`http://localhost:3000/api/posts/${postId}`)
       <div id="comments-container"></div>
        ${token ? `
           <textarea id="commentInput" class="textarea" placeholder="Add a comment"></textarea>
-          <button id="submitComment" class="button is-primary">Submit</button>
+          <button id="submitComment" class="button is-primary"><i class="fa-solid fa-check"></i>Submit</button>
+          
           ` : `
           <p>Please log in to add a comment.</p>
+          <button id="loginButton" class="button is-primary">Log In</button>
           `}
           ${token && post.userId === getUserIdFromToken(token) ? `<button id="deletePostButton" class="button is-danger">Delete Post</button>` : ''}
         </div>
     `;
-    document.getElementById('submitComment').addEventListener('click', () => {
-      const commentContent = document.getElementById('commentInput').value;
-      submitComment(postId, commentContent);
+    if(!token){
+      const loginButton = document.getElementById('loginButton');
+    loginButton.addEventListener('click', () => {
+      window.location.href = './login.html';
     });
-    document.getElementById('deletePostButton').addEventListener('click', () => {
+    }
+    
+    if(token){
+      document.getElementById('submitComment').addEventListener('click', () => {
+        const commentContent = document.getElementById('commentInput').value;
+        submitComment(postId, commentContent);
+      });
+      document.getElementById('deletePostButton').addEventListener('click', () => {
       deletePost(postId);
     });
 
+    }
+    
+    
     // Fetch and display the comments
     fetch(`http://localhost:3000/api/posts/${postId}/comments`)
       .then(response => response.json())

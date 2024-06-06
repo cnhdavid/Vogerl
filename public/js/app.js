@@ -5,11 +5,12 @@ import { fetchAndDisplayPosts } from './modules/posts.js';
 import { populateMenu, populateSidebar } from './modules/posts.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const navbarEnd = document.getElementById('navbar-end');
+  
 
   const user = checkToken();
 
   if (user) {
+    const navbarEnd = document.getElementById('navbar-end');
     const username = user.username;
 
     const welcomeMessage = document.createElement('div');

@@ -52,6 +52,7 @@ export async function fetchComments(postId) {
               ${comment.content}
             </p>
             <button class="button is-small is-light reply-button">Reply</button>
+            
             <div class="reply-input" style="display: none;">
               <textarea class="textarea" placeholder="Reply to comment"></textarea>
               <button class="button is-primary is-small submit-reply">Submit</button>

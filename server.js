@@ -169,7 +169,7 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
 
 
 
-app.get('/api/posts', authenticateToken, async (req, res) => {
+app.get('/api/posts', async (req, res) => {
     const subject = req.query.subject;
 
     try {
