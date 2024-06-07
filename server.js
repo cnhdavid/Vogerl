@@ -12,9 +12,11 @@ const fs = require('fs');
 const multer = require('multer');
 const upload = multer();
 const path = require('path');
-
-
 const app = express();
+const { filterProfanity, containsProfanity } = require('./public/js/modules/moderate');
+
+
+
 const port = 3000;
 app.use(cors());
 app.use(express.json());
@@ -116,7 +118,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/api/post', authenticateToken, upload.single('image'), async (req, res) => {
-    const { title, content, subject } = req.body;
+    let { title, content, subject } = req.body;
     const username = req.user.username; // Extract username from the token
     let image = null;
 
@@ -126,6 +128,20 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
     }
 
     try {
+        // Filter profanity from title and content
+        
+        const titleHasProfanity = await containsProfanity(title);
+        const contentHasProfanity = await containsProfanity(content);
+        console.log(titleHasProfanity, contentHasProfanity)
+        
+
+        if (titleHasProfanity || contentHasProfanity) {
+            title = 'This post contains profanity, please remove it';
+            content = 'This post contains profanity, please remove it';
+        }
+
+        
+
         const result = await pool.query(
             'INSERT INTO posts (title, content, subject, username, image) VALUES ($1, $2, $3, $4, $5) RETURNING *',
             [title, content, subject, username, image]
@@ -136,6 +152,8 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+// Function to check if a text contains profanity using Purgomalum API
+
 
 app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
     const postId = req.params.postId;
@@ -194,6 +212,39 @@ app.get('/api/posts', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
+    const postId = req.params.postId;
+    const username = req.user.username;
+    const { title, content } = req.body;
+    
+  
+    if (!title || !content) {
+      return res.status(400).send('Title and content are required');
+    }
+    let modifiedTitle = await filterProfanity(title);
+    const modifiedContent = await filterProfanity(content);
+    const titleHasProfanity = await containsProfanity(title);
+    const contentHasProfanity = await containsProfanity(content);
+    if (titleHasProfanity || contentHasProfanity) {
+        modifiedTitle += ' (The post content was changed due to it containing profanity)';
+    }
+  
+    try {
+      const query = 'UPDATE posts SET title = $1, content = $2, updated_at = NOW() WHERE id = $3 AND username = $4 RETURNING *';
+      const values = [modifiedTitle, modifiedContent, postId, username];
+  
+      const result = await pool.query(query, values);
+  
+      if (result.rows.length === 0) {
+        return res.status(404).send('Post not found or user not authorized');
+      }
+  
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error updating post:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
 
 // Function to get comments by post ID
 async function getCommentsByPostId(postId) {
@@ -311,10 +362,16 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
 });
 app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
     const { postId } = req.params;
-    const { content, parentId } = req.body; // Include parentId in the request body
+    let { content, parentId } = req.body; // Include parentId in the request body
     const username = req.user.username; // Extract username from the token
 
     try {
+        // Insert the comment into the database
+        
+        const contentHasProfanity = await containsProfanity(content);
+        if (contentHasProfanity) {
+            content = '***PROFANITY DETECTED***';
+        }
         const result = await pool.query(
             `INSERT INTO comments (username, post_id, content, parent_id, created_at, updated_at)
              VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *`,

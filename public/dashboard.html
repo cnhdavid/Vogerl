@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,15 +9,19 @@
     <title>Vogerl</title>
     <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
     <!-- Header und Navbar -->
     <header>
         <nav class="navbar" role="navigation" aria-label="main navigation">
             <div class="navbar-brand">
-                <a class="navbar-item" href="/">
-                    Vogerl
+                <a class="navbar-item" href="/public/dashboard.html">
+                    <figure class="image is-32x32">
+                        <img src="/public/images/Vogerl1.png" />
+                      </figure>
                 </a>
-                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbarBasicExample">
                     <span aria-hidden="true"></span>
                     <span aria-hidden="true"></span>
                     <span aria-hidden="true"></span>
@@ -24,24 +29,31 @@
             </div>
             <div id="navbarBasicExample" class="navbar-menu">
                 <div class="navbar-start">
-                    <a class="navbar-item" href="/">Home</a>
-                    <a class="navbar-item" href="/explore">Explore</a>
+                    <a class="navbar-item" href="/public/dashboard.html">Home</a>
+                    
+                    <a class="navbar-item"><input class="input is-normal" type="text" placeholder="Search..." /></a>
+                    <a class="navbar-item"><i class="fa-solid fa-magnifying-glass"></i></a>
                 </div>
                 <div id="navbar-end" class="navbar-end">
-                    <div class="navbar-item">
+                    <div class="navbar-item" id="auth-buttons">
                         <div class="buttons">
-                            <a class="button is-light" href="login.html">
+                            <a class="button is-light" href="login.html" id="login-button">
                                 Log in
                             </a>
-                            <a class="button is-primary" href="signup.html">
+                            <a class="button is-primary" href="signup.html" id="signup-button">
                                 <strong>Sign up</strong>
                             </a>
                         </div>
+                    </div>
+                    <div class="navbar-item" id="user-greeting" style="display: none;">
+                        <span id="greeting"></span>
+                        <a class="button is-light" href="#" id="logout-button">Log out</a>
                     </div>
                 </div>
             </div>
         </nav>
     </header>
+
 
     <!-- Hauptteil der Seite -->
     <section class="section">
@@ -52,7 +64,7 @@
                     <div class="menu">
                         <p class="menu-label">Categories</p>
                         <ul class="menu-list" id="sidebarMenu">
-                            
+
                         </ul>
                     </div>
                 </aside>
@@ -71,15 +83,16 @@
                             <div class="field">
                                 <label class="label">Image</label>
                                 <div class="control">
-                                    
+
                                     <input class="input" type="file" id="postImage" accept="image/*">
-                                    
+
                                 </div>
                             </div>
                             <div class="field">
                                 <label class="label">Content</label>
                                 <div class="control">
-                                    <textarea class="textarea" id="postContent" placeholder="Content" required></textarea>
+                                    <textarea class="textarea" id="postContent" placeholder="Content"
+                                        required></textarea>
                                 </div>
                             </div>
                             <div class="container">
@@ -88,7 +101,7 @@
                                     <div class="control">
                                         <div class="select" id="postSubject">
                                             <select id="postMenu">
-                                               
+
                                             </select>
                                         </div>
                                     </div>
@@ -99,7 +112,7 @@
                             </div>
                         </form>
                     </section>
-                    
+
                     <section id="postsDisplay">
                         <h2 class="title">Questions</h2>
                         <div id="postsContainer"></div>
@@ -111,13 +124,15 @@
                         </div>
                         <button class="modal-close is-large" aria-label="close"></button>
                     </div>
-                    
+
                 </main>
             </div>
         </div>
     </section>
 
     <script type="module" src="js/app.js"></script>
+    <script>sessionStorage.removeItem('redirectToPost');</script>
 
 </body>
+
 </html>

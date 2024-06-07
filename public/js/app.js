@@ -17,16 +17,27 @@ document.addEventListener('DOMContentLoaded', () => {
     welcomeMessage.classList.add('navbar-item');
     welcomeMessage.innerHTML = `<span>Welcome, ${username}</span>`;
 
-    const logoutButton = document.createElement('button');
-    logoutButton.classList.add('button', 'is-danger');
+    const logoutButton = document.createElement('a');
+    logoutButton.setAttribute('id', 'logout-button');
+    logoutButton.classList.add('navbar-item' );
     logoutButton.textContent = 'Logout';
     logoutButton.addEventListener('click', logout);
+
+    const profileButton = document.createElement('a');
+    profileButton.setAttribute('id', 'profile-button');
+    profileButton.classList.add('navbar-item');
+    profileButton.textContent = 'Profile';
+    profileButton.addEventListener('click', () => {
+      window.location.href = 'profile.html';
+    });
 
     navbarEnd.innerHTML = '';
     navbarEnd.appendChild(welcomeMessage);
     navbarEnd.appendChild(logoutButton);
+    navbarEnd.appendChild(profileButton);
   }
 
+  // Add event listener to the form
   document.getElementById('postForm').addEventListener('submit', async function(event) {
     event.preventDefault();
 
@@ -78,3 +89,5 @@ document.addEventListener('DOMContentLoaded', () => {
   populateMenu()
   populateSidebar();
 });
+
+

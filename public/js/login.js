@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const email = document.getElementById('registerEmail').value;
         const password = document.getElementById('registerPassword').value;
+        const redirectToPost = sessionStorage.getItem('redirectToPost');
 
         try {
             const response = await fetch('http://localhost:3000/login', {
@@ -19,25 +20,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.status === 401 || response.status === 403) {
                 // Token is invalid or expired
                 alert('Session expired or token invalid. Redirecting to login page...');
-                window.location.href = 'login.html'; // Redirect to login page
+                window.location.href = 'login.html';
                 return;
             }
 
-            if (response.ok) {
-                const data = await response.json();
-                
-                localStorage.setItem('token', data.token); // Store the token
-                
+            const data = await response.json();
+            const token = data.token;
 
-                
-                window.location.href = 'dashboard.html'; // Redirect to your desired page
+            localStorage.setItem('token', token);
+
+            if (redirectToPost) {
+                // Redirect back to the post
+                window.location.href = redirectToPost;
+                sessionStorage.removeItem('redirectToPost');
             } else {
-                const errorData = await response.json();
-                alert(`Login failed: ${errorData.message}`);
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
             }
         } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred. Please try again later.');
+            console.error('Error logging in:', error);
         }
     });
 });
