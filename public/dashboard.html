@@ -16,7 +16,7 @@
         <nav class="navbar" role="navigation" aria-label="main navigation">
             <div class="navbar-brand">
                 <a class="navbar-item" href="/">
-                    Vogerl
+                    <img src="/public/images/Vogerl.png" alt="Vogerl Logo" height="100">
                 </a>
                 <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
                     data-target="navbarBasicExample">
@@ -59,16 +59,16 @@
             <div class="columns">
                 <!-- Sidebar für Kategorien -->
                 <aside class="column is-one-quarter">
-                    <div class="menu">
-                        <p class="menu-label">Categories</p>
+                    <div class="menu has-background-link">
+                        <p class="menu-label has-text-white">Categories</p>
                         <ul class="menu-list" id="sidebarMenu">
 
                         </ul>
                     </div>
                 </aside>
-
+                
                 <!-- Hauptinhalt -->
-                <main class="column">
+                <main class="column has-background-link">
                     <section id="postQuestion">
                         <h1 class="title">Post a Question</h1>
                         <form id="postForm">
@@ -106,7 +106,7 @@
                                 </div>
                             </div>
                             <div class="control">
-                                <button class="button is-link" type="submit">Post</button>
+                                <button class="button is-danger" type="submit">Post</button>
                             </div>
                         </form>
                     </section>
