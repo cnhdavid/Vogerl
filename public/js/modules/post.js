@@ -1,7 +1,10 @@
-import { getUserIdFromToken } from './auth.js';
+import { getUserIdFromToken, checkToken, logout } from './auth.js';
+import { editPost  } from './modal.js';
+
 // Retrieve the postId from the URL query parameter
 const urlParams = new URLSearchParams(window.location.search);
 const postId = urlParams.get('postId');
+
 
 // Fetch the post and its comments
 fetch(`http://localhost:3000/api/posts/${postId}`)
@@ -10,45 +13,91 @@ fetch(`http://localhost:3000/api/posts/${postId}`)
     // Display the post and its comments on the page
     const postContainer = document.getElementById('post-container');
     const token = localStorage.getItem('token');
-    postContainer.innerHTML = `
-      <h2 class="title">${post.title}</h2>
-      <p class="subtitle">@${post.username}</p>
-      <div class="content">
-        <p>${post.content}</p>
-        ${post.image ? `<img src="data:image/jpeg;base64,${post.image}" alt="Post Image" class="post-image" />` : ''}
-      </div>
-      <h3 class="title is-5">Comments</h3>
-      <div id="comments-container"></div>
-       ${token ? `
-          <textarea id="commentInput" class="textarea" placeholder="Add a comment"></textarea>
-          <button id="submitComment" class="button is-primary"><i class="fa-solid fa-check"></i>Submit</button>
-          
-          ` : `
-          <p>Please log in to add a comment.</p>
-          <button id="loginButton" class="button is-primary">Log In</button>
-          `}
-          ${token && post.userId === getUserIdFromToken(token) ? `<button id="deletePostButton" class="button is-danger">Delete Post</button>` : ''}
-        </div>
-    `;
-    if(!token){
-      const loginButton = document.getElementById('loginButton');
-    loginButton.addEventListener('click', () => {
-      window.location.href = './login.html';
-    });
-    }
+    const createdAt = post.created_at;
+    const date = new Date(createdAt);
+
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     
-    if(token){
+
+
+    postContainer.innerHTML = `
+  ${token && post.userId === getUserIdFromToken(token) ? `<i id="editPostButton" class="fa-solid fa-pen-to-square is-pulled-right"></i>` : ''}
+  <h1 class="title">${post.title}</h1>
+  <p class="subtitle">@${post.username}</p>
+  <p class="subtitle">${post.subject}</p>
+  <p class="subtitle">${formattedDate}</p>
+  <div class="content">
+    <p>${post.content}</p>
+    ${post.image ? `<img src="data:image/jpeg;base64,${post.image}" alt="Post Image" class="post-image" />` : ''}
+  </div>
+  <h3 class="title is-5">Comments</h3>
+  <div id="comments-container"></div>
+  ${token ? `
+    <textarea id="commentInput" class="textarea" placeholder="Add a comment"></textarea>
+    <button id="submitComment" class="button is-primary"><i class="fa-solid fa-check"></i>Submit</button>
+  ` : `
+    <p>Please log in to add a comment.</p>
+    <button id="loginButton" class="button is-primary">Log In</button>
+  `}
+  ${token && post.userId === getUserIdFromToken(token) ? `<button id="deletePostButton" class="button is-danger">Delete Post</button>` : ''}
+`;
+    if (!token) {
+      const loginButton = document.getElementById('loginButton');
+      sessionStorage.setItem('redirectToPost', window.location.href);
+      loginButton.addEventListener('click', () => {
+        window.location.href = './login.html';
+      });
+    }
+    if (token && post.userId == getUserIdFromToken(token)) {
+      const editPostButton = document.getElementById('editPostButton');
+      editPostButton.addEventListener('click', () => {
+        const editPostModal = document.getElementById('editPostModal');
+        document.getElementById('editPostTitle').value = post.title;
+        document.getElementById('editPostContent').value = post.content;
+        editPostModal.style.display = 'block';
+        document.getElementById('confirmEditButton').addEventListener('click', () => {
+          const editPostTitle = document.getElementById('editPostTitle').value;
+          const editPostContent = document.getElementById('editPostContent').value;
+          editPost(postId, editPostTitle, editPostContent);
+        });
+      });
+      document.getElementById('cancelEditButton').addEventListener('click', () => {
+        const editPostModal = document.getElementById('editPostModal');
+        editPostModal.style.display = 'none';
+      });
+    
+      document.querySelector('.modal-close').addEventListener('click', () => {
+        const editPostModal = document.getElementById('editPostModal');
+        editPostModal.style.display = 'none';
+      });
+    }
+
+
+    if (token) {
+      sessionStorage.removeItem('redirectToPost');
+      document.getElementById('editPostButton').addEventListener('click', () => {
+
+      })
       document.getElementById('submitComment').addEventListener('click', () => {
         const commentContent = document.getElementById('commentInput').value;
         submitComment(postId, commentContent);
+
       });
       document.getElementById('deletePostButton').addEventListener('click', () => {
-      deletePost(postId);
-    });
+        deletePost(postId);
+      });
 
     }
-    
-    
+
+
     // Fetch and display the comments
     fetch(`http://localhost:3000/api/posts/${postId}/comments`)
       .then(response => response.json())
@@ -58,6 +107,7 @@ fetch(`http://localhost:3000/api/posts/${postId}`)
           const commentElement = document.createElement('div');
           commentElement.classList.add('box');
           commentElement.innerHTML = `
+          
         <h4 class="title is-6">${comment.username}</h4>
         <p class="content">${comment.content}</p>
         <button id="replyButton" class="button is-primary"">Reply</button>
@@ -207,10 +257,39 @@ async function deletePost(postId) {
       }
     });
 
-    
+
 
   } catch (error) {
     console.error('Error deleting post:', error);
   }
+}
+const user = checkToken();
+
+if (user) {
+  const navbarEnd = document.getElementById('navbar-end');
+  const username = user.username;
+
+  const welcomeMessage = document.createElement('div');
+  welcomeMessage.classList.add('navbar-item');
+  welcomeMessage.innerHTML = `<span>Welcome, ${username}</span>`;
+
+  const logoutButton = document.createElement('a');
+  logoutButton.setAttribute('id', 'logout-button');
+  logoutButton.classList.add('navbar-item' );
+  logoutButton.textContent = 'Logout';
+  logoutButton.addEventListener('click', logout);
+
+  const profileButton = document.createElement('a');
+  profileButton.setAttribute('id', 'profile-button');
+  profileButton.classList.add('navbar-item');
+  profileButton.textContent = 'Profile';
+  profileButton.addEventListener('click', () => {
+    window.location.href = 'profile.html';
+  });
+
+  navbarEnd.innerHTML = '';
+  navbarEnd.appendChild(welcomeMessage);
+  navbarEnd.appendChild(logoutButton);
+  navbarEnd.appendChild(profileButton);
 }
 

@@ -27,3 +27,21 @@ export function openPost(postId) {
     })
     .catch(error => console.error('Error fetching post:', error));
 }
+
+ export function editPost(postId, title, content) {
+  fetch(`http://localhost:3000/api/posts/${postId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: JSON.stringify({ title, content }),
+  })
+    .then(response => response.json())
+    .then(post => {
+      // Redirect to the new page
+      
+      openPost(postId);
+    })
+    .catch(error => console.error('Error editing post:', error));
+}

@@ -28,7 +28,6 @@
             <div id="navbarBasicExample" class="navbar-menu">
                 <div class="navbar-start">
                     <a class="navbar-item" href="/public/dashboard.html">Home</a>
-                    
                     <a class="navbar-item"><input class="input is-normal" type="text" placeholder="Search..." /></a>
                     <a class="navbar-item"><i class="fa-solid fa-magnifying-glass"></i></a>
                 </div>
@@ -68,49 +67,12 @@
                 </aside>
 
                 <!-- Hauptinhalt -->
-                <main class="column">
-                    <section id="postQuestion">
-                        <h1 class="title">Post a Question</h1>
-                        <form id="postForm">
-                            <div class="field">
-                                <label class="label">Title</label>
-                                <div class="control">
-                                    <input class="input" type="text" id="postTitle" placeholder="Title" required>
-                                </div>
-                            </div>
-                            <div class="field">
-                                <label class="label">Image</label>
-                                <div class="control">
-
-                                    <input class="input" type="file" id="postImage" accept="image/*">
-
-                                </div>
-                            </div>
-                            <div class="field">
-                                <label class="label">Content</label>
-                                <div class="control">
-                                    <textarea class="textarea" id="postContent" placeholder="Content"
-                                        required></textarea>
-                                </div>
-                            </div>
-                            <div class="container">
-                                <div class="field">
-                                    <label class="label">Subject</label>
-                                    <div class="control">
-                                        <div class="select" id="postSubject">
-                                            <select id="postMenu">
-
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="control">
-                                <button class="button is-link" type="submit">Post</button>
-                            </div>
-                        </form>
-                    </section>
-
+                <main class="container">
+                    <div class="box columns">
+                        <div class="column is-one-fifths">ProfilePic</div>
+                        <div class="column is-two-fifths">About</div>
+                        <div class="column is-one-fifths">likes and comments</div>
+                    </div>                   
                     <section id="postsDisplay">
                         <h2 class="title">Questions</h2>
                         <div id="postsContainer"></div>
@@ -128,8 +90,8 @@
         </div>
     </section>
 
-    <script type="module" src="js/app.js"></script>
-    <script>sessionStorage.removeItem('redirectToPost');</script>
+    <script type="module" src="js/modules/profile.js"></script>
+    
 
 </body>
 

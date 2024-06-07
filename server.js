@@ -194,6 +194,32 @@ app.get('/api/posts', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
+    const postId = req.params.postId;
+    const username = req.user.username;
+    const { title, content } = req.body;
+    
+  
+    if (!title || !content) {
+      return res.status(400).send('Title and content are required');
+    }
+  
+    try {
+      const query = 'UPDATE posts SET title = $1, content = $2, updated_at = NOW() WHERE id = $3 AND username = $4 RETURNING *';
+      const values = [title, content, postId, username];
+  
+      const result = await pool.query(query, values);
+  
+      if (result.rows.length === 0) {
+        return res.status(404).send('Post not found or user not authorized');
+      }
+  
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error updating post:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
 
 // Function to get comments by post ID
 async function getCommentsByPostId(postId) {
