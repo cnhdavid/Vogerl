@@ -90,4 +90,3 @@ document.addEventListener('DOMContentLoaded', () => {
   populateSidebar();
 });
 
-
