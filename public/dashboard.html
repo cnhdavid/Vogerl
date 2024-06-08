@@ -10,6 +10,7 @@
     <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
 </head>
 
+
 <body>
     <!-- Header und Navbar -->
     <header>
@@ -28,7 +29,7 @@
             <div id="navbarBasicExample" class="navbar-menu">
                 <div class="navbar-start">
                     <a class="navbar-item" href="/public/dashboard.html">Home</a>
-                    
+
                     <a class="navbar-item"><input class="input is-normal" type="text" placeholder="Search..." /></a>
                     <a class="navbar-item"><i class="fa-solid fa-magnifying-glass"></i></a>
                 </div>
@@ -54,7 +55,7 @@
         <div class="container">
             <div class="columns">
                 <!-- Sidebar für Kategorien -->
-                <aside class="column is-one-quarter">
+                <aside class="column is-one-fifth">
                     <div class="menu ">
                         <p class="menu-label has-text-white">Categories</p>
                         <ul class="menu-list" id="sidebarMenu">
@@ -62,53 +63,59 @@
                         </ul>
                     </div>
                 </aside>
-                
+
+
                 <!-- Hauptinhalt -->
                 <main class="column ">
-                    <section id="postQuestion">
-                        <h1 class="title">Post a Question</h1>
-                        <form id="postForm">
-                            <div class="field">
-                                <label class="label">Title</label>
-                                <div class="control">
-                                    <input class="input" type="text" id="postTitle" placeholder="Title" required>
-                                </div>
-                            </div>
-                            <div class="field">
-                                <label class="label">Image</label>
-                                <div class="control">
+                    
 
-                                    <input class="input" type="file" id="postImage" accept="image/*">
+                    <section id="postsDisplay">
+                        <div class="columns">
+                            <h2 class="title column">Questions</h2>
+                            <button id="toggleFormButton" class="button column is-2 create-post mt-3 mr-3 is-primary is-pulled-right">Create Post</button>
+                            
+                        </div>
+                        <section id="postQuestion">
 
-                                </div>
-                            </div>
-                            <div class="field">
-                                <label class="label">Content</label>
-                                <div class="control">
-                                    <textarea class="textarea" id="postContent" placeholder="Content"
-                                        required></textarea>
-                                </div>
-                            </div>
-                            <div class="container">
+                            <form class="box mb-4 "  id="postForm" style="display: none;">
                                 <div class="field">
-                                    <label class="label">Subject</label>
+                                    <label class="label">Title</label>
                                     <div class="control">
-                                        <div class="select" id="postSubject">
-                                            <select id="postMenu">
-
-                                            </select>
+                                        <input class="input" type="text" id="postTitle" placeholder="Title" required>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label class="label">Image</label>
+                                    <div class="control">
+    
+                                        <input class="input" type="file" id="postImage" accept="image/*">
+    
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label class="label">Content</label>
+                                    <div class="control">
+                                        <textarea class="textarea" id="postContent" placeholder="Content"
+                                            required></textarea>
+                                    </div>
+                                </div>
+                                <div class="container">
+                                    <div class="field">
+                                        <label class="label">Subject</label>
+                                        <div class="control">
+                                            <div class="select" id="postSubject">
+                                                <select id="postMenu">
+    
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="control">
-                                <button class="button is-danger" type="submit">Post</button>
-                            </div>
-                        </form>
-                    </section>
-
-                    <section id="postsDisplay">
-                        <h2 class="title">Questions</h2>
+                                <div class="control">
+                                    <button class="button is-primary mt-4" type="submit">Post</button>
+                                </div>
+                            </form>
+                        </section>
                         <div id="postsContainer"></div>
                     </section>
                     <div id="postModal" class="modal">
@@ -120,8 +127,17 @@
                     </div>
 
                 </main>
+                <aside class="column is-one-fifth is-hidden-mobile">
+                    <div class="menu ">
+                        <p class="menu-label has-text-white">Your Questions</p>
+                        <ul class="menu-list" id="sidebarPostsMenu">
+
+                        </ul>
+                    </div>
+                </aside>
             </div>
         </div>
+
     </section>
 
     <script type="module" src="js/app.js"></script>

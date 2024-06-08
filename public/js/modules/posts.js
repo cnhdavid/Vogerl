@@ -1,6 +1,6 @@
 // js/modules/post.js
 
-import { fetchComments } from './comment.js';
+import { fetchComments } from './postManager.js';
 import { openPost } from './modal.js';
 import sidebarSubjects from './subjects.js';
 
@@ -29,16 +29,18 @@ async function fetchPosts(subject = null) {
   }
 }
 
-export function populateMenu(){
+
+
+export function populateMenu() {
   const selectElement = document.getElementById('postMenu');
 
-        // Loop through the sidebarSubjects array and create options
-        sidebarSubjects.forEach(subject => {
-            const option = document.createElement('option');
-            option.textContent = subject.title;
-            option.value = subject.title;
-            selectElement.appendChild(option);
-        });
+  // Loop through the sidebarSubjects array and create options
+  sidebarSubjects.forEach(subject => {
+    const option = document.createElement('option');
+    option.textContent = subject.title;
+    option.value = subject.title;
+    selectElement.appendChild(option);
+  });
 }
 export function populateSidebar() {
   const sidebarMenu = document.getElementById('sidebarMenu');
@@ -58,6 +60,79 @@ export function populateSidebar() {
     listItem.appendChild(link);
     sidebarMenu.appendChild(listItem);
   });
+}
+export async function fetchPostsByUsername(username) {
+  try {
+    const response = await fetch(`http://localhost:3000/api/users/${username}/posts`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    if (response.ok) {
+      return await response.json();
+    } else {
+      console.error('Error fetching posts:', response.status);
+      return [];
+    }
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return [];
+  }
+}
+
+// Function to fetch posts and display in the sidebar
+export async function populatePostsSidebar(postsPromise) {
+  const posts = await postsPromise;
+  const sidebarMenu = document.getElementById('sidebarPostsMenu');
+
+  // Clear existing sidebar menu items
+  sidebarMenu.innerHTML = '';
+
+  // Ensure posts is an array before looping through it
+  if (Array.isArray(posts)) {
+    // Loop through the posts array and create options
+    posts.forEach(post => {
+      const listItem = document.createElement('li');
+      const postElement = document.createElement('div');
+      postElement.classList.add('box', 'is-clickable', 'my-3');
+      postElement.innerHTML = `
+    <article class="media is-clickable">
+      <div class="media-content">
+        <div class="content">
+          <p>
+            <strong>${post.title}</strong> 
+            <br>
+            
+            <br>
+            <content class="is-pulled-right my-3"><em>${post.subject}</em></content>
+            ${post.content}
+          </p>
+          
+        </div>
+      </div>
+    </article>
+  `;
+
+      listItem.addEventListener('click', () => {
+        openPost(post.id);
+      })
+
+      
+
+      listItem.appendChild(postElement);
+      sidebarMenu.appendChild(listItem);
+    });
+  } else {
+    console.error('Expected posts to be an array but received:', posts);
+  }
+}
+
+// Function to get posts by username
+export async function getPostsByUsername(username) {
+  const posts = await fetchPostsByUsername(username);
+  return posts;
 }
 
 
@@ -101,10 +176,26 @@ export function createPostElement(post, comments) {
             ${post.content}
           </p>
           ${imageData ? `<img src="${imageData}" alt="Post Image" class="post-image" />` : ''}
+          <i class="fa-solid fa-arrow-up"></i>
+          <i class="fa-solid fa-arrow-down"></i>
         </div>
       </div>
     </article>
   `;
+
+  const upvoteButton = postElement.querySelector('.fa-arrow-up');
+  const downvoteButton = postElement.querySelector('.fa-arrow-down');
+  upvoteButton.addEventListener('click', () => upvotePost(post.id));
+  downvoteButton.addEventListener('click', () => downvotePost(post.id));
+
+  // Add upvotes if available
+  if (post.upvotes) {
+    const upvoteCount = document.createElement('span');
+    upvoteCount.classList.add('upvote-count');
+    upvoteCount.textContent = post.upvotes;
+    postElement.appendChild(upvoteCount);
+  }
+  // Add comments if available
 
   if (comments.length > 0) {
     const commentsList = document.createElement('ul');

@@ -10,3 +10,8 @@
 .media{
     cursor: pointer;
 }
+.create-post{
+    cursor: pointer;
+    height: 50px;
+}
+

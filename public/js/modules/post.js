@@ -22,23 +22,28 @@ fetch(`http://localhost:3000/api/posts/${postId}`)
     const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
+    
 
-    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    const formattedDate = `${day}-${month}-${year} ${hours}:${minutes}`;
     
 
 
     postContainer.innerHTML = `
   ${token && post.userId === getUserIdFromToken(token) ? `<i id="editPostButton" class="fa-solid fa-pen-to-square is-pulled-right"></i>` : ''}
   <h1 class="title">${post.title}</h1>
-  <p class="subtitle">@${post.username}</p>
-  <p class="subtitle">${post.subject}</p>
-  <p class="subtitle">${formattedDate}</p>
+  <div class="columns">
+  <p class="subtitle column">posted by <strong>${post.username}</strong></p>
+  <p class="subtitle" column>posted on <strong>${formattedDate}</strong></p>
+  </div>
+  <p class="subtitle">Subject: ${post.subject}</p>
+  
   <div class="content">
     <p>${post.content}</p>
     ${post.image ? `<img src="data:image/jpeg;base64,${post.image}" alt="Post Image" class="post-image" />` : ''}
   </div>
-  <h3 class="title is-5">Comments</h3>
+  ${token ? `<i class="fa-solid fa-arrow-up"></i>` : ''}
+  ${token ? `<i class="fa-solid fa-arrow-down ml-2"></i>` : ''}
+  <h3 class="title is-5 my-3">Comments</h3>
   <div id="comments-container"></div>
   ${token ? `
     <textarea id="commentInput" class="textarea" placeholder="Add a comment"></textarea>

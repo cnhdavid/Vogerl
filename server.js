@@ -189,6 +189,7 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
 
 app.get('/api/posts', async (req, res) => {
     const subject = req.query.subject;
+    
 
     try {
         let result;
@@ -212,6 +213,21 @@ app.get('/api/posts', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+app.get('/api/users/:username/posts', async (req, res) => {
+    const username = req.params.username;
+    try {
+        const result = await pool.query(
+            'SELECT * FROM posts WHERE username = $1',
+            [username]
+        );
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+    
+})
 app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
     const postId = req.params.postId;
     const username = req.user.username;
@@ -231,8 +247,7 @@ app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
   
     try {
       const query = 'UPDATE posts SET title = $1, content = $2, updated_at = NOW() WHERE id = $3 AND username = $4 RETURNING *';
-      const values = [modifiedTitle, modifiedContent, postId, username];
-  
+      const values = [`${modifiedTitle} (edited by ${username})`, `${modifiedContent} (edited by ${username})`, postId, username];  
       const result = await pool.query(query, values);
   
       if (result.rows.length === 0) {
@@ -384,6 +399,17 @@ app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
     }
 });
 
+app.post('api/posts/:postId/upvote', authenticateToken, async (req, res) => {
+    const { postId } = req.params;
+    const username = req.user.username;
+    try {
+        const result = await pool.query()
+
+    } catch (error) {
+        console.error('Error upvoting post:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 function nestComments(comments) {
     const map = {};
     const roots = [];

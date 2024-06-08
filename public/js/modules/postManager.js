@@ -114,4 +114,42 @@ export async function fetchComments(postId) {
       console.error('Error submitting comment:', error);
     });
   }
+
+  export function upvotePost(postId) {
+    const authToken = localStorage.getItem('token');
+  
+    fetch(`http://localhost:3000/api/posts/${postId}/upvote`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Post upvoted:', data);
+    })
+    .catch(error => {
+      console.error('Error upvoting post:', error);
+    });
+  }
+  
+  export function downvotePost(postId) {
+    const authToken = localStorage.getItem('token');
+  
+    fetch(`http://localhost:3000/api/posts/${postId}/downvote`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Post downvoted:', data);
+    })
+    .catch(error => {
+      console.error('Error downvoting post:', error);
+    });
+  }
   
