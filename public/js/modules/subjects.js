@@ -4,10 +4,15 @@ const sidebarSubjects = [
     link: "/subjects/all"
   },
   {
+    title: "General Knowledge",
+    link: "/subjects/general-knowledge"
+  },
+
+  {
     title: "Mathematics",
     link: "/subjects/mathematics"
   },
-
+  
   {
     title: "Science",
     link: "/subjects/science"

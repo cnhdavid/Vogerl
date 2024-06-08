@@ -7,17 +7,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user) {
         const navbarEnd = document.getElementById('navbar-end');
         const username = user.username;
+
         const welcomeMessage = document.createElement('div');
         welcomeMessage.classList.add('navbar-item');
-        welcomeMessage.innerHTML = `<span>Welcome, ${username}</span>`;
+        welcomeMessage.innerHTML = `<span class="has-text-weight-semibold">Welcome, ${username}</span>`;
+
         navbarEnd.innerHTML = '';
         navbarEnd.appendChild(welcomeMessage);
-        const logoutButton = document.createElement('a');
+
+        const logoutButton = document.createElement('button');
         logoutButton.setAttribute('id', 'logout-button');
-        logoutButton.classList.add('navbar-item');
+        logoutButton.classList.add('navbar-item', 'button', 'is-danger', 'is-normal');
         logoutButton.textContent = 'Logout';
+        logoutButton.style.color = '#000000';
         logoutButton.addEventListener('click', logout);
-        navbarEnd.appendChild(logoutButton);
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.classList.add('buttons');
+        buttonContainer.appendChild(logoutButton);
+
+
+        navbarEnd.innerHTML = '';
+        navbarEnd.appendChild(welcomeMessage);
+        navbarEnd.appendChild(buttonContainer);
     }    
     populateSidebar();
 })

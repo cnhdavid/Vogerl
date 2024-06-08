@@ -22,6 +22,29 @@
         .edit-button-container button {
         margin-left: 5px;
     }
+
+        .navbar-end {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-end .navbar-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-end .buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .button {
+            margin: 0 5px;
+        }
+
+        .has-text-weight-semibold {
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -81,45 +104,25 @@
                     </div>
                 </aside>
 
-                 <!-- Hauptinhalt -->
-                 <main class="column">
-                    <div class="box">
-                        <div class="edit-button-container">
-                            <button class="button is-primary is-small" id="editButton">Edit</button>
-                            <button class="button is-primary is-small" id="saveButton" style="display: none;">Save</button>
-                            <button class="button is-light is-small" id="cancelButton" style="display: none;">Cancel</button>
-                        </div>
-                        <div class="columns is-mobile is-centered">
-                            <div class="column is-one-fifth has-text-centered">
-                                <figure class="image is-128x128">
-                                    <img class="is-rounded" id="profilePic" src="path_to_profile_pic.jpg" alt="Profile Picture">
-                                </figure>
-                                <p id="username">Username</p>
-                                <div class="file has-name is-small mt-2" id="fileInputContainer" style="display: none;">
-                                    <label class="file-label">
-                                        <input class="file-input" type="file" name="resume" id="uploadProfilePic">
-                                        <span class="file-cta">
-                                            <span class="file-label">Choose a file…</span>
-                                        </span>
-                                        <span class="file-name" id="file-name">No file uploaded</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="column is-two-fifths">
-                                <h1 class="title">About</h1>
-                                <p id="aboutText">Brief description about the user...</p>
-                                <textarea class="textarea" id="aboutTextarea" style="display: none;"></textarea>
-                            </div>
-                            <div class="column is-one-fifth">
-                                <h1 class="title">Likes and Comments</h1>
-                                <p>Details about likes and comments...</p>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Hauptinhalt -->
+                <main class="container">
+                    <div class="box columns">
+                        <div class="column is-one-fifths">ProfilePic</div>
+                        <div class="column is-two-fifths">About</div>
+                        <div class="column is-one-fifths">likes and comments</div>
+                    </div>                   
                     <section id="postsDisplay">
-                        <h2 class="title is-4">Questions</h2>
+                        <h2 class="title">Questions</h2>
                         <div id="postsContainer"></div>
                     </section>
+                    <div id="postModal" class="modal">
+                        <div class="modal-background"></div>
+                        <div class="modal-content">
+                            
+                        </div>
+                        <button class="modal-close is-large" aria-label="close"></button>
+                    </div>
+
                 </main>
             </div>
         </div>

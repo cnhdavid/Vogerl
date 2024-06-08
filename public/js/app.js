@@ -15,26 +15,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const welcomeMessage = document.createElement('div');
     welcomeMessage.classList.add('navbar-item');
-    welcomeMessage.innerHTML = `<span>Welcome, ${username}</span>`;
+    welcomeMessage.innerHTML = `<span class="has-text-weight-semibold">Welcome, ${username}</span>`;
 
-    const logoutButton = document.createElement('a');
+    const logoutButton = document.createElement('button');
     logoutButton.setAttribute('id', 'logout-button');
-    logoutButton.classList.add('navbar-item' );
+    logoutButton.classList.add('navbar-item','button', 'is-danger', 'is-normal');
     logoutButton.textContent = 'Logout';
+    logoutButton.style.color = '#000000';
     logoutButton.addEventListener('click', logout);
 
-    const profileButton = document.createElement('a');
+    const profileButton = document.createElement('button');
     profileButton.setAttribute('id', 'profile-button');
-    profileButton.classList.add('navbar-item');
+    profileButton.classList.add('navbar-item','button', 'is-info', 'is-normal');
     profileButton.textContent = 'Profile';
+    profileButton.style.color = '#000000';
     profileButton.addEventListener('click', () => {
       window.location.href = 'profile.html';
     });
 
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('buttons');
+    buttonContainer.appendChild(profileButton);
+    buttonContainer.appendChild(logoutButton);
+
     navbarEnd.innerHTML = '';
     navbarEnd.appendChild(welcomeMessage);
-    navbarEnd.appendChild(logoutButton);
-    navbarEnd.appendChild(profileButton);
+    navbarEnd.appendChild(buttonContainer);
+    
   }
 
   // Add event listener to the form
