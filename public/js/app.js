@@ -2,16 +2,36 @@
 
 import { checkToken, logout } from './modules/auth.js';
 import { fetchAndDisplayPosts } from './modules/posts.js';
-import { populateMenu, populateSidebar } from './modules/posts.js';
+import { populateMenu, populateSidebar, populatePostsSidebar, getPostsByUsername } from './modules/posts.js';
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
+
+  function toggleFormVisibility() {
+  const toggleFormButton = document.getElementById('toggleFormButton');  
+  const formContainer = document.getElementById('postForm');
+  if (formContainer.style.display === 'none') {
+    formContainer.style.display = 'block';
+    toggleFormButton.textContent = 'Cancel';
+    toggleFormButton.classList.add('is-danger');
+  } else {
+    formContainer.style.display = 'none';
+    toggleFormButton.textContent = 'Create Post';
+    toggleFormButton.classList.remove('is-danger');
+
+  }
   
+}
+  toggleFormButton.addEventListener('click', toggleFormVisibility);
 
   const user = checkToken();
 
   if (user) {
+
     const navbarEnd = document.getElementById('navbar-end');
     const username = user.username;
+    populatePostsSidebar(getPostsByUsername(username));
 
     const welcomeMessage = document.createElement('div');
     welcomeMessage.classList.add('navbar-item');
@@ -95,5 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchAndDisplayPosts();
   populateMenu()
   populateSidebar();
+
 });
 

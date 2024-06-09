@@ -114,4 +114,106 @@ export async function fetchComments(postId) {
       console.error('Error submitting comment:', error);
     });
   }
+  function resetVoteAnimation(button) {
+    button.classList.remove('upvoted', 'downvoted');
+    button.classList.add('normal');
+    console.log('Animation reset');
+  }
+  
+
+  export function upvotePost(postId) {
+    const authToken = localStorage.getItem('token');
+  
+    fetch(`http://localhost:3000/api/posts/${postId}/upvote`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      const upvoteButton = document.querySelector(`#upvote-${postId}`);
+            applyVoteAnimation(upvoteButton, 'upvote');
+
+            // Reset the downvote button state
+            const downvoteButton = document.querySelector(`#downvote-${postId}`);
+            resetVoteAnimation(downvoteButton);
+      console.log('Post upvoted:', data);
+    })
+    .catch(error => {
+      console.error('Error upvoting post:', error);
+    });
+  }
+  
+  export function downvotePost(postId) {
+    const authToken = localStorage.getItem('token');
+  
+    fetch(`http://localhost:3000/api/posts/${postId}/downvote`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      const downvoteButton = document.querySelector(`#downvote-${postId}`);
+            applyVoteAnimation(downvoteButton, 'downvote');
+
+            // Reset the upvote button state
+            const upvoteButton = document.querySelector(`#upvote-${postId}`);
+            resetVoteAnimation(upvoteButton);
+      console.log('Post downvoted:', data);
+    })
+    .catch(error => {
+      console.error('Error downvoting post:', error);
+    });
+  }
+  export async function getPostVotes(postId) {
+    try {
+      const response = await fetch(`http://localhost:3000/api/posts/${postId}/votes`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch upvotes');
+      }
+      const data = await response.json();
+      return data.totalVotes;
+    } catch (error) {
+      console.error('Error fetching upvotes:', error);
+      return 0;
+    }
+  }
+  
+ export async function hasUserVoted(postId, userId) {
+  const authToken = localStorage.getItem('token');
+  try {
+    const response = await fetch(`http://localhost:3000/api/posts/${postId}/hasUserLiked/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${authToken}` // Add the authorization token here
+      }
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch upvotes');
+    }
+    
+    const data = await response.json();
+    console.log(data.hasUserLiked);
+    return data.hasUserLiked;
+  } catch (error) {
+    console.error('Error fetching upvotes:', error);
+    return false;
+} }
+export function applyVoteAnimation(button, type) {
+  button.classList.remove('upvoted', 'downvoted', 'normal');
+
+  if (type === 'upvote') {
+      button.classList.add('upvoted');
+  } else if (type === 'downvote') {
+      button.classList.add('downvoted');
+  }
+}
+
+// Function to reset the animation state
+
+
   
