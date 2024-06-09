@@ -44,9 +44,10 @@ fetch(`http://localhost:3000/api/posts/${postId}`)
   </div>
   ${token ? `<i id="upvote-${post.id}" class="fa-solid fa-arrow-up mx-2"></i>` : ''}
   <span class="upvote-count"> Loading...</span>
-  ${token ? `<i id="downvote-${post.id}" class="fa-solid fa-arrow-down ml-2"></i>` : ''}
+  ${token ?  `<i id="downvote-${post.id}" class="fa-solid fa-arrow-down ml-2 "></i>` : ''}
   <h3 class="title is-5 my-3">Comments</h3>
   <div id="comments-container"></div>
+  
   ${token ? `
     <textarea id="commentInput" class="textarea" placeholder="Add a comment"></textarea>
     <button id="submitComment" class="button is-primary"><i  class="fa-solid fa-check"></i>Submit</button>
