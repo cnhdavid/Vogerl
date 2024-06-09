@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <title>Log In - Q&A Forum</title>
     <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
         html {
             font-size: 15px;
@@ -34,10 +35,8 @@
         <div class="container">
             <div class="columns is-centered">
                 <div class="column is-5-tablet is-4-desktop is-3-widescreen">
-                    <form action="#" class="box">
+                    <form action="#" class="box" id="loginForm">
                         <h1 class="title has-text-centered">Log In for Q&A Forum</h1>
-
-                        
 
                         <div class="field">
                             <label class="label" for="registerEmail">Email</label>
@@ -57,6 +56,10 @@
                                     <i class="fas fa-lock"></i>
                                 </span>
                             </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="g-recaptcha" data-sitekey="6Lf75vQpAAAAAC8YVgzi54SRTktaPB1gBQ-aii7V"></div>
                         </div>
 
                         <div class="field">

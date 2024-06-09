@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captcha PoC</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+<h1>Captcha PoC</h1>
+
+<?php
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $recaptcha_secret = 'your_secret_key';
+        $response = $_POST['g-recaptcha-response'];
+        $remoteip = $_SERVER['REMOTE_ADDR'];
+
+        $url = 'https://www.google.com/recaptcha/api/siteverify';
+        $data = array(
+            'secret' => $recaptcha_secret,
+'response' => $response,
+'remoteip' => $remoteip
+);
+
+$options = array(
+'http' => array(
+'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+'method' => 'POST',
+'content' => http_build_query($data)
+)
+);
+
+$context = stream_context_create($options);
+$result = file_get_contents($url, false, $context);
+$resultJson = json_decode($result);
+
+if ($resultJson->success) {
+echo "<p>Verification successful!</p>";
+} else {
+echo "<p>Verification failed!</p>";
+}
+}
+?>
+
+<form action="" method="POST">
+    <div class="g-recaptcha" data-sitekey="your_site_key"></div>
+    <br/>
+    <input type="submit" value="Submit">
+</form>
+</body>
+</html>

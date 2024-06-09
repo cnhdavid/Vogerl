@@ -1,11 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.querySelector('form');
+    const loginForm = document.getElementById('loginForm');
 
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const email = document.getElementById('registerEmail').value;
         const password = document.getElementById('registerPassword').value;
+        const recaptchaResponse = grecaptcha.getResponse();
+
+        if (!recaptchaResponse) {
+            alert('Bitte bestätigen Sie, dass Sie kein Roboter sind.');
+            return;
+        }
+
         const redirectToPost = sessionStorage.getItem('redirectToPost');
 
         try {
@@ -14,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, password, recaptchaResponse }),
             });
 
             if (response.status === 401 || response.status === 403) {

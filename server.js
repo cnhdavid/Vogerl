@@ -12,19 +12,17 @@ const fs = require('fs');
 const multer = require('multer');
 const upload = multer();
 const path = require('path');
-const app = express();
 const { filterProfanity, containsProfanity } = require('./public/js/modules/moderate');
+const fetch = require('node-fetch');  // Added for reCAPTCHA verification
 
-
-
+const app = express();
 const port = 3000;
+
 app.use(cors());
 app.use(express.json());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ limit: '20mb', extended: true }));
 app.use(express.urlencoded({ extended: true }));
-
-
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -35,9 +33,6 @@ const pool = new Pool({
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
 });
-
-
-
 
 // Check Cpnnection
 app.get('/check-db-connection', async (req, res) => {
@@ -81,9 +76,20 @@ app.post('/signup', async (req, res) => {
 
 // User login
 app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, recaptchaResponse } = req.body;
 
     try {
+        // Verify reCAPTCHA
+        const recaptchaSecretKey = '6Lf75vQpAAAAAEC3_zxEc3Xe6AlhzgkZsALXOUV8';
+        const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${recaptchaResponse}`;
+
+        const recaptchaVerification = await fetch(verificationURL, { method: 'POST' });
+        const recaptchaData = await recaptchaVerification.json();
+
+        if (!recaptchaData.success) {
+            return res.status(400).json({ message: 'reCAPTCHA verification failed.' });
+        }
+
         // Check if the email exists
         const userCheckQuery = 'SELECT * FROM users WHERE email = $1';
         const userCheckResult = await pool.query(userCheckQuery, [email]);
@@ -129,18 +135,14 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
 
     try {
         // Filter profanity from title and content
-        
         const titleHasProfanity = await containsProfanity(title);
         const contentHasProfanity = await containsProfanity(content);
         console.log(titleHasProfanity, contentHasProfanity)
         
-
         if (titleHasProfanity || contentHasProfanity) {
             title = 'This post contains profanity, please remove it';
             content = 'This post contains profanity, please remove it';
         }
-
-        
 
         const result = await pool.query(
             'INSERT INTO posts (title, content, subject, username, image) VALUES ($1, $2, $3, $4, $5) RETURNING *',
@@ -152,9 +154,8 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 // Function to check if a text contains profanity using Purgomalum API
-
-
 app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
     const postId = req.params.postId;
     const username = req.user.username; // Extract username from the token
@@ -184,9 +185,6 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
     }
 });
 
-
-
-
 app.get('/api/posts', async (req, res) => {
     const subject = req.query.subject;
 
@@ -212,14 +210,14 @@ app.get('/api/posts', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
     const postId = req.params.postId;
     const username = req.user.username;
     const { title, content } = req.body;
-    
-  
+
     if (!title || !content) {
-      return res.status(400).send('Title and content are required');
+        return res.status(400).send('Title and content are required');
     }
     let modifiedTitle = await filterProfanity(title);
     const modifiedContent = await filterProfanity(content);
@@ -228,23 +226,23 @@ app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
     if (titleHasProfanity || contentHasProfanity) {
         modifiedTitle += ' (The post content was changed due to it containing profanity)';
     }
-  
+
     try {
-      const query = 'UPDATE posts SET title = $1, content = $2, updated_at = NOW() WHERE id = $3 AND username = $4 RETURNING *';
-      const values = [modifiedTitle, modifiedContent, postId, username];
-  
-      const result = await pool.query(query, values);
-  
-      if (result.rows.length === 0) {
-        return res.status(404).send('Post not found or user not authorized');
-      }
-  
-      res.json(result.rows[0]);
+        const query = 'UPDATE posts SET title = $1, content = $2, updated_at = NOW() WHERE id = $3 AND username = $4 RETURNING *';
+        const values = [modifiedTitle, modifiedContent, postId, username];
+
+        const result = await pool.query(query, values);
+
+        if (result.rows.length === 0) {
+            return res.status(404).send('Post not found or user not authorized');
+        }
+
+        res.json(result.rows[0]);
     } catch (error) {
-      console.error('Error updating post:', error);
-      res.status(500).send('Internal Server Error');
+        console.error('Error updating post:', error);
+        res.status(500).send('Internal Server Error');
     }
-  });
+});
 
 // Function to get comments by post ID
 async function getCommentsByPostId(postId) {
@@ -291,6 +289,7 @@ app.delete('/api/post/:postId', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 // Function to get a post by ID
 async function getPostById(postId) {
     const query = 'SELECT * FROM posts WHERE id = $1';
@@ -308,6 +307,7 @@ async function getPostById(postId) {
         throw error;
     }
 }
+
 // Endpoint to get comments based on post ID
 app.get('/api/posts/:postId/comments', async (req, res) => {
     const postId = req.params.postId;
@@ -360,6 +360,7 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
     const { postId } = req.params;
     let { content, parentId } = req.body; // Include parentId in the request body
@@ -367,7 +368,6 @@ app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
 
     try {
         // Insert the comment into the database
-        
         const contentHasProfanity = await containsProfanity(content);
         if (contentHasProfanity) {
             content = '***PROFANITY DETECTED***';
@@ -401,9 +401,6 @@ function nestComments(comments) {
 
     return roots;
 }
-
-
-
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
