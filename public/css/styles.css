@@ -14,4 +14,39 @@
     cursor: pointer;
     height: 50px;
 }
+/* CSS for the upvote animation */
+.upvoted {
+    color: #80d9ff;
+    animation: upvoteAnimation 0.3s forwards;
+}
+
+@keyframes upvoteAnimation {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.2);
+    }
+}
+
+/* CSS for the downvote animation */
+.downvoted {
+    color: red;
+    animation: downvoteAnimation 0.3s forwards;
+}
+
+@keyframes downvoteAnimation {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.2);
+    }
+}
+
+/* CSS to reset to the normal state */
+.normal {
+    color: inherit;
+    transform: scale(1);
+}
 

@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { Pool } = require('pg');
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
@@ -14,6 +15,9 @@ const upload = multer();
 const path = require('path');
 const app = express();
 const { filterProfanity, containsProfanity } = require('./public/js/modules/moderate');
+const {pool, getClient, query} = require('./public/js/modules/db');
+const { getPostVotes, hasUserVoted } = require('./public/js/modules/voteservice'); // Assuming the function is in voteService.js
+
 
 
 
@@ -28,13 +32,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(bodyParser.json());
 
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-});
+ 
+
 
 
 
@@ -109,11 +108,26 @@ app.post('/login', async (req, res) => {
             await pool.query(updateQuery, [jwtSecretKey, email]);
         }
 
-        const token = jwt.sign({ username: user.username }, jwtSecretKey, { expiresIn: '1h' });        
+        const token = jwt.sign({userId: user.id, username: user.username }, jwtSecretKey, { expiresIn: '1h' });        
         res.json({ token });
     } catch (error) {
         console.error('Error logging in user:', error);
         res.status(500).json({ message: 'Internal server error' });
+    }
+});
+app.get('/api/users/:username', async (req, res) => {
+    const username = req.params.username;
+    try {
+        const result = await pool.query('SELECT id FROM users WHERE username = $1', [username]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const userId = result.rows[0].id;
+        console.log('User ID:', userId);
+        res.json({ userId });
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        res.status(500).json({ error: 'Failed to fetch user' });
     }
 });
 
@@ -399,17 +413,97 @@ app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
     }
 });
 
-app.post('api/posts/:postId/upvote', authenticateToken, async (req, res) => {
+app.post('/api/posts/:postId/upvote', authenticateToken, async (req, res) => {
     const { postId } = req.params;
     const username = req.user.username;
-    try {
-        const result = await pool.query()
 
+    try {
+        // Find user ID by username
+        const userResult = await pool.query('SELECT id FROM Users WHERE username = $1', [username]);
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const userId = userResult.rows[0].id;
+
+        // Check if the user has already voted on this post
+        const voteResult = await pool.query('SELECT * FROM PostVotes WHERE post_id = $1 AND user_id = $2', [postId, userId]);
+        
+        if (voteResult.rows.length === 0) {
+            // User hasn't voted on this post yet, insert a new upvote
+            await pool.query('INSERT INTO PostVotes (post_id, user_id, vote) VALUES ($1, $2, 1)', [postId, userId]);
+        } else {
+            const currentVote = voteResult.rows[0].vote;
+            if (currentVote === -1) {
+                // User has downvoted, update to upvote
+                await pool.query('UPDATE PostVotes SET vote = 1 WHERE post_id = $1 AND user_id = $2', [postId, userId]);
+            }
+            // If the user has already upvoted, do nothing or handle it as needed
+        }
+
+        res.status(200).json({ message: 'Post upvoted successfully' });
     } catch (error) {
         console.error('Error upvoting post:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+app.post('/api/posts/:postId/downvote', authenticateToken, async (req, res) => {
+    const { postId } = req.params;
+    const username = req.user.username;
+
+    try {
+        // Find user ID by username
+        const userResult = await pool.query('SELECT id FROM Users WHERE username = $1', [username]);
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const userId = userResult.rows[0].id;
+
+        // Check if the user has already voted on this post
+        const voteResult = await pool.query('SELECT * FROM PostVotes WHERE post_id = $1 AND user_id = $2', [postId, userId]);
+        
+        if (voteResult.rows.length === 0) {
+            // User hasn't voted on this post yet, insert a new downvote
+            await pool.query('INSERT INTO PostVotes (post_id, user_id, vote) VALUES ($1, $2, -1)', [postId, userId]);
+        } else {
+            const currentVote = voteResult.rows[0].vote;
+            if (currentVote === 1) {
+                // User has downvoted, update to upvote
+                await pool.query('UPDATE PostVotes SET vote = -1 WHERE post_id = $1 AND user_id = $2', [postId, userId]);
+            }
+            // If the user has already downvoted, do nothing or handle it as needed
+        }
+
+        res.status(200).json({ message: 'Post upvoted successfully' });
+    } catch (error) {
+        console.error('Error upvoting post:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+app.get('/api/posts/:postId/votes', async (req, res) => {
+    const { postId } = req.params;
+
+    try {
+        const totalVotes = await getPostVotes(postId);
+        res.status(200).json({ postId, totalVotes });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/posts/:postId/hasUserLiked/:userId', authenticateToken, async (req, res) => {
+    const  {postId}  = req.params;
+    const user_id  = req.params.userId;
+
+    try {
+        const hasUserLiked = await hasUserVoted(postId, user_id);
+        console.log(hasUserLiked);
+        res.status(200).json({ postId, hasUserLiked });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+
+});
+
 function nestComments(comments) {
     const map = {};
     const roots = [];

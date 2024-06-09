@@ -1,8 +1,10 @@
 // js/modules/post.js
 
-import { fetchComments } from './postManager.js';
+import { fetchComments, downvotePost, upvotePost, getPostVotes, hasUserVoted } from './postManager.js';
 import { openPost } from './modal.js';
 import sidebarSubjects from './subjects.js';
+import { getUserId } from './auth.js';
+
 
 async function fetchPosts(subject = null) {
   const url = subject
@@ -119,7 +121,7 @@ export async function populatePostsSidebar(postsPromise) {
         openPost(post.id);
       })
 
-      
+
 
       listItem.appendChild(postElement);
       sidebarMenu.appendChild(listItem);
@@ -145,17 +147,18 @@ export async function fetchAndDisplayPosts(subject = null) {
     const commentsPromises = posts.map(post => fetchComments(post.id));
     const allComments = await Promise.all(commentsPromises);
 
-    posts.forEach((post, index) => {
-      const postElement = createPostElement(post, allComments[index]);
+    await Promise.all(posts.map(async (post, index) => {
+      const postElement = await createPostElement(post, allComments[index]);
       postsContainer.appendChild(postElement);
-    });
+    }));
   } catch (error) {
     console.error('Error displaying posts:', error);
   }
 }
 
 
-export function createPostElement(post, comments) {
+export async function createPostElement(post, comments) {
+  
   const postElement = document.createElement('div');
   postElement.classList.add('box');
 
@@ -176,25 +179,57 @@ export function createPostElement(post, comments) {
             ${post.content}
           </p>
           ${imageData ? `<img src="${imageData}" alt="Post Image" class="post-image" />` : ''}
-          <i class="fa-solid fa-arrow-up"></i>
-          <i class="fa-solid fa-arrow-down"></i>
+          <i class="fa-solid fa-arrow-up is-fluid" id="upvote-${post.id}"></i>
+          <span class="upvote-count mx-3"> Loading...</span>
+          <i class="fa-solid fa-arrow-down is-fluid" id="downvote-${post.id}" ></i> 
+          
         </div>
       </div>
     </article>
   `;
+  getUserId(post.username)
+  .then(userId => {
+    console.log('User ID:', userId);
+    hasUserVoted(post.id, userId)
+    .then(liked => {
+      if (liked==='upvote') {
+        document.getElementById(`upvote-${post.id}`).classList.add('upvoted');
+      }
+
+      if (liked==='downvote') {
+        document.getElementById(`downvote-${post.id}`).classList.add('downvoted');
+      } 
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching user ID:', error);
+  });
+
+  
+
+  try {
+    const upvotes = await getPostVotes(post.id);
+
+    const upvoteCountElement = postElement.querySelector('.upvote-count');
+    upvoteCountElement.textContent = upvotes;
+  } catch (error) {
+    console.error('Error fetching votes:', error);
+  }
 
   const upvoteButton = postElement.querySelector('.fa-arrow-up');
   const downvoteButton = postElement.querySelector('.fa-arrow-down');
-  upvoteButton.addEventListener('click', () => upvotePost(post.id));
-  downvoteButton.addEventListener('click', () => downvotePost(post.id));
+  upvoteButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    upvotePost(post.id);
+  });
+
+  downvoteButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    downvotePost(post.id);
+  });
 
   // Add upvotes if available
-  if (post.upvotes) {
-    const upvoteCount = document.createElement('span');
-    upvoteCount.classList.add('upvote-count');
-    upvoteCount.textContent = post.upvotes;
-    postElement.appendChild(upvoteCount);
-  }
+
   // Add comments if available
 
   if (comments.length > 0) {
@@ -220,3 +255,4 @@ export function createPostElement(post, comments) {
 
   return postElement;
 }
+

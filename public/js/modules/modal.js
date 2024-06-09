@@ -1,6 +1,6 @@
 // js/modules/modal.js
 
-import { getUserIdFromToken } from './auth.js';
+
 import { loadComments, submitComment } from './postManager.js';
 
 // js/modules/modal.js

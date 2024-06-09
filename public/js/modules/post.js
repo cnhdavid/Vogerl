@@ -1,5 +1,6 @@
-import { getUserIdFromToken, checkToken, logout } from './auth.js';
+import { getUserIdFromToken, checkToken, logout,getUserId } from './auth.js';
 import { editPost  } from './modal.js';
+import { getPostVotes, hasUserVoted, upvotePost, downvotePost } from './postManager.js';
 
 // Retrieve the postId from the URL query parameter
 const urlParams = new URLSearchParams(window.location.search);
@@ -29,7 +30,7 @@ fetch(`http://localhost:3000/api/posts/${postId}`)
 
 
     postContainer.innerHTML = `
-  ${token && post.userId === getUserIdFromToken(token) ? `<i id="editPostButton" class="fa-solid fa-pen-to-square is-pulled-right"></i>` : ''}
+  ${token && post.username === getUserIdFromToken(token) ? `<i id="editPostButton" class="fa-solid fa-pen-to-square is-pulled-right"></i>` : ''}
   <h1 class="title">${post.title}</h1>
   <div class="columns">
   <p class="subtitle column">posted by <strong>${post.username}</strong></p>
@@ -41,19 +42,54 @@ fetch(`http://localhost:3000/api/posts/${postId}`)
     <p>${post.content}</p>
     ${post.image ? `<img src="data:image/jpeg;base64,${post.image}" alt="Post Image" class="post-image" />` : ''}
   </div>
-  ${token ? `<i class="fa-solid fa-arrow-up"></i>` : ''}
-  ${token ? `<i class="fa-solid fa-arrow-down ml-2"></i>` : ''}
+  ${token ? `<i id="upvote-${post.id}" class="fa-solid fa-arrow-up mx-2"></i>` : ''}
+  <span class="upvote-count"> Loading...</span>
+  ${token ? `<i id="downvote-${post.id}" class="fa-solid fa-arrow-down ml-2"></i>` : ''}
   <h3 class="title is-5 my-3">Comments</h3>
   <div id="comments-container"></div>
   ${token ? `
     <textarea id="commentInput" class="textarea" placeholder="Add a comment"></textarea>
-    <button id="submitComment" class="button is-primary"><i class="fa-solid fa-check"></i>Submit</button>
+    <button id="submitComment" class="button is-primary"><i  class="fa-solid fa-check"></i>Submit</button>
   ` : `
     <p>Please log in to add a comment.</p>
     <button id="loginButton" class="button is-primary">Log In</button>
   `}
-  ${token && post.userId === getUserIdFromToken(token) ? `<button id="deletePostButton" class="button is-danger">Delete Post</button>` : ''}
+  ${token && post.username === getUserIdFromToken(token) ? `<button id="deletePostButton" class="button is-danger">Delete Post</button>` : ''}
 `;
+try {
+  getPostVotes(post.id)
+  .then(upvotes => {
+    const upvoteCountElement = postContainer.querySelector('.upvote-count');
+  upvoteCountElement.textContent = upvotes;
+  });  
+} catch (error) {
+  console.error('Error fetching votes:', error);
+}
+getUserId(post.username)
+  .then(userId => {
+    console.log('User ID:', userId);
+    hasUserVoted(post.id, userId)
+    .then(liked => {
+      if (liked==='upvote') {
+        document.getElementById(`upvote-${post.id}`).classList.add('upvoted');
+      }
+
+      if (liked==='downvote') {
+        document.getElementById(`downvote-${post.id}`).style.color = 'red';
+      } 
+    });
+  })
+const upvoteButton = postContainer.querySelector('.fa-arrow-up');
+  const downvoteButton = postContainer.querySelector('.fa-arrow-down');
+  upvoteButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    upvotePost(post.id);
+  });
+
+  downvoteButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    downvotePost(post.id);
+  });
     if (!token) {
       const loginButton = document.getElementById('loginButton');
       sessionStorage.setItem('redirectToPost', window.location.href);
@@ -61,7 +97,7 @@ fetch(`http://localhost:3000/api/posts/${postId}`)
         window.location.href = './login.html';
       });
     }
-    if (token && post.userId == getUserIdFromToken(token)) {
+    if (token && post.username == getUserIdFromToken(token)) {
       const editPostButton = document.getElementById('editPostButton');
       editPostButton.addEventListener('click', () => {
         const editPostModal = document.getElementById('editPostModal');
