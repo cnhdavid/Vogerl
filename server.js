@@ -4,18 +4,19 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { Pool } = require('pg');
-
+const fs = require('fs');
+const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const authenticateToken = require('./authenticate');
-const fs = require('fs');
+let jwtSecretKey = process.env.JWT_SECRET_KEY || crypto.randomBytes(64).toString('hex');
+process.env.JWT_SECRET_KEY = jwtSecretKey; // Store in environment variable
+
 const multer = require('multer');
 const upload = multer();
-const path = require('path');
 const { filterProfanity, containsProfanity } = require('./public/js/modules/moderate');
-const {pool, getClient, query} = require('./public/js/modules/db');
-const { getPostVotes, hasUserVoted } = require('./public/js/modules/voteservice'); // Assuming the function is in voteService.js
+
 
 
 const app = express();
@@ -29,7 +30,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(bodyParser.json());
 
- 
+const sslCert = fs.readFileSync(path.resolve(__dirname, process.env.PG_SSL_CERT_PATH)).toString();
+const pool = new Pool({
+    host: process.env.PG_HOST,
+    port: process.env.PG_PORT,
+    database: process.env.PG_DATABASE,
+    user: process.env.PG_USER,
+    password: process.env.PG_PASSWORD,
+    ssl: {
+        rejectUnauthorized: true,
+        ca: sslCert
+    }
+});
+
 
 
 
@@ -38,7 +51,7 @@ app.use(bodyParser.json());
 // Check Cpnnection
 app.get('/check-db-connection', async (req, res) => {
     try {
-        await pool.query('SELECT 1');
+        await client.query('SELECT 1');
         res.status(200).json({ success: true, message: 'Database connection is successful' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Database connection failed', error: error.message });
@@ -48,76 +61,69 @@ app.get('/check-db-connection', async (req, res) => {
 // User registration
 app.post('/signup', async (req, res) => {
     const { username, email, password, date_of_birth, first_name, last_name } = req.body;
-    console.log("tryinggg")
+    console.log("tryinggg");
     const dob = new Date(date_of_birth);
     const formattedDOB = dob.toISOString().split('T')[0];
-    console.log(formattedDOB)
-    
-    try {
-        // Check if username or email already exists
-        const userCheckQuery = 'SELECT * FROM users WHERE username = $1 OR email = $2';
-        const userCheckResult = await pool.query(userCheckQuery, [username, email]);
+    console.log(formattedDOB);
 
-        if (userCheckResult.rows.length > 0) {
-            return res.status(400).json({ message: 'Username or email already exists' });
-        }
+    try {
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert new user into the database
-        const insertQuery = 'INSERT INTO users (username, email, password, date_of_birth, first_name, last_name) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
-        const insertResult = await pool.query(insertQuery, [username, email, hashedPassword,formattedDOB , first_name, last_name]);
+        const client = await pool.connect();
+        try {
+            const userCheckQuery = 'SELECT * FROM users WHERE email = $1';
+            const userCheckResult = await client.query(userCheckQuery, [email]);
 
-        res.status(201).json(insertResult.rows[0]);
+            if (userCheckResult.rows.length > 0) {
+                return res.status(400).json({ message: 'Email already exists' });
+            }
+
+            const insertQuery = 'INSERT INTO users (username, email, password, date_of_birth, first_name, last_name) VALUES ($1, $2, $3, $4, $5, $6)';
+            await client.query(insertQuery, [username, email, hashedPassword, formattedDOB, first_name, last_name]);
+
+            return res.status(201).json({ message: 'User created successfully' });
+        } finally {
+            client.release();  // Release the client back to the pool
+        }
     } catch (error) {
-        console.error('Error:', error);
-        console.error('Error inserting user:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Error creating user:', error);
+        return res.status(500).json({ message: 'Error creating user' });
     }
 });
 
 // User login
-app.post('/login', async (req, res) => {
-    const { email, password, recaptchaResponse } = req.body;
+app.post('/api/login', async (req, res) => {
+    const { email, password } = req.body;
+    console.log(email, password);
 
     try {
-        // Verify reCAPTCHA
-        const recaptchaSecretKey = '6Lf75vQpAAAAAEC3_zxEc3Xe6AlhzgkZsALXOUV8';
-        const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${recaptchaResponse}`;
 
-        const recaptchaVerification = await fetch(verificationURL, { method: 'POST' });
-        const recaptchaData = await recaptchaVerification.json();
+        const client = await pool.connect();
+        try {
+            const userCheckQuery = 'SELECT * FROM users WHERE email = $1';
+            const userCheckResult = await client.query(userCheckQuery, [email]);
 
-        if (!recaptchaData.success) {
-            return res.status(400).json({ message: 'reCAPTCHA verification failed.' });
-        }
+            if (userCheckResult.rows.length === 0) {
+                return res.status(400).json({ message: 'Invalid email or password' });
+            }
 
-        // Check if the email exists
-        const userCheckQuery = 'SELECT * FROM users WHERE email = $1';
-        const userCheckResult = await pool.query(userCheckQuery, [email]);
+            const user = userCheckResult.rows[0];
 
-        if (userCheckResult.rows.length === 0) {
-            return res.status(400).json({ message: 'Invalid email or password' });
-        }
+            const passwordMatch = await bcrypt.compare(password, user.password);
 
-        const user = userCheckResult.rows[0];
+            if (!passwordMatch) {
+                return res.status(400).json({ message: 'Invalid email or password' });
+            }
 
-        // Compare the provided password with the hashed password
-        const passwordMatch = await bcrypt.compare(password, user.password);
-
-        if (!passwordMatch) {
-            return res.status(400).json({ message: 'Invalid email or password' });
-        }
-
-        // Generate and store JWT secret key if not already present
-        let jwtSecretKey = user.jwt_secret_key;
-        if (!jwtSecretKey) {
             jwtSecretKey = crypto.randomBytes(64).toString('hex');
-            const updateQuery = 'UPDATE users SET jwt_secret_key = $1 WHERE email = $2';
-            await pool.query(updateQuery, [jwtSecretKey, email]);
-        }
+            process.env.JWT_SECRET_KEY = jwtSecretKey;
 
-        const token = jwt.sign({userId: user.id, username: user.username }, jwtSecretKey, { expiresIn: '1h' });        
-        res.json({ token });
+            const token = jwt.sign({ userId: user.id, username: user.username }, jwtSecretKey, { expiresIn: '1h' });
+            console.log(token);
+            res.json({ token });
+        } finally {
+            client.release();  // Release the client back to the pool
+        }
     } catch (error) {
         console.error('Error logging in user:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -126,16 +132,17 @@ app.post('/login', async (req, res) => {
 app.get('/api/users/:username', async (req, res) => {
     const username = req.params.username;
     try {
-        const result = await pool.query('SELECT id FROM users WHERE username = $1', [username]);
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
+        const client = await pool.connect();
+        try {
+            const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
+            console.log(result.rows[0].id);
+            res.status(200).json(result.rows[0].id);
+        } finally {
+            client.release();  // Release the client back to the pool
         }
-        const userId = result.rows[0].id;
-        console.log('User ID:', userId);
-        res.json({ userId });
     } catch (error) {
         console.error('Error fetching user:', error);
-        res.status(500).json({ error: 'Failed to fetch user' });
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
 
@@ -150,35 +157,28 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
     }
 
     try {
-        // Filter profanity from title and content
-        const titleHasProfanity = await containsProfanity(title);
-        const contentHasProfanity = await containsProfanity(content);
-        console.log(titleHasProfanity, contentHasProfanity)
-        
-        if (titleHasProfanity || contentHasProfanity) {
-            title = 'This post contains profanity, please remove it';
-            content = 'This post contains profanity, please remove it';
+        const client = await pool.connect();
+        try {
+            const insertQuery = 'INSERT INTO posts (username, title, content, subject, image) VALUES ($1, $2, $3, $4, $5)';
+            await client.query(insertQuery, [username, title, content, subject, image]);
+            res.status(201).json({ message: 'Post created successfully' });
+        } finally {
+            client.release();  // Release the client back to the pool
         }
-
-        const result = await pool.query(
-            'INSERT INTO posts (title, content, subject, username, image) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [title, content, subject, username, image]
-        );
-        res.status(201).json(result.rows[0]);
     } catch (error) {
-        console.error('Error inserting data into database:', error);
+        console.error('Error creating post:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-// Function to check if a text contains profanity using Purgomalum API
+
 app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
     const postId = req.params.postId;
     const username = req.user.username; // Extract username from the token
 
     try {
         // Check if the post exists and belongs to the authenticated user
-        const postQuery = await pool.query(
+        const postQuery = await client.query(
             'SELECT * FROM posts WHERE id = $1 AND username = $2',
             [postId, username]
         );
@@ -188,11 +188,11 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
         }
 
         // Delete the post
-        await pool.query(
+        await client.query(
             'DELETE FROM posts WHERE id = $1',
             [postId]
         );
-        
+
         // Respond with success message
         res.json({ message: 'Post deleted successfully' });
     } catch (error) {
@@ -203,25 +203,24 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
 
 app.get('/api/posts', async (req, res) => {
     const subject = req.query.subject;
-    
 
     try {
-        let result;
-        if (subject) {
-            result = await pool.query(
-                'SELECT * FROM posts WHERE subject = $1',
-                [subject]
-            );
+        const client = await pool.connect();
+        try {
+            let result;
+            if (subject) {
+                if (subject === "All") {
+                    result = await client.query('SELECT * FROM posts');
+                } else {
+                    result = await client.query('SELECT * FROM posts WHERE subject = $1', [subject]);
+                }
+            } else {
+                result = await client.query('SELECT * FROM posts');
+            }
+            res.status(200).json(result.rows);
+        } finally {
+            client.release();  // Release the client back to the pool
         }
-        if (subject=="All") {
-            result = await pool.query(
-                'SELECT * FROM posts');
-        } else if (!subject) {
-            result = await pool.query(
-                'SELECT * FROM posts');
-            
-        }
-        res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error fetching posts:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -231,16 +230,18 @@ app.get('/api/posts', async (req, res) => {
 app.get('/api/users/:username/posts', async (req, res) => {
     const username = req.params.username;
     try {
-        const result = await pool.query(
-            'SELECT * FROM posts WHERE username = $1',
-            [username]
-        );
-        res.status(200).json(result.rows);
+        const client = await pool.connect();
+        try {
+            const result = await client.query('SELECT * FROM posts WHERE username = $1', [username]);
+            res.status(200).json(result.rows);
+        } finally {
+            client.release();  // Release the client back to the pool
+        }
     } catch (error) {
         console.error('Error fetching posts:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-    
+
 })
 app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
     const postId = req.params.postId;
@@ -259,18 +260,16 @@ app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
     }
 
     try {
-      const query = 'UPDATE posts SET title = $1, content = $2, updated_at = NOW() WHERE id = $3 AND username = $4 RETURNING *';
-      const values = [`${modifiedTitle} (edited by ${username})`, `${modifiedContent} (edited by ${username})`, postId, username];  
-      const result = await pool.query(query, values);
-  
-      if (result.rows.length === 0) {
-        return res.status(404).send('Post not found or user not authorized');
-      }
-  
-      res.json(result.rows[0]);
+        const clien = await pool.connect();
+        try {
+            await client.query('UPDATE posts SET title = $1, content = $2 WHERE id = $3 AND username = $4', [modifiedTitle, modifiedContent, postId, username]);
+            res.status(200).json({ message: 'Post updated successfully' });
+        } finally {
+            client.release();  // Release the client back to the pool
+        }
     } catch (error) {
         console.error('Error updating post:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
@@ -278,10 +277,18 @@ app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
 async function getCommentsByPostId(postId) {
     const query = 'SELECT * FROM comments WHERE post_id = $1';
     const values = [postId];
-    
+
     try {
-        const result = await pool.query(query, values);
-        return result.rows;
+        const client = await pool.connect();
+        try {
+            const result = await client.query(query, values);
+            return result.rows;
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+            throw error;
+        } finally {
+            client.release();  // Release the client back to the pool
+        }
     } catch (error) {
         console.error('Error fetching comments:', error);
         throw error;
@@ -292,28 +299,13 @@ app.delete('/api/post/:postId', authenticateToken, async (req, res) => {
     const postId = req.params.postId;
     const username = req.user.username; // Extract username from the token
     try {
-        // Check if the post exists and belongs to the authenticated user
-        const postQuery = await pool.query(
-            'SELECT * FROM posts WHERE id = $1 AND username = $2',
-            [postId, username]
-        );
-        const post = postQuery.rows[0];
-        if (!post) {
-            return res.status(404).json({ error: 'Post not found or unauthorized' });
+        const client = await pool.connect();
+        try {
+            const result = await client.query('DELETE FROM posts WHERE id = $1 AND username = $2', [postId, username]);
+            res.status(200).json({ message: 'Post deleted successfully' });
+        } finally {
+            client.release();  // Release the client back to the pool   
         }
-        await pool.query(
-            'DELETE FROM comments WHERE post_id = $1',
-            [postId]
-        );
-
-        // Delete the post
-        await pool.query(
-            'DELETE FROM posts WHERE id = $1',
-            [postId]
-        );
-        
-        // Respond with success message
-        res.json({ message: 'Post deleted successfully' });
     } catch (error) {
         console.error('Error deleting post:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -324,14 +316,15 @@ app.delete('/api/post/:postId', authenticateToken, async (req, res) => {
 async function getPostById(postId) {
     const query = 'SELECT * FROM posts WHERE id = $1';
     const values = [postId];
-    
+
     try {
-        const result = await pool.query(query, values);
-        if (result.rows.length === 0) {
-            console.error(`Post with ID ${postId} not found.`);
-            return null;
+        const client = await pool.connect();
+        try {
+            const result = await client.query(query, values);
+            return result.rows[0];
+        } finally {
+            client.release();  // Release the client back to the pool
         }
-        return result.rows[0];
     } catch (error) {
         console.error('Error fetching post:', error);
         throw error;
@@ -341,7 +334,7 @@ async function getPostById(postId) {
 // Endpoint to get comments based on post ID
 app.get('/api/posts/:postId/comments', async (req, res) => {
     const postId = req.params.postId;
-    
+
     try {
         const comments = await getCommentsByPostId(postId);
         res.status(200).json(comments);
@@ -352,41 +345,33 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
 
 app.get('/api/posts/:postId', async (req, res) => {
     const postId = req.params.postId;
-    
+
     try {
-        const post = await getPostById(postId);
-        if (post) {
+        const client = await pool.connect();
+        try {
+            const post = await getPostById(postId);
             res.status(200).json(post);
-        } else {
-            res.status(404).json({ error: 'Post not found' });
+        } finally {
+            client.release();  // Release the client back to the pool
         }
     } catch (error) {
-        res.status(500).json({ error: 'An error occurred while fetching the post' });
+        console.error('Error fetching post:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
 app.get('/api/posts/:postId/comments', async (req, res) => {
     const { postId } = req.params;
-
     try {
-        const result = await pool.query(
-            `WITH RECURSIVE comment_tree AS (
-                SELECT id, username, post_id, content, parent_id, created_at
-                FROM comments
-                WHERE post_id = $1 AND parent_id IS NULL
-                UNION ALL
-                SELECT c.id, c.username, c.post_id, c.content, c.parent_id, c.created_at
-                FROM comments c
-                INNER JOIN comment_tree ct ON ct.id = c.parent_id
-            )
-            SELECT * FROM comment_tree ORDER BY created_at`,
-            [postId]
-        );
-
-        const comments = nestComments(result.rows);
-        res.json(comments);
+        const client = await pool.connect();
+        try {
+            const comments = await getCommentsByPostId(postId);
+            res.status(200).json(comments);
+        } finally {
+            client.release();  // Release the client back to the pool
+        }
     } catch (error) {
-        console.error('Error fetching comments from database:', error);
+        console.error('Error fetching comments:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -397,19 +382,27 @@ app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
     const username = req.user.username; // Extract username from the token
 
     try {
-        // Insert the comment into the database
-        const contentHasProfanity = await containsProfanity(content);
-        if (contentHasProfanity) {
-            content = '***PROFANITY DETECTED***';
+        const client = await pool.connect();
+        try {
+            // Insert the comment into the database
+            const contentHasProfanity = await containsProfanity(content);
+            if (contentHasProfanity) {
+                content = '***PROFANITY DETECTED***';
+            }
+            const result = await client.query(
+                `INSERT INTO comments (username, post_id, content, parent_id, created_at, updated_at)
+                 VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *`,
+                [username, postId, content, parentId]
+            );
+            res.status(201).json(result.rows[0]);
+        } catch (error) {
+            console.error('Error inserting comment into database:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        } finally {
+            client.release();  // Release the client back to the pool
         }
-        const result = await pool.query(
-            `INSERT INTO comments (username, post_id, content, parent_id, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *`,
-            [username, postId, content, parentId]
-        );
-        res.status(201).json(result.rows[0]);
     } catch (error) {
-        console.error('Error inserting comment into database:', error);
+        console.error('Error connecting to database:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -419,31 +412,39 @@ app.post('/api/posts/:postId/upvote', authenticateToken, async (req, res) => {
     const username = req.user.username;
 
     try {
-        // Find user ID by username
-        const userResult = await pool.query('SELECT id FROM Users WHERE username = $1', [username]);
-        if (userResult.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        const userId = userResult.rows[0].id;
-
-        // Check if the user has already voted on this post
-        const voteResult = await pool.query('SELECT * FROM PostVotes WHERE post_id = $1 AND user_id = $2', [postId, userId]);
-        
-        if (voteResult.rows.length === 0) {
-            // User hasn't voted on this post yet, insert a new upvote
-            await pool.query('INSERT INTO PostVotes (post_id, user_id, vote) VALUES ($1, $2, 1)', [postId, userId]);
-        } else {
-            const currentVote = voteResult.rows[0].vote;
-            if (currentVote === -1) {
-                // User has downvoted, update to upvote
-                await pool.query('UPDATE PostVotes SET vote = 1 WHERE post_id = $1 AND user_id = $2', [postId, userId]);
+        const client = await pool.connect();
+        try {
+            // Find user ID by username
+            const userResult = await client.query('SELECT id FROM Users WHERE username = $1', [username]);
+            if (userResult.rows.length === 0) {
+                return res.status(404).json({ error: 'User not found' });
             }
-            // If the user has already upvoted, do nothing or handle it as needed
-        }
+            const userId = userResult.rows[0].id;
 
-        res.status(200).json({ message: 'Post upvoted successfully' });
+            // Check if the user has already voted on this post
+            const voteResult = await client.query('SELECT * FROM PostVotes WHERE post_id = $1 AND user_id = $2', [postId, userId]);
+
+            if (voteResult.rows.length === 0) {
+                // User hasn't voted on this post yet, insert a new upvote
+                await client.query('INSERT INTO PostVotes (post_id, user_id, vote) VALUES ($1, $2, 1)', [postId, userId]);
+            } else {
+                const currentVote = voteResult.rows[0].vote;
+                if (currentVote === -1) {
+                    // User has downvoted, update to upvote
+                    await client.query('UPDATE PostVotes SET vote = 1 WHERE post_id = $1 AND user_id = $2', [postId, userId]);
+                }
+                // If the user has already upvoted, do nothing or handle it as needed
+            }
+
+            res.status(200).json({ message: 'Post upvoted successfully' });
+        } catch (error) {
+            console.error('Error upvoting post:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        } finally {
+            client.release();  // Release the client back to the pool
+        }
     } catch (error) {
-        console.error('Error upvoting post:', error);
+        console.error('Error connecting to database:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -452,31 +453,39 @@ app.post('/api/posts/:postId/downvote', authenticateToken, async (req, res) => {
     const username = req.user.username;
 
     try {
-        // Find user ID by username
-        const userResult = await pool.query('SELECT id FROM Users WHERE username = $1', [username]);
-        if (userResult.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        const userId = userResult.rows[0].id;
-
-        // Check if the user has already voted on this post
-        const voteResult = await pool.query('SELECT * FROM PostVotes WHERE post_id = $1 AND user_id = $2', [postId, userId]);
-        
-        if (voteResult.rows.length === 0) {
-            // User hasn't voted on this post yet, insert a new downvote
-            await pool.query('INSERT INTO PostVotes (post_id, user_id, vote) VALUES ($1, $2, -1)', [postId, userId]);
-        } else {
-            const currentVote = voteResult.rows[0].vote;
-            if (currentVote === 1) {
-                // User has downvoted, update to upvote
-                await pool.query('UPDATE PostVotes SET vote = -1 WHERE post_id = $1 AND user_id = $2', [postId, userId]);
+        const client = await pool.connect();
+        try {
+            // Find user ID by username
+            const userResult = await client.query('SELECT id FROM Users WHERE username = $1', [username]);
+            if (userResult.rows.length === 0) {
+                return res.status(404).json({ error: 'User not found' });
             }
-            // If the user has already downvoted, do nothing or handle it as needed
-        }
+            const userId = userResult.rows[0].id;
 
-        res.status(200).json({ message: 'Post upvoted successfully' });
+            // Check if the user has already voted on this post
+            const voteResult = await client.query('SELECT * FROM PostVotes WHERE post_id = $1 AND user_id = $2', [postId, userId]);
+
+            if (voteResult.rows.length === 0) {
+                // User hasn't voted on this post yet, insert a new downvote
+                await client.query('INSERT INTO PostVotes (post_id, user_id, vote) VALUES ($1, $2, -1)', [postId, userId]);
+            } else {
+                const currentVote = voteResult.rows[0].vote;
+                if (currentVote === 1) {
+                    // User has downvoted, update to upvote
+                    await client.query('UPDATE PostVotes SET vote = -1 WHERE post_id = $1 AND user_id = $2', [postId, userId]);
+                }
+                // If the user has already downvoted, do nothing or handle it as needed
+            }
+
+            res.status(200).json({ message: 'Post upvoted successfully' });
+        } catch (error) {
+            console.error('Error upvoting post:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        } finally {
+            client.release();  // Release the client back to the pool
+        }
     } catch (error) {
-        console.error('Error upvoting post:', error);
+        console.error('Error connecting to database:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -492,8 +501,9 @@ app.get('/api/posts/:postId/votes', async (req, res) => {
 });
 
 app.get('/api/posts/:postId/hasUserLiked/:userId', authenticateToken, async (req, res) => {
-    const  {postId}  = req.params;
-    const user_id  = req.params.userId;
+    const { postId } = req.params;
+    const user_id = req.params.userId;
+    console.log(postId, user_id);
 
     try {
         const hasUserLiked = await hasUserVoted(postId, user_id);
@@ -504,6 +514,72 @@ app.get('/api/posts/:postId/hasUserLiked/:userId', authenticateToken, async (req
     }
 
 });
+async function getPostVotes(postId) {
+    try { const client = await pool.connect();
+        try {
+            const result = await pool.query(
+                `SELECT 
+                    COALESCE(SUM(vote), 0) AS total_votes 
+                 FROM 
+                    postvotes 
+                 WHERE 
+                    post_id = $1`, 
+                [postId]
+            );
+    
+            console.log('Result:', result.rows[0].total_votes);
+            return result.rows[0].total_votes;
+        } catch (error) {
+            console.error('Error fetching votes for post:', error);
+            throw new Error('Internal Server Error');
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error('Error connecting to database:', error);
+        throw new Error('Internal Server Error');
+    }
+}
+ async function hasUserVoted(postId, userId) {
+    console.log('postId:', postId, 'userId:', userId);
+
+    try {
+        const client = await pool.connect();
+        try {
+            // Query the PostVotes table to check if the user has voted on the post
+            const voteResult = await pool.query('SELECT * FROM PostVotes WHERE post_id = $1 AND user_id = $2', [postId, userId]);
+            
+            if (voteResult.rows.length === 0) {
+                // User hasn't voted on the post
+                return 'none';
+            } else {
+                // User has voted on the post, check the vote value
+                const vote = voteResult.rows[0].vote;
+                if (vote === 1) {
+                    // User has upvoted the post
+                    return 'upvote';
+                } else if (vote === -1) {
+                    // User has downvoted the post
+                    return 'downvote';
+                } else {
+                    // Invalid vote value
+                    throw new Error('Invalid vote value');
+                }
+            }
+        } catch (error) {
+            console.error('Error checking if user has voted on post:', error);
+            // Handle the error as needed
+            throw new Error('Error checking if user has voted on post');
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error('Error connecting to database:', error);
+        throw new Error('Internal Server Error');   
+    }
+    
+}
+
 
 function nestComments(comments) {
     const map = {};

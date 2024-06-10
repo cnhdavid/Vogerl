@@ -6,22 +6,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const email = document.getElementById('registerEmail').value;
         const password = document.getElementById('registerPassword').value;
-        const recaptchaResponse = grecaptcha.getResponse();
-
-        if (!recaptchaResponse) {
-            alert('Bitte bestätigen Sie, dass Sie kein Roboter sind.');
-            return;
-        }
+        
 
         const redirectToPost = sessionStorage.getItem('redirectToPost');
 
         try {
-            const response = await fetch('http://localhost:3000/login', {
+            const response = await fetch('http://localhost:3000/api/login', {
                 method: 'POST',
-                headers: {
+                body: JSON.stringify({ email, password }), headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password, recaptchaResponse }),
+                }
             });
 
             if (response.status === 401 || response.status === 403) {

@@ -1,7 +1,26 @@
 export function checkToken() {
     const token = localStorage.getItem('token');
-    return token ? JSON.parse(atob(token.split('.')[1])) : null;
-  }
+    if (!token) {
+        console.error('No token found');
+        return null;
+    }
+
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+        console.error('Token format is invalid');
+        return null;
+    }
+
+    const payload = parts[1];
+    try {
+        const decodedPayload = atob(payload);
+        return JSON.parse(decodedPayload);
+    } catch (error) {
+        console.error('Failed to decode or parse token payload:', error);
+        return null;
+    }
+}
+
   
   export function logout() {
     localStorage.removeItem('token');
@@ -14,7 +33,8 @@ export function checkToken() {
             throw new Error('Failed to fetch user ID');
         }
         const data = await response.json();
-        return data.userId;
+        console.log(data);
+        return data;
     } catch (error) {
         console.error('Error fetching user ID:', error);
         return null; // Or handle the error as needed

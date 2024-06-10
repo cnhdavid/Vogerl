@@ -1,13 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { Pool } = require('pg');
 
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-});
 
 const authenticateToken = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -18,17 +10,10 @@ const authenticateToken = async (req, res, next) => {
     }
 
     try {
-        const decodedToken = jwt.decode(token);
-        const username = decodedToken.username;
+        
 
-        const userQuery = 'SELECT jwt_secret_key FROM users WHERE username = $1';
-        const userResult = await pool.query(userQuery, [username]);
-
-        if (userResult.rows.length === 0) {
-            return res.status(403).json({ message: 'User not found' }); // Forbidden
-        }
-
-        const jwtSecretKey = userResult.rows[0].jwt_secret_key;
+        const jwtSecretKey = process.env.JWT_SECRET_KEY || crypto.randomBytes(64).toString('hex');
+        process.env.JWT_SECRET_KEY = jwtSecretKey;
 
         jwt.verify(token, jwtSecretKey, (err, user) => {
             if (err) {
