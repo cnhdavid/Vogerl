@@ -99,6 +99,9 @@ const upvoteButton = postContainer.querySelector('.fa-arrow-up');
       });
     }
     if (token && post.username == getUserIdFromToken(token)) {
+      document.getElementById('deletePostButton').addEventListener('click', () => {
+        deletePost(postId);
+      });
       const editPostButton = document.getElementById('editPostButton');
       editPostButton.addEventListener('click', () => {
         const editPostModal = document.getElementById('editPostModal');
@@ -125,17 +128,12 @@ const upvoteButton = postContainer.querySelector('.fa-arrow-up');
 
     if (token) {
       sessionStorage.removeItem('redirectToPost');
-      document.getElementById('editPostButton').addEventListener('click', () => {
-
-      })
       document.getElementById('submitComment').addEventListener('click', () => {
         const commentContent = document.getElementById('commentInput').value;
         submitComment(postId, commentContent);
 
       });
-      document.getElementById('deletePostButton').addEventListener('click', () => {
-        deletePost(postId);
-      });
+      
 
     }
 
