@@ -13,6 +13,7 @@ const authenticateToken = require('./authenticate');
 let jwtSecretKey = process.env.JWT_SECRET_KEY || crypto.randomBytes(64).toString('hex');
 process.env.JWT_SECRET_KEY = jwtSecretKey; // Store in environment variable
 
+
 const multer = require('multer');
 const upload = multer();
 const { filterProfanity, containsProfanity } = require('./public/js/modules/moderate');
@@ -115,11 +116,10 @@ app.post('/api/login', async (req, res) => {
                 return res.status(400).json({ message: 'Invalid email or password' });
             }
 
-            jwtSecretKey = crypto.randomBytes(64).toString('hex');
-            process.env.JWT_SECRET_KEY = jwtSecretKey;
+
 
             const token = jwt.sign({ userId: user.id, username: user.username }, jwtSecretKey, { expiresIn: '1h' });
-            console.log(token);
+            console.log({ token });
             res.json({ token });
         } finally {
             client.release();  // Release the client back to the pool
@@ -515,7 +515,8 @@ app.get('/api/posts/:postId/hasUserLiked/:userId', authenticateToken, async (req
 
 });
 async function getPostVotes(postId) {
-    try { const client = await pool.connect();
+    try {
+        const client = await pool.connect();
         try {
             const result = await pool.query(
                 `SELECT 
@@ -523,10 +524,10 @@ async function getPostVotes(postId) {
                  FROM 
                     postvotes 
                  WHERE 
-                    post_id = $1`, 
+                    post_id = $1`,
                 [postId]
             );
-    
+
             console.log('Result:', result.rows[0].total_votes);
             return result.rows[0].total_votes;
         } catch (error) {
@@ -540,7 +541,7 @@ async function getPostVotes(postId) {
         throw new Error('Internal Server Error');
     }
 }
- async function hasUserVoted(postId, userId) {
+async function hasUserVoted(postId, userId) {
     console.log('postId:', postId, 'userId:', userId);
 
     try {
@@ -548,7 +549,7 @@ async function getPostVotes(postId) {
         try {
             // Query the PostVotes table to check if the user has voted on the post
             const voteResult = await pool.query('SELECT * FROM PostVotes WHERE post_id = $1 AND user_id = $2', [postId, userId]);
-            
+
             if (voteResult.rows.length === 0) {
                 // User hasn't voted on the post
                 return 'none';
@@ -575,9 +576,9 @@ async function getPostVotes(postId) {
         }
     } catch (error) {
         console.error('Error connecting to database:', error);
-        throw new Error('Internal Server Error');   
+        throw new Error('Internal Server Error');
     }
-    
+
 }
 
 

@@ -27,16 +27,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             const token = data.token;
-
             localStorage.setItem('token', token);
+            console.log('Tokennn:', token);
+            console.log('Token:', localStorage.getItem('token'));
+            
+            
+
+            
 
             if (redirectToPost) {
                 // Redirect back to the post
                 window.location.href = redirectToPost;
                 sessionStorage.removeItem('redirectToPost');
+                
             } else {
                 // Redirect to dashboard
                 window.location.href = 'dashboard.html';
+                
             }
         } catch (error) {
             console.error('Error logging in:', error);

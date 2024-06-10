@@ -1,5 +1,6 @@
 export function checkToken() {
     const token = localStorage.getItem('token');
+    console.log(token);
     if (!token) {
         console.error('No token found');
         return null;
@@ -41,6 +42,11 @@ export function checkToken() {
     }
 }
 export function getUserIdFromToken(token) {
+    console.log(token);
+    if (!token) {
+        throw new Error("Token is undefined or null");
+    }
+    console.log(token);
   if (!token) {
       return null;
   }

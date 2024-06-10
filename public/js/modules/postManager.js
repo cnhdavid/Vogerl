@@ -1,5 +1,6 @@
 // js/modules/comment.js
 
+import { getUserIdFromToken } from './auth.js';
 import { fetchAndDisplayPosts } from './posts.js';
 export async function fetchComments(postId) {
     try {
@@ -173,7 +174,13 @@ export async function fetchComments(postId) {
   export async function getPostVotes(postId) {
     try {
       const response = await fetch(`http://localhost:3000/api/posts/${postId}/votes`);
+      if (response===403||response===401) {
+        window.location.href = '/public/login.html';
+        alert('Please login first!');
+        return
+      }
       if (!response.ok) {
+        console.log('Error fetching upvotes:', response.statusText);
         throw new Error('Failed to fetch upvotes');
       }
       const data = await response.json();
@@ -186,6 +193,8 @@ export async function fetchComments(postId) {
   
  export async function hasUserVoted(postId, userId) {
   const authToken = localStorage.getItem('token');
+  console.log('authToken:', authToken);
+  getUserIdFromToken(authToken);
   try {
     const response = await fetch(`http://localhost:3000/api/posts/${postId}/hasUserLiked/${userId}`, {
       method: 'GET',
@@ -193,7 +202,13 @@ export async function fetchComments(postId) {
         'Authorization': `Bearer ${authToken}` // Add the authorization token here
       }
     });
+
+    
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        alert('Please login first');
+        window.location.href = '/public/login.html';
+      }
       console.log('Error fetching upvotes:', response.statusText);
       throw new Error('Failed to fetch upvotes');
     }

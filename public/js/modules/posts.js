@@ -187,23 +187,7 @@ export async function createPostElement(post, comments) {
       </div>
     </article>
   `;
-  getUserId(post.username)
-  .then(userId => {
-    console.log('User ID:', userId);
-    hasUserVoted(post.id, userId)
-    .then(liked => {
-      if (liked==='upvote') {
-        document.getElementById(`upvote-${post.id}`).classList.add('upvoted');
-      }
-
-      if (liked==='downvote') {
-        document.getElementById(`downvote-${post.id}`).classList.add('downvoted');
-      } 
-    });
-  })
-  .catch(error => {
-    console.error('Error fetching user ID:', error);
-  });
+  
 
   
 
@@ -226,6 +210,23 @@ export async function createPostElement(post, comments) {
   downvoteButton.addEventListener('click', (event) => {
     event.stopPropagation();
     downvotePost(post.id);
+  });
+  getUserId(post.username)
+  .then(userId => {
+    console.log('User ID:', userId);
+    hasUserVoted(post.id, userId)
+    .then(liked => {
+      if (liked==='upvote') {
+        document.getElementById(`upvote-${post.id}`).classList.add('upvoted');
+      }
+
+      if (liked==='downvote') {
+        document.getElementById(`downvote-${post.id}`).classList.add('downvoted');
+      } 
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching user ID:', error);
   });
 
   // Add upvotes if available
