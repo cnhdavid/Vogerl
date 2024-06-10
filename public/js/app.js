@@ -96,6 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         body: formData
       });
+      if (response.status === 403) {
+        alert('You are not authorized to create a post.');
+        window.location.href = 'login.html';
+      }
 
       if (response.ok) {
         const data = await response.json();

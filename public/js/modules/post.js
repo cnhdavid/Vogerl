@@ -247,7 +247,11 @@ const submitComment = async (postId, content, parentId = null) => {
       },
       body: JSON.stringify({ content, userId, parentId }),
     });
-
+    if (response===403||response===401) {
+      window.location.href = 'login.html';
+      alert('Please login first');
+      return
+    }
     if (response.ok) {
 
       location.reload();

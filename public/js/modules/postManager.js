@@ -188,11 +188,13 @@ export async function fetchComments(postId) {
   const authToken = localStorage.getItem('token');
   try {
     const response = await fetch(`http://localhost:3000/api/posts/${postId}/hasUserLiked/${userId}`, {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${authToken}` // Add the authorization token here
       }
     });
     if (!response.ok) {
+      console.log('Error fetching upvotes:', response.statusText);
       throw new Error('Failed to fetch upvotes');
     }
     
