@@ -1,17 +1,22 @@
-.box .post-image {
-    max-width: 150px;
-    max-height: 150px;
-    margin-left: 20px;
-    margin-right: 20px;
-    margin-top: 0;
-    cursor: pointer;
-    float: right;
-}
-
-
-.media{
-    cursor: pointer;
-}
+.media {
+    display: flex;
+    align-items: flex-start;
+  }
+  
+  .media-content {
+    flex: 1;
+  }
+  
+  .post-image {
+    max-width: 100%; /* Adjust as needed */
+    align-self: flex-start; /* Align image to the top */
+    margin-left: 20px; /* Adjust as needed */
+  }
+  
+  .post-content {
+    margin-right: 20px; /* Adjust as needed */
+  }
+  
 .create-post{
     cursor: pointer;
     height: 50px;

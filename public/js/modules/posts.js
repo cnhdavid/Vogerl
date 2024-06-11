@@ -178,23 +178,25 @@ export async function createPostElement(post, comments) {
 
   postElement.innerHTML = `
     <article class="media">
-      <div class="media-content">
-        <div class="content">
-          <p>
-            <strong>${post.title}</strong> <small>@${post.username}</small>
-            <br>
-            <em>${post.subject}</em>
-            <br>
-            ${post.content}
-          </p>
-          ${imageData ? `<img src="${imageData}" alt="Post Image" class="post-image" />` : ''}
-          <i class="fa-solid fa-arrow-up is-fluid" id="upvote-${post.id}"></i>
-          <span id="upvote-count-${post.id}" class="upvote-count mx-3"> Loading...</span>
-          <i class="fa-solid fa-arrow-down is-fluid" id="downvote-${post.id}" ></i> 
-          
-        </div>
+  <div class="media-content">
+    <div class="content">
+      <div class="post-content">
+        <p>
+          <strong>${post.title}</strong> <small>@${post.username}</small>
+          <br>
+          <em>${post.subject}</em>
+          <br>
+          ${post.content}
+        </p>
+        <i class="fa-solid fa-arrow-up is-fluid" id="upvote-${post.id}"></i>
+        <span id="upvote-count-${post.id}" class="upvote-count mx-3"> Loading...</span>
+        <i class="fa-solid fa-arrow-down is-fluid" id="downvote-${post.id}" ></i> 
       </div>
-    </article>
+    </div>
+  </div>
+  ${imageData ? `<img src="${imageData}" alt="Post Image" class="post-image" />` : ''}
+</article>
+
   `;
   
 
