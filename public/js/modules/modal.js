@@ -41,7 +41,7 @@ export function openPost(postId) {
     .then(post => {
       // Redirect to the new page
       
-      openPost(postId);
+      //openPost(postId);
     })
     .catch(error => console.error('Error editing post:', error));
 }

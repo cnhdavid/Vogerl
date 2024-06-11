@@ -31,7 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Tokennn:', token);
             console.log('Token:', localStorage.getItem('token'));
             
-            
+            if (response.status === 400) {
+                alert('Invalid email or password. Please try again.');
+                return;
+            }
 
             
 

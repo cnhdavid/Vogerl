@@ -94,27 +94,38 @@ export async function fetchComments(postId) {
   
   export function submitComment(postId, content, parentId = null) {
     const authToken = localStorage.getItem('token');
-  
+
     fetch(`http://localhost:3000/api/posts/${postId}/comments`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`
-      },
-      body: JSON.stringify({ content, parentId })
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ content, parentId })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Failed to submit comment: ${response.statusText}`);
+        }
+        if (response.status === 403) {
+          alert('Please login first');
+          window.location.href = '/login.html';
+        }
+        return response.json();
+    })
     .then(comment => {
-      if (!parentId) {
-        document.getElementById('commentInput').value = '';
-      }
-      loadComments(postId);
-      fetchAndDisplayPosts();
+        if (!parentId) {
+            document.getElementById('commentInput').value = '';
+        }
+        loadComments(postId);
+        fetchAndDisplayPosts();
     })
     .catch(error => {
-      console.error('Error submitting comment:', error);
+        console.error('Error submitting comment:', error.message);
+        // Handle the error, display an error message, etc.
     });
-  }
+}
+
   function resetVoteAnimation(button) {
     button.classList.remove('upvoted', 'downvoted');
     button.classList.add('normal');
@@ -140,7 +151,17 @@ export async function fetchComments(postId) {
             // Reset the downvote button state
             const downvoteButton = document.querySelector(`#downvote-${postId}`);
             resetVoteAnimation(downvoteButton);
+            
       console.log('Post upvoted:', data);
+      try {
+        getPostVotes(postId)
+        .then(upvotes => {
+          const upvoteCount = document.getElementById(`upvote-count-${postId}`);
+        upvoteCount.textContent = upvotes;
+        });  
+      } catch (error) {
+        console.error('Error fetching votes:', error);
+      }
     })
     .catch(error => {
       console.error('Error upvoting post:', error);
@@ -165,7 +186,17 @@ export async function fetchComments(postId) {
             // Reset the upvote button state
             const upvoteButton = document.querySelector(`#upvote-${postId}`);
             resetVoteAnimation(upvoteButton);
+            
       console.log('Post downvoted:', data);
+      try {
+        getPostVotes(postId)
+        .then(upvotes => {
+          const upvoteCount = document.getElementById(`upvote-count-${postId}`);
+        upvoteCount.textContent = upvotes;
+        });  
+      } catch (error) {
+        console.error('Error fetching votes:', error);
+      }
     })
     .catch(error => {
       console.error('Error downvoting post:', error);

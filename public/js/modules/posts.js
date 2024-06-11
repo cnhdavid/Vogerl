@@ -6,10 +6,16 @@ import sidebarSubjects from './subjects.js';
 import { getUserId } from './auth.js';
 
 
-async function fetchPosts(subject = null) {
-  const url = subject
-    ? `http://localhost:3000/api/posts?subject=${encodeURIComponent(subject)}`
-    : 'http://localhost:3000/api/posts';
+async function fetchPosts(subject = null, username = null) {
+  let url = 'http://localhost:3000/api/posts';
+
+  if (subject) {
+    url += `?subject=${encodeURIComponent(subject)}`;
+  }
+
+  if (username) {
+    url += subject ? `&username=${encodeURIComponent(username)}` : `?username=${encodeURIComponent(username)}`;
+  }
 
   try {
     const response = await fetch(url, {
@@ -33,6 +39,7 @@ async function fetchPosts(subject = null) {
 
 
 
+
 export function populateMenu() {
   const selectElement = document.getElementById('postMenu');
 
@@ -44,7 +51,7 @@ export function populateMenu() {
     selectElement.appendChild(option);
   });
 }
-export function populateSidebar() {
+export function populateSidebar(username = null) {
   const sidebarMenu = document.getElementById('sidebarMenu');
 
   // Clear existing sidebar menu items
@@ -57,12 +64,13 @@ export function populateSidebar() {
     link.textContent = subject.title;
     link.href = '#'; // Prevent default link behavior
     link.addEventListener('click', () => {
-      fetchAndDisplayPosts(subject.title);
+      fetchAndDisplayPosts(subject.title, username); // Pass the username parameter
     });
     listItem.appendChild(link);
     sidebarMenu.appendChild(listItem);
   });
 }
+
 export async function fetchPostsByUsername(username) {
   try {
     const response = await fetch(`http://localhost:3000/api/users/${username}/posts`, {
@@ -138,9 +146,9 @@ export async function getPostsByUsername(username) {
 }
 
 
-export async function fetchAndDisplayPosts(subject = null) {
+export async function fetchAndDisplayPosts(subject = null, username = null) {
   try {
-    const posts = await fetchPosts(subject);
+    const posts = await fetchPosts(subject, username); // Pass username to fetchPosts function
     const postsContainer = document.getElementById('postsContainer');
     postsContainer.innerHTML = '';
 
@@ -155,6 +163,7 @@ export async function fetchAndDisplayPosts(subject = null) {
     console.error('Error displaying posts:', error);
   }
 }
+
 
 
 export async function createPostElement(post, comments) {
@@ -180,7 +189,7 @@ export async function createPostElement(post, comments) {
           </p>
           ${imageData ? `<img src="${imageData}" alt="Post Image" class="post-image" />` : ''}
           <i class="fa-solid fa-arrow-up is-fluid" id="upvote-${post.id}"></i>
-          <span class="upvote-count mx-3"> Loading...</span>
+          <span id="upvote-count-${post.id}" class="upvote-count mx-3"> Loading...</span>
           <i class="fa-solid fa-arrow-down is-fluid" id="downvote-${post.id}" ></i> 
           
         </div>
@@ -233,16 +242,7 @@ export async function createPostElement(post, comments) {
 
   // Add comments if available
 
-  if (comments.length > 0) {
-    const commentsList = document.createElement('ul');
-    commentsList.classList.add('comments-list');
-    comments.forEach(comment => {
-      const commentItem = document.createElement('li');
-      commentItem.textContent = `${comment.username}: "${comment.content}"`;
-      commentsList.appendChild(commentItem);
-    });
-    postElement.querySelector('.content').appendChild(commentsList);
-  }
+  
 
   if (imageData) {
     const imageElement = postElement.querySelector('.post-image');

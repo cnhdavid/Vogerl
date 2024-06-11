@@ -10,8 +10,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const authenticateToken = require('./authenticate');
-let jwtSecretKey = process.env.JWT_SECRET_KEY || crypto.randomBytes(64).toString('hex');
-process.env.JWT_SECRET_KEY = jwtSecretKey; // Store in environment variable
+
 
 
 const multer = require('multer');
@@ -62,10 +61,10 @@ app.get('/check-db-connection', async (req, res) => {
 // User registration
 app.post('/signup', async (req, res) => {
     const { username, email, password, date_of_birth, first_name, last_name } = req.body;
-    console.log("tryinggg");
+    
     const dob = new Date(date_of_birth);
     const formattedDOB = dob.toISOString().split('T')[0];
-    console.log(formattedDOB);
+   
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -95,7 +94,8 @@ app.post('/signup', async (req, res) => {
 // User login
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
-    console.log(email, password);
+    
+    
 
     try {
 
@@ -115,11 +115,12 @@ app.post('/api/login', async (req, res) => {
             if (!passwordMatch) {
                 return res.status(400).json({ message: 'Invalid email or password' });
             }
+            jwtSecretKey = process.env.JWT_SECRET_KEY;
 
 
 
             const token = jwt.sign({ userId: user.id, username: user.username }, jwtSecretKey, { expiresIn: '1h' });
-            console.log({ token });
+           
             res.json({ token });
         } finally {
             client.release();  // Release the client back to the pool
@@ -135,7 +136,7 @@ app.get('/api/users/:username', async (req, res) => {
         const client = await pool.connect();
         try {
             const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
-            console.log(result.rows[0].id);
+            
             res.status(200).json(result.rows[0].id);
         } finally {
             client.release();  // Release the client back to the pool
@@ -200,32 +201,45 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 app.get('/api/posts', async (req, res) => {
-    const subject = req.query.subject;
+    
+    let subject = req.query.subject;
+    console.log(subject);
+    if (!subject) {
+        subject = "All";
+    }
+    const username = req.query.username; // Get the username from query params
+    console.log(username);
+    
 
     try {
         const client = await pool.connect();
         try {
             let result;
-            if (subject) {
+            if (username) {
+                console.log(username);
                 if (subject === "All") {
-                    result = await client.query('SELECT * FROM posts');
+                    result = await client.query('SELECT * FROM posts WHERE username = $1', [username]);
                 } else {
-                    result = await client.query('SELECT * FROM posts WHERE subject = $1', [subject]);
+                    result = await client.query('SELECT * FROM posts WHERE username = $1 AND subject = $2', [username, subject]);
                 }
+            } else if (subject && subject !== "All") {
+                result = await client.query('SELECT * FROM posts WHERE subject = $1', [subject]);
             } else {
                 result = await client.query('SELECT * FROM posts');
             }
+            
             res.status(200).json(result.rows);
         } finally {
             client.release();  // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error fetching posts:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: 'An internal server error occurred' });
     }
 });
+
+
 
 app.get('/api/users/:username/posts', async (req, res) => {
     const username = req.params.username;
@@ -260,7 +274,7 @@ app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
     }
 
     try {
-        const clien = await pool.connect();
+        const client = await pool.connect();
         try {
             await client.query('UPDATE posts SET title = $1, content = $2 WHERE id = $3 AND username = $4', [modifiedTitle, modifiedContent, postId, username]);
             res.status(200).json({ message: 'Post updated successfully' });
@@ -477,7 +491,7 @@ app.post('/api/posts/:postId/downvote', authenticateToken, async (req, res) => {
                 // If the user has already downvoted, do nothing or handle it as needed
             }
 
-            res.status(200).json({ message: 'Post upvoted successfully' });
+            res.status(200).json({ message: 'Post Downvoted successfully' });
         } catch (error) {
             console.error('Error upvoting post:', error);
             res.status(500).json({ error: 'Internal Server Error' });
@@ -503,11 +517,11 @@ app.get('/api/posts/:postId/votes', async (req, res) => {
 app.get('/api/posts/:postId/hasUserLiked/:userId', authenticateToken, async (req, res) => {
     const { postId } = req.params;
     const user_id = req.params.userId;
-    console.log(postId, user_id);
+    
 
     try {
         const hasUserLiked = await hasUserVoted(postId, user_id);
-        console.log(hasUserLiked);
+        
         res.status(200).json({ postId, hasUserLiked });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -528,7 +542,7 @@ async function getPostVotes(postId) {
                 [postId]
             );
 
-            console.log('Result:', result.rows[0].total_votes);
+            
             return result.rows[0].total_votes;
         } catch (error) {
             console.error('Error fetching votes for post:', error);
@@ -542,7 +556,7 @@ async function getPostVotes(postId) {
     }
 }
 async function hasUserVoted(postId, userId) {
-    console.log('postId:', postId, 'userId:', userId);
+    
 
     try {
         const client = await pool.connect();
