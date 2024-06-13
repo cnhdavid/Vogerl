@@ -18,6 +18,12 @@ const upload = multer();
 const { filterProfanity, containsProfanity } = require('./public/js/modules/moderate');
 
 
+let fetch;
+(async () => {
+    fetch = (await import('node-fetch')).default;
+})();
+
+
 
 const app = express();
 const port = 3000;
@@ -93,11 +99,21 @@ app.post('/signup', async (req, res) => {
 
 // User login
 app.post('/api/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, recaptchaResponse } = req.body;
     
     
 
     try {
+
+        // Verify reCAPTCHA
+        const recaptchaSecret = '6Lf75vQpAAAAAEC3_zxEc3Xe6AlhzgkZsALXOUV8';
+        const recaptchaUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecret}&response=${recaptchaResponse}`;
+        const recaptchaRes = await fetch(recaptchaUrl, { method: 'POST' });
+        const recaptchaData = await recaptchaRes.json();
+
+        if (!recaptchaData.success) {
+            return res.status(400).json({ message: 'reCAPTCHA verification failed' });
+        }
 
         const client = await pool.connect();
         try {

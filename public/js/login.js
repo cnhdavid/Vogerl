@@ -6,14 +6,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const email = document.getElementById('registerEmail').value;
         const password = document.getElementById('registerPassword').value;
-        
+        const recaptchaResponse = grecaptcha.getResponse();
 
         const redirectToPost = sessionStorage.getItem('redirectToPost');
+
+
+        if (!recaptchaResponse) {
+            alert('Please complete the reCAPTCHA.');
+            return;
+        }
 
         try {
             const response = await fetch('http://localhost:3000/api/login', {
                 method: 'POST',
-                body: JSON.stringify({ email, password }), headers: {
+                body: JSON.stringify({ email, password, recaptchaResponse }), headers: {
                     'Content-Type': 'application/json',
                 }
             });
