@@ -1,12 +1,21 @@
 // js/app.js
 
 import { checkToken, logout } from './modules/auth.js';
-import { fetchAndDisplayPosts } from './modules/posts.js';
+import { fetchAndDisplayPosts, searchPosts } from './modules/posts.js';
 import { populateMenu, populateSidebar, populatePostsSidebar, getPostsByUsername } from './modules/posts.js';
 
 
 
 document.addEventListener('DOMContentLoaded', () => {
+  const searchButton = document.getElementById('searchButton');
+  searchButton.addEventListener('click', () => {
+    const searchInput = document.getElementById('searchInput');
+    const searchTerm = searchInput.value;
+    fetchAndDisplayPosts(null, null, searchTerm);
+    searchInput.value = '';
+    document.getElementById('questionTitle').innerText = `Search Results for "${searchTerm}"`;
+
+  })
 
   function toggleFormVisibility() {
   const toggleFormButton = document.getElementById('toggleFormButton');  

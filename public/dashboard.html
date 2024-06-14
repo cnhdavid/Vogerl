@@ -25,8 +25,8 @@
             <div id="navbarBasicExample" class="navbar-menu">
                 <div class="navbar-start">
                     <a class="navbar-item" href="/public/dashboard.html">Home</a>
-                    <a class="navbar-item"><input class="input is-normal" type="text" placeholder="Search..." /></a>
-                    <a class="navbar-item"><i class="fa-solid fa-magnifying-glass"></i></a>
+                    <a class="navbar-item"><input class="input is-normal" id="searchInput" type="text" placeholder="Search..." /></a>
+                    <a class="navbar-item" id="searchButton"><i class="fa-solid fa-magnifying-glass"></i></a>
                 </div>
                 <div id="navbar-end" class="navbar-end">
                     <div class="navbar-item" id="auth-buttons">
@@ -58,7 +58,7 @@
                 <main class="column">
                     <section id="postsDisplay">
                         <div class="columns">
-                            <h2 class="title column">Questions</h2>
+                            <h2 class="title column" id="questionTitle">Questions</h2>
                             <button id="toggleFormButton" class="button column is-2 create-post mt-3 mr-3 is-primary is-pulled-right">Ask a Question</button>
                         </div>
                         <section id="postQuestion">

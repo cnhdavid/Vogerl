@@ -146,9 +146,14 @@ export async function getPostsByUsername(username) {
 }
 
 
-export async function fetchAndDisplayPosts(subject = null, username = null) {
+export async function fetchAndDisplayPosts(subject = null, username = null, searchTerm = null) {
   try {
-    const posts = await fetchPosts(subject, username); // Pass username to fetchPosts function
+    let posts;
+    if (searchTerm) {
+      posts = await searchPosts(searchTerm);
+    } else {
+      posts = await fetchPosts(subject, username);
+    }
     const postsContainer = document.getElementById('postsContainer');
     postsContainer.innerHTML = '';
 
@@ -162,6 +167,18 @@ export async function fetchAndDisplayPosts(subject = null, username = null) {
   } catch (error) {
     console.error('Error displaying posts:', error);
   }
+}
+export async function searchPosts(searchTerm) {
+  const posts = await fetchPosts();
+  const filteredPosts = posts.filter(post => {
+    const titleMatch = post.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const contentMatch = post.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const subjectMatch = post.subject.toLowerCase().includes(searchTerm.toLowerCase());
+    const usernameMatch = post.username.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return titleMatch || contentMatch || subjectMatch || usernameMatch;
+  });
+  return filteredPosts;
 }
 
 
