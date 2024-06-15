@@ -241,7 +241,7 @@ export async function createPostElement(post, comments) {
   });
   getUserId(post.username)
   .then(userId => {
-    console.log('User ID:', userId);
+    
     hasUserVoted(post.id, userId)
     .then(liked => {
       if (liked==='upvote') {

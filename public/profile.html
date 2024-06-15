@@ -35,7 +35,8 @@
 
         .navbar-end .buttons {
             display: flex;
-            gap: 10px; /* Adds space between buttons */
+            gap: 10px;
+            /* Adds space between buttons */
         }
 
         .button {
@@ -56,7 +57,8 @@
                 <a class="navbar-item" href="/">
                     Vogerl
                 </a>
-                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                    data-target="navbarBasicExample">
                     <span aria-hidden="true"></span>
                     <span aria-hidden="true"></span>
                     <span aria-hidden="true"></span>
@@ -111,16 +113,26 @@
                                 <div class="column is-full">
                                     <div class="edit-button-container">
                                         <button class="button is-primary is-small" id="editButton">Edit</button>
-                                        <button class="button is-primary is-small" id="saveButton" style="display: none;">Save</button>
-                                        <button class="button is-light is-small" id="cancelButton" style="display: none;">Cancel</button>
+                                        <button class="button is-primary is-small" id="saveButton"
+                                            style="display: none;">Save</button>
+                                        <button class="button is-light is-small" id="cancelButton"
+                                            style="display: none;">Cancel</button>
                                     </div>
                                 </div>
                                 <div class="column is-one-third has-text-centered">
                                     <figure class="image is-128x128">
-                                        <img class="is-rounded" id="profilePic" src="path_to_profile_pic.jpg" alt="Profile Picture">
+                                        <img class="is-rounded" id="profilePic" src="path_to_profile_pic.jpg"
+                                            alt="Profile Picture">
                                     </figure>
-                                    <p class="title is-pulled-left" id="username">Username</p>
-                                    <div class="file has-name is-small mt-2" id="fileInputContainer" style="display: none;">
+                                    <p class="subtitle is-pulled-left" id="username"></p>
+                                    <br><br>
+                                    
+                                        <p class="title  " id="firstName">firstname</p>
+                                        <p class="title  " id="lastName">lastname</p>
+                                    
+
+                                    <div class="file has-name is-small mt-2" id="fileInputContainer"
+                                        style="display: none;">
                                         <label class="file-label">
                                             <input class="file-input" type="file" name="resume" id="uploadProfilePic">
                                             <span class="file-cta">

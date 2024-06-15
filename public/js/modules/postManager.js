@@ -129,7 +129,7 @@ export async function fetchComments(postId) {
   function resetVoteAnimation(button) {
     button.classList.remove('upvoted', 'downvoted');
     button.classList.add('normal');
-    console.log('Animation reset');
+    
   }
   
 
@@ -152,7 +152,7 @@ export async function fetchComments(postId) {
             const downvoteButton = document.querySelector(`#downvote-${postId}`);
             resetVoteAnimation(downvoteButton);
             
-      console.log('Post upvoted:', data);
+      
       try {
         getPostVotes(postId)
         .then(upvotes => {
@@ -187,7 +187,7 @@ export async function fetchComments(postId) {
             const upvoteButton = document.querySelector(`#upvote-${postId}`);
             resetVoteAnimation(upvoteButton);
             
-      console.log('Post downvoted:', data);
+      
       try {
         getPostVotes(postId)
         .then(upvotes => {
@@ -224,7 +224,7 @@ export async function fetchComments(postId) {
   
  export async function hasUserVoted(postId, userId) {
   const authToken = localStorage.getItem('token');
-  console.log('authToken:', authToken);
+  
   getUserIdFromToken(authToken);
   try {
     const response = await fetch(`http://localhost:3000/api/posts/${postId}/hasUserLiked/${userId}`, {
@@ -245,7 +245,7 @@ export async function fetchComments(postId) {
     }
     
     const data = await response.json();
-    console.log(data.hasUserLiked);
+    
     return data.hasUserLiked;
   } catch (error) {
     console.error('Error fetching upvotes:', error);

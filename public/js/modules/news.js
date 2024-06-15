@@ -1,6 +1,10 @@
+import { checkToken } from "./auth.js";
+import { populateNavbar } from "../app.js";
+
 document.addEventListener("DOMContentLoaded", () => {
     const apiKey = '1b0e9154b79b457f948d28fe91bf0c1e';
     const newsContainer = document.getElementById('newsContainer');
+    const token = localStorage.getItem('token');
 
     async function fetchNews() {
         try {
@@ -50,4 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     fetchNews();
+
+    populateNavbar(checkToken());
 });

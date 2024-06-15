@@ -220,12 +220,12 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
 app.get('/api/posts', async (req, res) => {
     
     let subject = req.query.subject;
-    console.log(subject);
+    
     if (!subject) {
         subject = "All";
     }
     const username = req.query.username; // Get the username from query params
-    console.log(username);
+    
     
 
     try {
@@ -233,7 +233,7 @@ app.get('/api/posts', async (req, res) => {
         try {
             let result;
             if (username) {
-                console.log(username);
+                
                 if (subject === "All") {
                     result = await client.query('SELECT * FROM posts WHERE username = $1', [username]);
                 } else {
@@ -544,6 +544,24 @@ app.get('/api/posts/:postId/hasUserLiked/:userId', authenticateToken, async (req
     }
 
 });
+
+app.get('/api/userInfo/:username', async (req, res) => {
+    const username = req.params.username;
+
+    try {
+        const client = await pool.connect();
+        try {
+            const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
+            
+            res.status(200).json(result.rows[0]);
+        } finally {
+            client.release();  // Release the client back to the pool
+        }
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+})
 async function getPostVotes(postId) {
     try {
         const client = await pool.connect();

@@ -4,43 +4,11 @@ import { checkToken, logout } from './modules/auth.js';
 import { fetchAndDisplayPosts, searchPosts } from './modules/posts.js';
 import { populateMenu, populateSidebar, populatePostsSidebar, getPostsByUsername } from './modules/posts.js';
 
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  const searchButton = document.getElementById('searchButton');
-  searchButton.addEventListener('click', () => {
-    const searchInput = document.getElementById('searchInput');
-    const searchTerm = searchInput.value;
-    fetchAndDisplayPosts(null, null, searchTerm);
-    searchInput.value = '';
-    document.getElementById('questionTitle').innerText = `Search Results for "${searchTerm}"`;
-
-  })
-
-  function toggleFormVisibility() {
-  const toggleFormButton = document.getElementById('toggleFormButton');  
-  const formContainer = document.getElementById('postForm');
-  if (formContainer.style.display === 'none') {
-    formContainer.style.display = 'block';
-    toggleFormButton.textContent = 'Cancel';
-    toggleFormButton.classList.add('is-danger');
-  } else {
-    formContainer.style.display = 'none';
-    toggleFormButton.textContent = 'Create Post';
-    toggleFormButton.classList.remove('is-danger');
-
-  }
-  
-}
-  toggleFormButton.addEventListener('click', toggleFormVisibility);
-
-  const user = checkToken();
-
+export function populateNavbar(user) {
   if (user) {
 
     const navbarEnd = document.getElementById('navbar-end');
     const username = user.username;
-    populatePostsSidebar(getPostsByUsername(username));
 
     const welcomeMessage = document.createElement('div');
     welcomeMessage.classList.add('navbar-item');
@@ -72,6 +40,43 @@ document.addEventListener('DOMContentLoaded', () => {
     navbarEnd.appendChild(buttonContainer);
     
   }
+}
+
+populateNavbar(checkToken());
+
+document.addEventListener('DOMContentLoaded', () => {
+  const searchButton = document.getElementById('searchButton');
+  searchButton.addEventListener('click', () => {
+    const searchInput = document.getElementById('searchInput');
+    const searchTerm = searchInput.value;
+    fetchAndDisplayPosts(null, null, searchTerm);
+    searchInput.value = '';
+    document.getElementById('questionTitle').innerText = `Search Results for "${searchTerm}"`;
+
+  })
+
+  function toggleFormVisibility() {
+  const toggleFormButton = document.getElementById('toggleFormButton');  
+  const formContainer = document.getElementById('postForm');
+  if (formContainer.style.display === 'none') {
+    formContainer.style.display = 'block';
+    toggleFormButton.textContent = 'Cancel';
+    toggleFormButton.classList.add('is-danger');
+  } else {
+    formContainer.style.display = 'none';
+    toggleFormButton.textContent = 'Create Post';
+    toggleFormButton.classList.remove('is-danger');
+
+  }
+  
+}
+  toggleFormButton.addEventListener('click', toggleFormVisibility);
+
+  const user = checkToken();
+  const username = user.username;
+    populatePostsSidebar(getPostsByUsername(username));
+
+  
 
   // Add event listener to the form
   document.getElementById('postForm').addEventListener('submit', async function(event) {
