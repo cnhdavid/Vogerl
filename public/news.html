@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
     <link rel="stylesheet" href="css/styles.css">
-    <title>Vogerl</title>
+    <title>World News - Vogerl</title>
     <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -60,50 +60,9 @@
 
                     <!-- Main content -->
                     <div class="column">
-                        <div id="postsDisplay">
-                            <div class="columns">
-                                <h2 class="title column" id="questionTitle">Questions</h2>
-                                <button id="toggleFormButton" class="button column is-2 create-post mt-3 mr-3 is-primary is-pulled-right">Ask a Question</button>
-                            </div>
-                            <section id="postQuestion">
-                                <h3 class="subtitle">Post a Question</h3>
-                                <form class="box mb-4" id="postForm" style="display: none;">
-                                    <div class="field">
-                                        <label class="label">Title</label>
-                                        <div class="control">
-                                            <input class="input" type="text" id="postTitle" placeholder="Title" required>
-                                        </div>
-                                    </div>
-                                    <div class="field">
-                                        <label class="label">Image</label>
-                                        <div class="control">
-                                            <input class="input" type="file" id="postImage" accept="image/*">
-                                        </div>
-                                    </div>
-                                    <div class="field">
-                                        <label class="label">Content</label>
-                                        <div class="control">
-                                            <textarea class="textarea" id="postContent" placeholder="Content" required></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="container">
-                                        <div class="field">
-                                            <label class="label">Subject</label>
-                                            <div class="control">
-                                                <div class="select" id="postSubject">
-                                                    <select id="postMenu">
-                                                        <!-- Subject options will be inserted here -->
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="control">
-                                        <button class="button is-primary mt-4" type="submit">Post</button>
-                                    </div>
-                                </form>
-                            </section>
-                            <div id="postsContainer"></div>
+                        <h2 class="title" id="newsTitle">World News</h2>
+                        <div id="newsContainer" class="columns is-multiline">
+                            <!-- News articles will be inserted here -->
                         </div>
                     </div>
 
@@ -120,7 +79,6 @@
         </section>
     </main>
 
-    <script type="module" src="js/app.js"></script>
-    <script>sessionStorage.removeItem('redirectToPost');</script>
+    <script type="module" src="js/modules/news.js"></script>
 </body>
 </html>
