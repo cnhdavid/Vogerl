@@ -11,7 +11,7 @@
 <body>
     <!-- Header und Navbar -->
     <header>
-        <nav class="navbar" role="navigation" aria-label="main navigation">
+        <nav class="navbar" aria-label="main navigation">
             <div class="navbar-brand">
                 <a class="navbar-item" href="/">
                     <img src="/public/images/Vogerl.png" alt="Vogerl Logo" height="100">
@@ -25,7 +25,9 @@
             <div id="navbarBasicExample" class="navbar-menu">
                 <div class="navbar-start">
                     <a class="navbar-item" href="/public/dashboard.html">Home</a>
-                    <a class="navbar-item"><input class="input is-normal" id="searchInput" type="text" placeholder="Search..." /></a>
+                    <div class="navbar-item">
+                        <input class="input is-normal" id="searchInput" type="text" placeholder="Search...">
+                    </div>
                     <a class="navbar-item" id="searchButton"><i class="fa-solid fa-magnifying-glass"></i></a>
                 </div>
                 <div id="navbar-end" class="navbar-end">
@@ -40,80 +42,82 @@
         </nav>
     </header>
 
-    <!-- Hauptteil der Seite -->
-    <section class="section">
-        <div class="container">
-            <div class="columns">
-                <!-- Sidebar für Kategorien -->
-                <aside class="column is-one-fifth">
-                    <div class="menu">
-                        <p class="menu-label has-text-white">Categories</p>
-                        <ul class="menu-list" id="sidebarMenu">
-                            <!-- Categories will be inserted here -->
-                        </ul>
-                    </div>
-                </aside>
-
-                <!-- Hauptinhalt -->
-                <main class="column">
-                    <section id="postsDisplay">
-                        <div class="columns">
-                            <h2 class="title column" id="questionTitle">Questions</h2>
-                            <button id="toggleFormButton" class="button column is-2 create-post mt-3 mr-3 is-primary is-pulled-right">Ask a Question</button>
+    <!-- Main content -->
+    <main>
+        <section class="section">
+            <div class="container">
+                <div class="columns">
+                    <!-- Sidebar for Categories -->
+                    <aside class="column is-one-fifth">
+                        <div class="menu">
+                            <p class="menu-label has-text-white">Categories</p>
+                            <ul class="menu-list" id="sidebarMenu">
+                                <!-- Categories will be inserted here -->
+                            </ul>
                         </div>
-                        <section id="postQuestion">
-                            <form class="box mb-4" id="postForm" style="display: none;">
-                                <div class="field">
-                                    <label class="label">Title</label>
-                                    <div class="control">
-                                        <input class="input" type="text" id="postTitle" placeholder="Title" required>
-                                    </div>
-                                </div>
-                                <div class="field">
-                                    <label class="label">Image</label>
-                                    <div class="control">
-                                        <input class="input" type="file" id="postImage" accept="image/*">
-                                    </div>
-                                </div>
-                                <div class="field">
-                                    <label class="label">Content</label>
-                                    <div class="control">
-                                        <textarea class="textarea" id="postContent" placeholder="Content" required></textarea>
-                                    </div>
-                                </div>
-                                <div class="container">
+                    </aside>
+
+                    <!-- Main content -->
+                    <div class="column">
+                        <div id="postsDisplay">
+                            <div class="columns">
+                                <h2 class="title column" id="questionTitle">Questions</h2>
+                                <button id="toggleFormButton" class="button column is-2 create-post mt-3 mr-3 is-primary is-pulled-right">Ask a Question</button>
+                            </div>
+                            <section id="postQuestion">
+                                <h3 class="subtitle">Post a Question</h3>
+                                <form class="box mb-4" id="postForm" style="display: none;">
                                     <div class="field">
-                                        <label class="label">Subject</label>
+                                        <label class="label">Title</label>
                                         <div class="control">
-                                            <div class="select" id="postSubject">
-                                                <select id="postMenu">
-                                                    <!-- Subject options will be inserted here -->
-                                                </select>
+                                            <input class="input" type="text" id="postTitle" placeholder="Title" required>
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                        <label class="label">Image</label>
+                                        <div class="control">
+                                            <input class="input" type="file" id="postImage" accept="image/*">
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                        <label class="label">Content</label>
+                                        <div class="control">
+                                            <textarea class="textarea" id="postContent" placeholder="Content" required></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="container">
+                                        <div class="field">
+                                            <label class="label">Subject</label>
+                                            <div class="control">
+                                                <div class="select" id="postSubject">
+                                                    <select id="postMenu">
+                                                        <!-- Subject options will be inserted here -->
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="control">
-                                    <button class="button is-primary mt-4" type="submit">Post</button>
-                                </div>
-                            </form>
-                        </section>
-                        <div id="postsContainer"></div>
-                    </section>
-                    
-                </main>
-
-                <aside class="column is-one-fifth is-hidden-mobile">
-                    <div class="menu">
-                        <p class="menu-label has-text-white">Your Questions</p>
-                        <ul class="menu-list" id="sidebarPostsMenu">
-                            <!-- User's questions will be inserted here -->
-                        </ul>
+                                    <div class="control">
+                                        <button class="button is-primary mt-4" type="submit">Post</button>
+                                    </div>
+                                </form>
+                            </section>
+                            <div id="postsContainer"></div>
+                        </div>
                     </div>
-                </aside>
+
+                    <aside class="column is-one-fifth is-hidden-mobile">
+                        <div class="menu">
+                            <p class="menu-label has-text-white">Your Questions</p>
+                            <ul class="menu-list" id="sidebarPostsMenu">
+                                <!-- User's questions will be inserted here -->
+                            </ul>
+                        </div>
+                    </aside>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
     <script type="module" src="js/app.js"></script>
     <script>sessionStorage.removeItem('redirectToPost');</script>
