@@ -172,12 +172,21 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
     if (req.file) {
         image = req.file.buffer.toString('base64');
     }
+    let modifiedTitle = await filterProfanity(title);
+    const modifiedContent = await filterProfanity(content);
+    const titleHasProfanity = await containsProfanity(title);
+    const contentHasProfanity = await containsProfanity(content);
+    console.log(modifiedContent, modifiedTitle);
+    if (titleHasProfanity || contentHasProfanity) {
+        modifiedTitle += ' (The post content was changed due to it containing profanity)';
+        console.log(modifiedTitle);
+    }
 
     try {
         const client = await pool.connect();
         try {
             const insertQuery = 'INSERT INTO posts (username, title, content, subject, image) VALUES ($1, $2, $3, $4, $5)';
-            await client.query(insertQuery, [username, title, content, subject, image]);
+            await client.query(insertQuery, [username, modifiedTitle, modifiedContent, subject, image]);
             res.status(201).json({ message: 'Post created successfully' });
         } finally {
             client.release();  // Release the client back to the pool
@@ -285,8 +294,10 @@ app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
     const modifiedContent = await filterProfanity(content);
     const titleHasProfanity = await containsProfanity(title);
     const contentHasProfanity = await containsProfanity(content);
+    console.log(modifiedContent, modifiedTitle);
     if (titleHasProfanity || contentHasProfanity) {
         modifiedTitle += ' (The post content was changed due to it containing profanity)';
+        console.log(modifiedTitle);
     }
 
     try {
