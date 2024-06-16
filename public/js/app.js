@@ -16,14 +16,14 @@ export function populateNavbar(user) {
 
     const logoutButton = document.createElement('button');
     logoutButton.setAttribute('id', 'logout-button');
-    logoutButton.classList.add('navbar-item','button', 'is-danger', 'is-normal');
+    logoutButton.classList.add('navbar-item', 'button', 'is-danger', 'is-normal');
     logoutButton.textContent = 'Logout';
     logoutButton.style.color = '#000000';
     logoutButton.addEventListener('click', logout);
 
     const profileButton = document.createElement('button');
     profileButton.setAttribute('id', 'profile-button');
-    profileButton.classList.add('navbar-item','button', 'is-info', 'is-normal');
+    profileButton.classList.add('navbar-item', 'button', 'is-info', 'is-normal');
     profileButton.textContent = 'Profile';
     profileButton.style.color = '#000000';
     profileButton.addEventListener('click', () => {
@@ -39,6 +39,8 @@ export function populateNavbar(user) {
     navbarEnd.appendChild(welcomeMessage);
     navbarEnd.appendChild(buttonContainer);
     
+    populatePostsSidebar(getPostsByUsername(username));
+
   }
 }
 
@@ -56,30 +58,28 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   function toggleFormVisibility() {
-  const toggleFormButton = document.getElementById('toggleFormButton');  
-  const formContainer = document.getElementById('postForm');
-  if (formContainer.style.display === 'none') {
-    formContainer.style.display = 'block';
-    toggleFormButton.textContent = 'Cancel';
-    toggleFormButton.classList.add('is-danger');
-  } else {
-    formContainer.style.display = 'none';
-    toggleFormButton.textContent = 'Create Post';
-    toggleFormButton.classList.remove('is-danger');
+    const toggleFormButton = document.getElementById('toggleFormButton');
+    const formContainer = document.getElementById('postForm');
+    if (formContainer.style.display === 'none') {
+      formContainer.style.display = 'block';
+      toggleFormButton.textContent = 'Cancel';
+      toggleFormButton.classList.add('is-danger');
+    } else {
+      formContainer.style.display = 'none';
+      toggleFormButton.textContent = 'Create Post';
+      toggleFormButton.classList.remove('is-danger');
+
+    }
 
   }
-  
-}
   toggleFormButton.addEventListener('click', toggleFormVisibility);
 
-  const user = checkToken();
-  const username = user.username;
-    populatePostsSidebar(getPostsByUsername(username));
 
-  
+
+
 
   // Add event listener to the form
-  document.getElementById('postForm').addEventListener('submit', async function(event) {
+  document.getElementById('postForm').addEventListener('submit', async function (event) {
     event.preventDefault();
 
     const title = document.getElementById('postTitle').value;
