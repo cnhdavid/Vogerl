@@ -9,18 +9,8 @@
     <title>Vogerl</title>
     <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
     <style>
-        .edit-button-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-
         .box {
             position: relative;
-        }
-
-        .edit-button-container button {
-            margin-left: 5px;
         }
 
         .navbar-end {
@@ -45,6 +35,35 @@
 
         .has-text-weight-semibold {
             font-weight: 600;
+        }
+
+        #profileContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: left;
+        }
+
+        #profileContainer #username {
+            margin-right: 10%;
+            text-align: left;
+            /* Adds space between the username and the profile picture */
+        }
+
+        #profileContainer #nameContainer {
+            margin-right: 10px;
+            /* Adds space between the profile picture and the name */
+            text-align: left;
+        }
+
+        #profilePic {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .about-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
     </style>
 </head>
@@ -110,27 +129,18 @@
                     <main>
                         <div class="box">
                             <div class="columns is-multiline">
-                                <div class="column is-full">
-                                    <div class="edit-button-container">
-                                        <button class="button is-primary is-small" id="editButton">Edit</button>
-                                        <button class="button is-primary is-small" id="saveButton"
-                                            style="display: none;">Save</button>
-                                        <button class="button is-light is-small" id="cancelButton"
-                                            style="display: none;">Cancel</button>
-                                    </div>
-                                </div>
                                 <div class="column is-one-third has-text-centered">
-                                    <figure class="image is-128x128">
-                                        <img class="is-rounded" id="profilePic" src="path_to_profile_pic.jpg"
-                                            alt="Profile Picture">
-                                    </figure>
-                                    <p class="subtitle is-pulled-left" id="username"></p>
-                                    <br><br>
-                                    
-                                        <p class="title  " id="firstName">firstname</p>
-                                        <p class="title  " id="lastName">lastname</p>
-                                    
-
+                                    <div id="profileContainer">
+                                        <p class="subtitle" id="username">username</p>
+                                        <figure class="image is-128x128">
+                                            <img class="is-rounded" id="profilePic" src="path_to_profile_pic.jpg"
+                                                alt="Profile Picture">
+                                        </figure>
+                                        <div id="nameContainer">
+                                            <p class="title" id="firstName">firstname</p>
+                                            <p class="title" id="lastName">lastname</p>
+                                        </div>
+                                    </div>
                                     <div class="file has-name is-small mt-2" id="fileInputContainer"
                                         style="display: none;">
                                         <label class="file-label">
@@ -143,7 +153,16 @@
                                     </div>
                                 </div>
                                 <div class="column is-two-thirds">
-                                    <h1 class="title">About</h1>
+                                    <div class="about-header">
+                                        <h1 class="title">About</h1>
+                                        <div class="edit-button-container">
+                                            <button class="button is-primary is-small" id="editButton">Edit</button>
+                                            <button class="button is-primary is-small" id="saveButton"
+                                                style="display: none;">Save</button>
+                                            <button class="button is-light is-small" id="cancelButton"
+                                                style="display: none;">Cancel</button>
+                                        </div>
+                                    </div>
                                     <p id="aboutText">Brief description about the user...</p>
                                     <textarea class="textarea" id="aboutTextarea" style="display: none;"></textarea>
                                 </div>

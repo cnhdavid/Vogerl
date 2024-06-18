@@ -116,25 +116,10 @@
       window.location.href = 'dashboard.html';
     });
 
-    function toggleModal() {
-      const modal = document.getElementById('confirmationModal');
-      modal.classList.toggle('is-active');
-    }
+    
 
     // Event listeners to show/hide modal
-    document.getElementById('confirmDelete').addEventListener('click', () => {
-      toggleModal();
-      // Call deletePost function if confirmed
-      deletePost(postId);
-    });
-    document.getElementById('cancelDelete').addEventListener('click', () => {
-      console.log('Cancel delete');
-      toggleModal();
-    });
-
-    document.getElementById('modalClose').addEventListener('click', () => {
-      toggleModal();
-    });
+    
   </script>
 </body>
 

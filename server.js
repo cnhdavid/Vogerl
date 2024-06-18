@@ -172,12 +172,21 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
     if (req.file) {
         image = req.file.buffer.toString('base64');
     }
+    let modifiedTitle = await filterProfanity(title);
+    const modifiedContent = await filterProfanity(content);
+    const titleHasProfanity = await containsProfanity(title);
+    const contentHasProfanity = await containsProfanity(content);
+   
+    if (titleHasProfanity || contentHasProfanity) {
+        modifiedTitle += ' (The post content was changed due to it containing profanity)';
+        
+    }
 
     try {
         const client = await pool.connect();
         try {
             const insertQuery = 'INSERT INTO posts (username, title, content, subject, image) VALUES ($1, $2, $3, $4, $5)';
-            await client.query(insertQuery, [username, title, content, subject, image]);
+            await client.query(insertQuery, [username, modifiedTitle, modifiedContent, subject, image]);
             res.status(201).json({ message: 'Post created successfully' });
         } finally {
             client.release();  // Release the client back to the pool
@@ -193,6 +202,7 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
     const postId = req.params.postId;
     const username = req.user.username; // Extract username from the token
 
+    const client = await pool.connect();
     try {
         // Check if the post exists and belongs to the authenticated user
         const postQuery = await client.query(
@@ -205,9 +215,16 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
         }
 
         // Delete the post
-        await client.query(
-            'DELETE FROM posts WHERE id = $1',
-            [postId]
+         client.query(
+            'DELETE FROM postvotes WHERE post_id = $1',[postId]
+         );
+
+        client.query(
+            'DELETE FROM comments WHERE post_id = $1', [postId]
+        );
+
+        client.query(
+            'DELETE FROM posts WHERE id = $1', [postId]
         );
 
         // Respond with success message
@@ -215,6 +232,8 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('Error deleting post:', error);
         res.status(500).json({ error: 'Internal Server Error' });
+    } finally {
+        client.release();  // Release the client back to the pool
     }
 });
 app.get('/api/posts', async (req, res) => {
@@ -285,8 +304,10 @@ app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
     const modifiedContent = await filterProfanity(content);
     const titleHasProfanity = await containsProfanity(title);
     const contentHasProfanity = await containsProfanity(content);
+    
     if (titleHasProfanity || contentHasProfanity) {
         modifiedTitle += ' (The post content was changed due to it containing profanity)';
+        
     }
 
     try {

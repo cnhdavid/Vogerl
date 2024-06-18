@@ -294,7 +294,7 @@ async function deletePost(postId) {
     // Wait for user confirmation
     document.getElementById('confirmDelete').addEventListener('click', async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/post/${postId}`, {
+        const response = await fetch(`http://localhost:3000/api/Deletepost/${postId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -354,4 +354,22 @@ if (user) {
   navbarEnd.appendChild(logoutButton);
   navbarEnd.appendChild(profileButton);
 };
+
+function toggleModal() {
+  const modal = document.getElementById('confirmationModal');
+  modal.classList.toggle('is-active');
+}
+document.getElementById('confirmDelete').addEventListener('click', () => {
+  toggleModal();
+  // Call deletePost function if confirmed
+  deletePost(postId);
+});
+document.getElementById('cancelDelete').addEventListener('click', () => {
+  console.log('Cancel delete');
+  toggleModal();
+});
+
+document.getElementById('modalClose').addEventListener('click', () => {
+  toggleModal();
+});
 displayPost(postId);
