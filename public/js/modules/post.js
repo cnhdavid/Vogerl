@@ -45,6 +45,8 @@ function displayPost(postId) {
         ${token ? `<i id="upvote-${post.id}" class="fa-solid fa-arrow-up mx-2"></i>` : ''}
         <span id="upvote-count-${post.id}" class="upvote-count"> Loading...</span>
         ${token ?  `<i id="downvote-${post.id}" class="fa-solid fa-arrow-down ml-2 "></i>` : ''}
+        <id="commentIcon" class="fa-solid fa-comment mx-2"></i>
+        <span id="comment-count-${post.id}" class="comment-count"> Loading...</span>
         <h3 class="title is-5 my-6">Comments</h3>
         <div class="comments-container" id="comments-container"></div>
         ${token ? ` 
@@ -94,6 +96,7 @@ function displayPost(postId) {
         event.stopPropagation();
         downvotePost(post.id);
       });
+      getCommentCount(postId)
 
       if (!token) {
         const loginButton = document.getElementById('loginButton');
@@ -138,6 +141,7 @@ function displayPost(postId) {
           const commentContent = document.getElementById('commentInput').value;
           submitComment(postId, commentContent);
           document.getElementById('commentInput').value = '';
+          
           
         });
       }
@@ -192,6 +196,16 @@ function displayPost(postId) {
         });
       })
       .catch(error => console.error('Error fetching comments:', error));
+  }
+
+  export function getCommentCount(postId) {
+    fetch(`http://localhost:3000/api/posts/${postId}/comments`)
+      .then(response => response.json())
+      .then(comments => {
+        const commentCount = comments.length;
+        document.getElementById('comment-count-${postId}').textContent = commentCount;
+        console.log(commentCount);
+      })
   }
   
 
