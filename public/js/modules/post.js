@@ -218,7 +218,7 @@ function displayPost(postId) {
         const commentCountElement = document.getElementById(`comment-count-${postId}`);
         commentCountElement.textContent = commentCount;
         
-        console.log(commentCount);
+        
       })
   }
   
