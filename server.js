@@ -176,10 +176,10 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
     const modifiedContent = await filterProfanity(content);
     const titleHasProfanity = await containsProfanity(title);
     const contentHasProfanity = await containsProfanity(content);
-    console.log(modifiedContent, modifiedTitle);
+   
     if (titleHasProfanity || contentHasProfanity) {
         modifiedTitle += ' (The post content was changed due to it containing profanity)';
-        console.log(modifiedTitle);
+        
     }
 
     try {
@@ -294,10 +294,10 @@ app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
     const modifiedContent = await filterProfanity(content);
     const titleHasProfanity = await containsProfanity(title);
     const contentHasProfanity = await containsProfanity(content);
-    console.log(modifiedContent, modifiedTitle);
+    
     if (titleHasProfanity || contentHasProfanity) {
         modifiedTitle += ' (The post content was changed due to it containing profanity)';
-        console.log(modifiedTitle);
+        
     }
 
     try {
