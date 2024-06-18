@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Success:', data);
         document.getElementById('postForm').reset();
         fetchAndDisplayPosts();
-        
+
       } else {
         const errorData = await response.json();
         alert(`Failed to submit post: ${errorData.message}`);
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  fetchAndDisplayPosts();
+  fetchAndDisplayPosts(null, null, null);
   populateMenu()
   populateSidebar();
 
