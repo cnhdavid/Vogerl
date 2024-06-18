@@ -185,7 +185,7 @@ export async function searchPosts(searchTerm) {
 
 
 export async function createPostElement(post, comments) {
-  
+
   const postElement = document.createElement('div');
   postElement.classList.add('box');
 
@@ -209,20 +209,23 @@ export async function createPostElement(post, comments) {
         <i class="fa-solid fa-arrow-up is-fluid" id="upvote-${post.id}"></i>
         <span id="upvote-count-${post.id}" class="upvote-count mx-3"> Loading...</span>
         <i class="fa-solid fa-arrow-down is-fluid" id="downvote-${post.id}" ></i> 
+        <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment"></i></span>
+   <span id="comment-count-${post.id}"> Loading...</span>
       </div>
     </div>
   </div>
   ${imageData ? `<img src="${imageData}" alt="Post Image" class="post-image" />` : ''}
+  
 </article>
 
   `;
-  
 
-  
+
+
 
   try {
     const upvotes = await getPostVotes(post.id);
-
+    getCommentCount(post.id)
     const upvoteCountElement = postElement.querySelector('.upvote-count');
     upvoteCountElement.textContent = upvotes;
   } catch (error) {
@@ -241,28 +244,28 @@ export async function createPostElement(post, comments) {
     downvotePost(post.id);
   });
   getUserId(post.username)
-  .then(userId => {
-    
-    hasUserVoted(post.id, userId)
-    .then(liked => {
-      if (liked==='upvote') {
-        document.getElementById(`upvote-${post.id}`).classList.add('upvoted');
-      }
+    .then(userId => {
 
-      if (liked==='downvote') {
-        document.getElementById(`downvote-${post.id}`).classList.add('downvoted');
-      } 
+      hasUserVoted(post.id, userId)
+        .then(liked => {
+          if (liked === 'upvote') {
+            document.getElementById(`upvote-${post.id}`).classList.add('upvoted');
+          }
+
+          if (liked === 'downvote') {
+            document.getElementById(`downvote-${post.id}`).classList.add('downvoted');
+          }
+        });
+    })
+    .catch(error => {
+      console.error('Error fetching user ID:', error);
     });
-  })
-  .catch(error => {
-    console.error('Error fetching user ID:', error);
-  });
 
   // Add upvotes if available
 
   // Add comments if available
 
-  
+
 
   if (imageData) {
     const imageElement = postElement.querySelector('.post-image');

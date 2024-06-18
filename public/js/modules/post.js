@@ -106,8 +106,21 @@ function displayPost(postId) {
       }
 
       if (token && post.username == getUserIdFromToken(token)) {
-        document.getElementById('deletePostButton').addEventListener('click', () => {
+        document.getElementById('confirmDelete').addEventListener('click', () => {
+          toggleModal();
+          // Call deletePost function if confirmed
           deletePost(postId);
+        });
+        document.getElementById('cancelDelete').addEventListener('click', () => {
+          console.log('Cancel delete');
+          toggleModal();
+        });
+        
+        document.getElementById('modalClose').addEventListener('click', () => {
+          toggleModal();
+        });
+        document.getElementById('deletePostButton').addEventListener('click', () => {
+          toggleModal();
         });
 
         const editPostButton = document.getElementById('editPostButton');
@@ -374,17 +387,5 @@ function toggleModal() {
   const modal = document.getElementById('confirmationModal');
   modal.classList.toggle('is-active');
 }
-document.getElementById('confirmDelete').addEventListener('click', () => {
-  toggleModal();
-  // Call deletePost function if confirmed
-  deletePost(postId);
-});
-document.getElementById('cancelDelete').addEventListener('click', () => {
-  console.log('Cancel delete');
-  toggleModal();
-});
 
-document.getElementById('modalClose').addEventListener('click', () => {
-  toggleModal();
-});
 displayPost(postId);
