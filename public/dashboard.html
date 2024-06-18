@@ -49,7 +49,7 @@
             <div class="container">
                 <div class="columns">
                     <!-- Sidebar for Categories -->
-                    <aside class="column is-one-fifth">
+                    <aside class="column is-one-fifth is-hidden-mobile">
                         <div class="menu">
                             <p class="menu-label has-text-white">Categories</p>
                             <ul class="menu-list" id="sidebarMenu">
@@ -61,9 +61,10 @@
                     <!-- Main content -->
                     <div class="column">
                         <div id="postsDisplay">
+                            <button id="toggleFormButton" class="button column is-2 create-post mt-3 mr-3 is-primary is-pulled-right">Ask a Question</button>
                             <div class="columns">
                                 <h2 class="title column" id="questionTitle">Questions</h2>
-                                <button id="toggleFormButton" class="button column is-2 create-post mt-3 mr-3 is-primary is-pulled-right">Ask a Question</button>
+                               
                             </div>
                             <section id="postQuestion">
                                 
