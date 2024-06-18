@@ -45,9 +45,8 @@ function displayPost(postId) {
         ${token ? `<i id="upvote-${post.id}" class="fa-solid fa-arrow-up mx-2"></i>` : ''}
         <span id="upvote-count-${post.id}" class="upvote-count"> Loading...</span>
         ${token ?  `<i id="downvote-${post.id}" class="fa-solid fa-arrow-down ml-2 "></i>` : ''}
-        <id="commentIcon" class="fa-solid fa-comment mx-2"></i>
-        <span id="comment-count-${post.id}" class="comment-count"> Loading...</span>
-        <h3 class="title is-5 my-6">Comments</h3>
+        <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment"></i></span>
+        <span id="comment-count-${post.id}"> Loading...</span>
         <div class="comments-container" id="comments-container"></div>
         ${token ? ` 
           <textarea id="commentInput" class="textarea my-2" placeholder="Add a comment"></textarea>
@@ -203,7 +202,9 @@ function displayPost(postId) {
       .then(response => response.json())
       .then(comments => {
         const commentCount = comments.length;
-        document.getElementById('comment-count-${postId}').textContent = commentCount;
+        const commentCountElement = document.getElementById(`comment-count-${postId}`);
+        commentCountElement.textContent = commentCount;
+        
         console.log(commentCount);
       })
   }

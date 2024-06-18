@@ -2,6 +2,7 @@
 
 import { fetchComments, downvotePost, upvotePost, getPostVotes, hasUserVoted } from './postManager.js';
 import { openPost } from './modal.js';
+import { getCommentCount } from './post.js';
 import sidebarSubjects from './subjects.js';
 import { getUserId } from './auth.js';
 
