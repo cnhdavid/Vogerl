@@ -25,7 +25,7 @@ export function checkToken() {
   
   export function logout() {
     localStorage.removeItem('token');
-    window.location.href = 'dashboard.html';
+    window.location.href = 'login.html';
   }
   export async function getUserId(username) {
     try {

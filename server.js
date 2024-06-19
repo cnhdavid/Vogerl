@@ -10,6 +10,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const authenticateToken = require('./authenticate');
+const http = require('http');
+const WebSocket = require('ws');
 
 
 
@@ -49,7 +51,43 @@ const pool = new Pool({
     }
 });
 
+const server = http.createServer(app);
 
+// Create a WebSocket server attached to the HTTP server
+const wss = new WebSocket.Server({ server });
+wss.on('connection', ws => {
+    console.log('Client connected');
+
+    ws.on('message', message => {
+        console.log(`Received message: ${message}`);
+    });
+
+    // Send a message to the client when the server is shutting down
+    ws.on('close', () => {
+        console.log('Client disconnected');
+    });
+
+    // Send a welcome message
+    ws.send('Welcome to the WebSocket server');
+});
+
+// Handle server shutdown
+process.on('SIGINT', () => {
+    console.log('Server is shutting down');
+    
+    // Notify all connected WebSocket clients
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send('Server is shutting down');
+        }
+    });
+
+    // Close the server
+    server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+    });
+});
 
 
 
@@ -669,6 +707,6 @@ function nestComments(comments) {
     return roots;
 }
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
 });

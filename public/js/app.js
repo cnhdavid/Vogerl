@@ -4,6 +4,8 @@ import { checkToken, logout } from './modules/auth.js';
 import { fetchAndDisplayPosts, searchPosts } from './modules/posts.js';
 import { populateMenu, populateSidebar, populatePostsSidebar, getPostsByUsername } from './modules/posts.js';
 
+const socket = new WebSocket('ws://localhost:3000');
+
 export function populateNavbar(user) {
   if (user) {
 
@@ -130,6 +132,25 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('An error occurred. Please try again later.');
     }
   });
+  socket.addEventListener('message', event => {
+    console.log('Message from server:', event.data);
+    if (event.data === 'Server is shutting down') {
+        localStorage.removeItem('token');
+        socket.close();
+        
+    }
+});
+
+socket.addEventListener('open', () => {
+    console.log('Connected to WebSocket server');
+    
+});
+
+socket.addEventListener('close', () => {
+    console.log('Disconnected from WebSocket server');
+    alert('Server is shutting down. Please log in again.');
+        window.location.href = 'login.html';p
+});
 
   fetchAndDisplayPosts(null, null, null);
   populateMenu()
