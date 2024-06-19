@@ -173,9 +173,15 @@ app.post('/api/login', async (req, res) => {
 
 
 
-            const token = jwt.sign({ userId: user.id, username: user.username }, jwtSecretKey, { expiresIn: '1h' });
+            const token = jwt.sign({ userId: user.id, username: user.username, role: user.user_role }, jwtSecretKey, { expiresIn: '1h' });
            
-            res.json({ token });
+            if (user.user_role === 'admin') {
+                console.log('Admin login successful');
+                return res.status(200).json({ token, role: 'admin' });
+            } else {
+                console.log('User login successful');
+                return res.status(200).json({ token, role: 'user' });
+            }
         } finally {
             client.release();  // Release the client back to the pool
         }
@@ -238,14 +244,15 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
 
 app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
     const postId = req.params.postId;
-    const username = req.user.username; // Extract username from the token
+    
+    console.log(postId);
 
     const client = await pool.connect();
     try {
         // Check if the post exists and belongs to the authenticated user
         const postQuery = await client.query(
-            'SELECT * FROM posts WHERE id = $1 AND username = $2',
-            [postId, username]
+            'SELECT * FROM posts WHERE id = $1',
+            [postId]
         );
         const post = postQuery.rows[0];
         if (!post) {

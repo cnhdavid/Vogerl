@@ -51,7 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 
             } else {
                 // Redirect to dashboard
-                window.location.href = 'dashboard.html';
+                if (data.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
                 
             }
         } catch (error) {

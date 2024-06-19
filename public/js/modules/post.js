@@ -1,6 +1,7 @@
-import { getUserIdFromToken, checkToken, logout,getUserId } from './auth.js';
+import { getUserIdFromToken, checkToken, logout,getUserId, getRoleFromToken } from './auth.js';
 import { editPost  } from './modal.js';
 import { getPostVotes, hasUserVoted, upvotePost, downvotePost } from './postManager.js';
+import { fetchAndDisplayPosts } from './posts.js';
 
 // Retrieve the postId from the URL query parameter
 const urlParams = new URLSearchParams(window.location.search);
@@ -107,21 +108,10 @@ function displayPost(postId) {
 
       if (token && post.username == getUserIdFromToken(token)) {
         document.getElementById('confirmDelete').addEventListener('click', () => {
-          toggleModal();
-          // Call deletePost function if confirmed
+          
           deletePost(postId);
         });
-        document.getElementById('cancelDelete').addEventListener('click', () => {
-          console.log('Cancel delete');
-          toggleModal();
-        });
         
-        document.getElementById('modalClose').addEventListener('click', () => {
-          toggleModal();
-        });
-        document.getElementById('deletePostButton').addEventListener('click', () => {
-          toggleModal();
-        });
 
         const editPostButton = document.getElementById('editPostButton');
         editPostButton.addEventListener('click', () => {
@@ -311,13 +301,14 @@ const submitComment = async (postId, content, parentId = null) => {
   }
 };
 
-async function deletePost(postId) {
+export async function deletePost(postId) {
   try {
     const token = localStorage.getItem('token');
     const userId = getUserIdFromToken(token);
 
     // Show modal
     toggleModal();
+    
 
     // Wait for user confirmation
     document.getElementById('confirmDelete').addEventListener('click', async () => {
@@ -329,6 +320,7 @@ async function deletePost(postId) {
             Authorization: `Bearer ${token}`,
           },
         });
+        
 
         if (response.ok) {
           // Delete the post from the UI
@@ -337,8 +329,13 @@ async function deletePost(postId) {
           if (postElement) {
             postElement.remove();
           }
-          alert('Post deleted successfully');
-          window.location.href = 'dashboard.html';
+          if (getRoleFromToken(token) === 'admin') {
+            fetchAndDisplayPosts();
+            toggleModal();
+            
+          } else {
+            window.location.href = 'dashboard.html';
+          }
         } else {
           console.error('Error deleting post:', response.status);
         }
@@ -389,3 +386,12 @@ function toggleModal() {
 }
 
 displayPost(postId);
+window.addEventListener('popstate', () => {
+  // Redirect to the dashboard page
+  if (getRoleFromToken(localStorage.getItem('token')) === 'admin') {
+    window.location.href = 'admin.html';
+  } else {
+    window.location.href = 'dashboard.html';
+  }
+  
+});

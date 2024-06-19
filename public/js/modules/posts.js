@@ -2,9 +2,9 @@
 
 import { fetchComments, downvotePost, upvotePost, getPostVotes, hasUserVoted } from './postManager.js';
 import { openPost } from './modal.js';
-import { getCommentCount } from './post.js';
+import { getCommentCount, deletePost } from './post.js';
 import sidebarSubjects from './subjects.js';
-import { getUserId } from './auth.js';
+import { getUserId, getRoleFromToken } from './auth.js';
 
 
 async function fetchPosts(subject = null, username = null) {
@@ -211,6 +211,7 @@ export async function createPostElement(post, comments) {
         <i class="fa-solid fa-arrow-down is-fluid" id="downvote-${post.id}" ></i> 
         <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment"></i></span>
    <span id="comment-count-${post.id}"> Loading...</span>
+   ${getRoleFromToken(localStorage.getItem('token')) === 'admin' ? `<button class="button is-danger is-small is-pulled-right" id="deletePost-${post.id}">Delete Post</button>` : ''}
       </div>
     </div>
   </div>
@@ -220,8 +221,15 @@ export async function createPostElement(post, comments) {
 
   `;
 
-
-
+  if (getRoleFromToken(localStorage.getItem('token')) === 'admin') {
+    const deleteButton = postElement.querySelector(`#deletePost-${post.id}`);
+    
+    deleteButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      deletePost(post.id);
+    });
+    
+  }
 
   try {
     const upvotes = await getPostVotes(post.id);
