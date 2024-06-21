@@ -8,7 +8,6 @@ const socket = new WebSocket('ws://localhost:3000');
 
 export function populateNavbar(user) {
   if (user) {
-
     const navbarEnd = document.getElementById('navbar-end');
     const username = user.username;
 
@@ -42,13 +41,27 @@ export function populateNavbar(user) {
     navbarEnd.appendChild(buttonContainer);
     
     populatePostsSidebar(getPostsByUsername(username));
-
   }
 }
 
 populateNavbar(checkToken());
 
+// Mobile menu
 document.addEventListener('DOMContentLoaded', () => {
+  const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+  if ($navbarBurgers.length > 0) {
+    $navbarBurgers.forEach(el => {
+      el.addEventListener('click', () => {
+        const target = el.dataset.target;
+        const $target = document.getElementById(target);
+
+        el.classList.toggle('is-active');
+        $target.classList.toggle('is-active');
+      });
+    });
+  }
+
   const searchButton = document.getElementById('searchButton');
   searchButton.addEventListener('click', () => {
     const searchInput = document.getElementById('searchInput');
@@ -56,8 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndDisplayPosts(null, null, searchTerm);
     searchInput.value = '';
     document.getElementById('questionTitle').innerText = `Search Results for "${searchTerm}"`;
-
-  })
+  });
 
   function toggleFormVisibility() {
     const toggleFormButton = document.getElementById('toggleFormButton');
@@ -70,15 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
       formContainer.style.display = 'none';
       toggleFormButton.textContent = 'Create Post';
       toggleFormButton.classList.remove('is-danger');
-
     }
-
   }
-  toggleFormButton.addEventListener('click', toggleFormVisibility);
-
-
-
-
+  document.getElementById('toggleFormButton').addEventListener('click', toggleFormVisibility);
 
   // Add event listener to the form
   document.getElementById('postForm').addEventListener('submit', async function (event) {
@@ -122,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Success:', data);
         document.getElementById('postForm').reset();
         fetchAndDisplayPosts();
-
       } else {
         const errorData = await response.json();
         alert(`Failed to submit post: ${errorData.message}`);
@@ -132,29 +137,26 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('An error occurred. Please try again later.');
     }
   });
+
   socket.addEventListener('message', event => {
     console.log('Message from server:', event.data);
     if (event.data === 'Server is shutting down') {
-        localStorage.removeItem('token');
-        socket.close();
-        
+      localStorage.removeItem('token');
+      socket.close();
     }
-});
+  });
 
-socket.addEventListener('open', () => {
+  socket.addEventListener('open', () => {
     console.log('Connected to WebSocket server');
-    
-});
+  });
 
-socket.addEventListener('close', () => {
+  socket.addEventListener('close', () => {
     console.log('Disconnected from WebSocket server');
     alert('Server is shutting down. Please log in again.');
-        window.location.href = 'login.html';p
-});
+    window.location.href = 'login.html';
+  });
 
   fetchAndDisplayPosts(null, null, null);
-  populateMenu()
+  populateMenu();
   populateSidebar();
-
 });
-
