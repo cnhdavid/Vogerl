@@ -277,7 +277,7 @@ export async function hasUserVoted(postId, userId) {
         if (!response.ok) {
             if (response.status === 401 || response.status === 403) {
                 alert('Please login first');
-                window.location.href = '/public/login.html';
+                window.location.href = 'login.html';
             }
             console.log('Error fetching upvotes:', response.statusText);
             throw new Error('Failed to fetch upvotes');
@@ -323,7 +323,7 @@ export async function markCommentAsAnswer(commentId, postId) {
         if (!response.ok) {
             if (response.status === 401 || response.status === 403) {
                 alert('Please login first');
-                window.location.href = '/public/login.html';
+                window.location.href = 'login.html';
             }
             console.log('Error fetching upvotes:', response.statusText);
             throw new Error('Failed to fetch upvotes');
@@ -350,7 +350,7 @@ export async function deleteComment(commentId) {
         if (!response.ok) {
             if (response.status === 401 || response.status === 403) {
                 alert('Please login first');
-                window.location.href = '/public/login.html';
+                window.location.href = 'login.html';
             }
             console.log('Error fetching upvotes:', response.statusText);
             throw new Error('Failed to fetch upvotes');
