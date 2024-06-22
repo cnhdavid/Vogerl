@@ -767,6 +767,30 @@ async function markPostAsAnswered(postId) {
         }
     }
 }
+
+// Delete Comment
+app.delete('/api/Comment/:commentId', authenticateToken, async(req, res) => {
+    const commentId = req.params.commentId;
+    try {
+        const client = await pool.connect();
+        try {
+            const result = await client.query('DELETE FROM comments WHERE id = $1', [commentId]);
+            if (result.rowCount === 0) {
+                return res.status(404).json({ message: 'Comment not found' });
+            }
+            return res.status(200).json({ message: 'Comment deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+            return res.status(500).json({ message: 'Internal server error' });
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error('Error connecting to database:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
 });

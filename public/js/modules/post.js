@@ -1,7 +1,7 @@
 // Import necessary functions from other modules
 import { getUserIdFromToken, checkToken, logout, getUserId, getRoleFromToken } from './auth.js';
 import { editPost } from './modal.js';
-import { getPostVotes, hasUserVoted, upvotePost, downvotePost, markCommentAsAnswer } from './postManager.js';
+import { getPostVotes, hasUserVoted, upvotePost, downvotePost, markCommentAsAnswer, deleteComment } from './postManager.js';
 import { fetchAndDisplayPosts } from './posts.js';
 
 // Retrieve the postId from the URL query parameter
@@ -54,12 +54,12 @@ function displayPost(postId) {
         <div class="comments-container" id="comments-container"></div>
         ${token ? ` 
           <textarea id="commentInput" class="textarea my-2" placeholder="Add a comment"></textarea>
-          <button id="submitComment" class="button is-primary my-2"><i class="fa-solid fa-check"></i>Submit</button>
+          <button id="submitComment" class="button is-primary my-2"><i class="fa-solid fa-check mx-2"></i>Submit</button>
         ` : `
           <p>Please log in to add a comment.</p>
           <button id="loginButton" class="button is-primary">Log In</button>
         `}
-        ${token && post.username === getUserIdFromToken(token) ? `<button id="deletePostButton" class="button is-danger my-2">Delete Post</button>` : ''}
+        ${token && post.username === getUserIdFromToken(token) ? `<button id="deletePostButton" class="button is-danger my-2 is-pulled-right">Delete Post</button>` : ''}
       `;
 
       // Fetch and display upvote count
@@ -116,7 +116,7 @@ function displayPost(postId) {
 
       // If the user is the author of the post, allow them to delete or edit the post
       if (token && post.username == getUserIdFromToken(token)) {
-        
+
         document.getElementById('deletePostButton').addEventListener('click', () => {
           deletePost(postId);
         });
@@ -166,6 +166,17 @@ function displayComments(postId, postUsername) {
     .then(response => response.json())
     .then(comments => {
 
+      // Sort comments: marked as answer first
+      comments.sort((a, b) => {
+        if (a.isanswer && !b.isanswer) {
+          return -1; // a should come before b
+        } else if (!a.isanswer && b.isanswer) {
+          return 1; // b should come before a
+        } else {
+          return 0; // maintain existing order
+        }
+      });
+
       const commentsContainer = document.getElementById('comments-container');
       commentsContainer.innerHTML = '';
       comments.forEach(comment => {
@@ -177,21 +188,20 @@ function displayComments(postId, postUsername) {
 
             <h4 class="title is-6">${comment.username}</h4>
             <p class="content">${comment.content}</p>
-            ${localStorage.getItem('token') && postUsername === getUserIdFromToken(localStorage.getItem('token')) ? `<button id="deleteCommentButton-${comment.id}" class="button is-danger is-small my-2">Delete Comment</button>` : ''}
-            ${!comment.isanswer && postUsername === getUserIdFromToken(localStorage.getItem('token')) ? `<button id="MarkCommentAsAnswerButton-${comment.id}" class="button is-success is-small my-2">Mark as Answer</button>` : ''}
+            ${localStorage.getItem('token') && (postUsername === getUserIdFromToken(localStorage.getItem('token')) || getRoleFromToken(localStorage.getItem('token')) === 'admin') ? `<button id="deleteCommentButton-${comment.id}" class="button is-danger is-small my-2">Delete Comment</button>` : ''}            ${!comment.isanswer && postUsername === getUserIdFromToken(localStorage.getItem('token')) ? `<button id="MarkCommentAsAnswerButton-${comment.id}" class="button is-success is-small my-2">Mark as Answer</button>` : ''}
             </div>
           `;
 
         const deleteCommentButton = commentElement.querySelector(`#deleteCommentButton-${comment.id}`);
         if (deleteCommentButton) {
           deleteCommentButton.addEventListener('click', () => {
-            deleteComment(comment.id);
+            confirmCommentDelete(comment.id);
           });
         }
 
-        const MarkCommentAsAnswerButton = commentElement.querySelector(`#MarkCommentAsAnswerButton-${comment.id}`);
-        if (MarkCommentAsAnswerButton) {
-          MarkCommentAsAnswerButton.addEventListener('click', () => {
+        const markCommentAsAnswerButton = commentElement.querySelector(`#MarkCommentAsAnswerButton-${comment.id}`);
+        if (markCommentAsAnswerButton) {
+          markCommentAsAnswerButton.addEventListener('click', () => {
             markCommentAsAnswer(comment.id, postId);
           });
         }
@@ -201,25 +211,36 @@ function displayComments(postId, postUsername) {
     .catch(error => console.error('Error fetching comments:', error));
 }
 
+// 
+function confirmCommentDelete(commentId) {
+  var confirmation = confirm("Are you sure you want to delete this comment?");
+
+  if (confirmation) {
+    deleteComment(commentId);
+  } else {
+    return
+  }
+}
+
 /**
  * Get the count of comments for the post with the given postId.
  * @param {string} postId - The ID of the post.
  */
 export function getCommentCount(postId) {
   return fetch(`http://localhost:3000/api/posts/${postId}/comments`)
-      .then(response => response.json())
-      .then(comments => {
-          const commentCount = comments.length;
-          const commentCountElement = document.getElementById(`comment-count-${postId}`);
-          if (commentCountElement) {
-              commentCountElement.textContent = commentCount;
-          } else {
-              console.error(`Element with id comment-count-${postId} not found`);
-          }
-      })
-      .catch(error => {
-          console.error('Error fetching comments:', error);
-      });
+    .then(response => response.json())
+    .then(comments => {
+      const commentCount = comments.length;
+      const commentCountElement = document.getElementById(`comment-count-${postId}`);
+      if (commentCountElement) {
+        commentCountElement.textContent = commentCount;
+      } else {
+        console.error(`Element with id comment-count-${postId} not found`);
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching comments:', error);
+    });
 }
 
 /**
@@ -258,10 +279,8 @@ const submitComment = async (postId, content, parentId = null) => {
     }
 
     if (response.ok) {
-      const comment = await response.json();
-      const commentsContainer = document.getElementById('comments-container');
-      displayComments(postId);
-      
+      window.location.reload();
+
     } else {
       console.error('Error submitting comment:', response.statusText);
     }
@@ -279,6 +298,8 @@ export async function deletePost(postId) {
     const token = localStorage.getItem('token');
     const userId = getUserIdFromToken(token);
     toggleModal();
+    document.getElementById('cancelDelete').addEventListener('click', toggleModal);
+    document.getElementById('modalClose').addEventListener('click', toggleModal);
     document.getElementById('confirmDelete').addEventListener('click', async () => {
       try {
         const response = await fetch(`http://localhost:3000/api/Deletepost/${postId}`, {

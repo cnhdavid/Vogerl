@@ -4,7 +4,7 @@
  */
 
 // Import necessary functions from other modules
-import { checkToken, logout } from './modules/auth.js';
+import { checkToken, getRoleFromToken, logout } from './modules/auth.js';
 import { fetchAndDisplayPosts, searchPosts } from './modules/posts.js';
 import { populateMenu, populateSidebar, populatePostsSidebar, getPostsByUsername } from './modules/posts.js';
 
@@ -51,6 +51,9 @@ export function populateNavbar(user) {
 
         populatePostsSidebar(getPostsByUsername(username));
     }
+}
+if (getRoleFromToken(localStorage.getItem('token')) === 'admin') {
+  window.location.href = 'admin.html';
 }
 
 // Populate the navbar with user information if the user is logged in
