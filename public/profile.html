@@ -4,82 +4,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Include Bulma CSS framework and custom styles -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <title>Vogerl</title>
+    <!-- Include Font Awesome for icons -->
     <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
     <style>
         .box {
             position: relative;
         }
-
+        
         .navbar-end {
             display: flex;
             align-items: center;
         }
-
+        
         .navbar-end .navbar-item {
             display: flex;
             align-items: center;
         }
-
+        
         .navbar-end .buttons {
             display: flex;
             gap: 10px;
-            /* Adds space between buttons */
         }
-
+        
         .button {
             margin: 0 5px;
         }
-
+        
         .has-text-weight-semibold {
             font-weight: 600;
         }
-
+        
         #profileContainer {
             display: flex;
             flex-direction: column;
             align-items: left;
         }
-
+        
         #profileContainer #username {
             margin-right: 10%;
             text-align: left;
-            /* Adds space between the username and the profile picture */
         }
-
+        
         #profileContainer #nameContainer {
             margin-right: 10px;
-            /* Adds space between the profile picture and the name */
             text-align: left;
         }
-
+        
         #profilePic {
             margin-top: 10px;
             margin-bottom: 10px;
         }
-
+        
         .about-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-
-        
     </style>
 </head>
 
 <body>
-    <!-- Header und Navbar -->
+    <!-- Header and Navbar -->
     <header>
         <nav class="navbar" aria-label="main navigation">
             <div class="navbar-brand">
                 <a class="navbar-item" href="/">
                     Vogerl
                 </a>
-                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
-                    data-target="navbarBasicExample">
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
                     <span aria-hidden="true"></span>
                     <span aria-hidden="true"></span>
                     <span aria-hidden="true"></span>
@@ -113,11 +109,11 @@
         </nav>
     </header>
 
-    <!-- Hauptteil der Seite -->
+    <!-- Main Content Section -->
     <div class="section">
         <div class="container">
             <div class="columns">
-                <!-- Sidebar für Kategorien -->
+                <!-- Sidebar for Categories -->
                 <aside class="column is-one-quarter">
                     <div class="menu">
                         <p class="menu-label">Categories</p>
@@ -135,16 +131,14 @@
                                     <div id="profileContainer">
                                         <p class="subtitle" id="username">username</p>
                                         <figure class="image is-128x128">
-                                            <img class="is-rounded" id="profilePic" src="path_to_profile_pic.jpg"
-                                                alt="Profile Picture">
+                                            <img class="is-rounded" id="profilePic" src="path_to_profile_pic.jpg" alt="Profile Picture">
                                         </figure>
                                         <div id="nameContainer">
-                                            <p class="Title" id="firstName">firstname</p>
-                                            <p class="Title" id="lastName">lastname</p>
+                                            <p class="title" id="firstName">firstname</p>
+                                            <p class="title" id="lastName">lastname</p>
                                         </div>
                                     </div>
-                                    <div class="file has-name is-small mt-2" id="fileInputContainer"
-                                        style="display: none;">
+                                    <div class="file has-name is-small mt-2" id="fileInputContainer" style="display: none;">
                                         <label class="file-label">
                                             <input class="file-input" type="file" name="resume" id="uploadProfilePic">
                                             <span class="file-cta">
@@ -159,10 +153,8 @@
                                         <h1 class="title">About</h1>
                                         <div class="edit-button-container">
                                             <button class="button is-primary is-small" id="editButton">Edit</button>
-                                            <button class="button is-primary is-small" id="saveButton"
-                                                style="display: none;">Save</button>
-                                            <button class="button is-light is-small" id="cancelButton"
-                                                style="display: none;">Cancel</button>
+                                            <button class="button is-primary is-small" id="saveButton" style="display: none;">Save</button>
+                                            <button class="button is-light is-small" id="cancelButton" style="display: none;">Cancel</button>
                                         </div>
                                     </div>
                                     <p id="aboutText">Brief description about the user...</p>
@@ -184,6 +176,7 @@
         </div>
     </div>
 
+    <!-- Include JavaScript file for profile functionalities -->
     <script type="module" src="js/modules/profile.js"></script>
 </body>
 

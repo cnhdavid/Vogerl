@@ -1,6 +1,12 @@
+// Import necessary functions from other modules
 import { checkToken, logout } from './auth.js';
 import { fetchAndDisplayPosts, populateSidebar } from './posts.js';
 import { getUserIdFromToken } from './auth.js';
+
+/**
+ * Setup the navbar with user information and logout button.
+ * @param {Object} user - The user object containing user information.
+ */
 function setupNavbar(user) {
     const navbarEnd = document.getElementById('navbar-end');
     const username = user.username;
@@ -26,6 +32,9 @@ function setupNavbar(user) {
     navbarEnd.appendChild(buttonContainer);
 }
 
+/**
+ * Enable profile editing by showing text area and file input.
+ */
 function editProfile() {
     document.getElementById('aboutText').style.display = 'none';
     document.getElementById('aboutTextarea').style.display = 'block';
@@ -36,8 +45,12 @@ function editProfile() {
     document.getElementById('cancelButton').style.display = 'inline-block';
 }
 
+/**
+ * Save profile changes and update the profile view.
+ */
 function saveProfile() {
     const aboutText = document.getElementById('aboutTextarea').value;
+    document.getElementById('aboutText').innerText = aboutText;
     document.getElementById('aboutText').style.display = 'block';
     document.getElementById('aboutTextarea').style.display = 'none';
     document.getElementById('fileInputContainer').style.display = 'none';
@@ -46,6 +59,9 @@ function saveProfile() {
     document.getElementById('cancelButton').style.display = 'none';
 }
 
+/**
+ * Cancel profile editing and revert the view to the original state.
+ */
 function cancelProfileEdit() {
     document.getElementById('aboutText').style.display = 'block';
     document.getElementById('aboutTextarea').style.display = 'none';
@@ -54,6 +70,11 @@ function cancelProfileEdit() {
     document.getElementById('saveButton').style.display = 'none';
     document.getElementById('cancelButton').style.display = 'none';
 }
+
+/**
+ * Fetch user information based on the token.
+ * @returns {Promise<Object>} - A promise that resolves to the user object.
+ */
 async function fetchUser() {
     const token = localStorage.getItem('token');
     const userId = getUserIdFromToken(token);
@@ -62,20 +83,23 @@ async function fetchUser() {
     return user;
 }
 
+/**
+ * Populate the profile section with user information.
+ */
 function populateProfile() {
     fetchUser().then(user => {
-        
         document.getElementById('aboutText').innerText = user.about;
-    document.getElementById('username').innerText = "@"+user.username;
-    document.getElementById('firstName').innerText = user.first_name;
-    document.getElementById('lastName').innerText = user.last_name;
-    
-    
-    document.getElementById('profilePic').src = user.profilePic;
-    })
-
-    
+        document.getElementById('username').innerText = "@" + user.username;
+        document.getElementById('firstName').innerText = user.first_name;
+        document.getElementById('lastName').innerText = user.last_name;
+        document.getElementById('profilePic').src = user.profilePic;
+    });
 }
+
+/**
+ * Handle profile picture upload and display the selected image.
+ * @param {Event} event - The file input change event.
+ */
 function handleProfilePicUpload(event) {
     const fileInput = event.target;
     const fileName = fileInput.files[0].name;
@@ -87,13 +111,14 @@ function handleProfilePicUpload(event) {
     };
     reader.readAsDataURL(fileInput.files[0]);
 }
+
+/**
+ * Update user information with the new profile data.
+ */
 async function updateUserInfo() {
-    
-    
     const about = document.getElementById('aboutTextarea').value;
     const firstName = document.getElementById('firstNameInput').value;
     const lastName = document.getElementById('lastNameInput').value;
-
     const token = localStorage.getItem('token');
 
     try {
@@ -103,7 +128,7 @@ async function updateUserInfo() {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ email, password, firstName, lastName }),
+            body: JSON.stringify({ firstName, lastName, about }),
         });
 
         if (!response.ok) {
@@ -123,8 +148,9 @@ async function updateUserInfo() {
     }
 }
 
-
-
+/**
+ * Initialize the application on DOMContentLoaded.
+ */
 document.addEventListener('DOMContentLoaded', () => {
     const user = checkToken();
     if (user) {
@@ -132,13 +158,12 @@ document.addEventListener('DOMContentLoaded', () => {
         populateProfile();
     }
     populateSidebar(getUserIdFromToken(localStorage.getItem('token')));
-    
-    fetchAndDisplayPosts(null,getUserIdFromToken(localStorage.getItem('token')));
+    fetchAndDisplayPosts(null, getUserIdFromToken(localStorage.getItem('token')));
     populateSidebar(getUserIdFromToken(localStorage.getItem('token')));
 });
 
+// Add event listeners for profile editing actions
 document.getElementById('editButton').addEventListener('click', editProfile);
 document.getElementById('saveButton').addEventListener('click', saveProfile);
 document.getElementById('cancelButton').addEventListener('click', cancelProfileEdit);
 document.getElementById('uploadProfilePic').addEventListener('change', handleProfilePicUpload);
-

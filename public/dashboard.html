@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Include Bulma CSS framework and custom styles -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <title>Vogerl</title>
+    <!-- Include Font Awesome for icons -->
     <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
-    <!-- Header und Navbar -->
+    <!-- Header and Navbar -->
     <header>
         <nav class="navbar" aria-label="main navigation">
             <div class="navbar-brand">
@@ -64,10 +68,8 @@
                             <button id="toggleFormButton" class="button column is-2 create-post mt-3 mr-3 is-primary is-pulled-right">Ask a Question</button>
                             <div class="columns">
                                 <h2 class="title column" id="questionTitle">Questions</h2>
-                               
                             </div>
                             <section id="postQuestion">
-                                
                                 <form class="box mb-4" id="postForm" style="display: none;">
                                     <h3 class="subtitle">Post a Question</h3>
                                     <div class="field">
@@ -109,6 +111,7 @@
                         </div>
                     </div>
 
+                    <!-- Sidebar for User's Questions -->
                     <aside class="column is-one-fifth is-hidden-mobile">
                         <div class="menu">
                             <p class="menu-label has-text-white">Your Questions</p>
@@ -122,7 +125,12 @@
         </section>
     </main>
 
+    <!-- Include JavaScript file for app functionalities -->
     <script type="module" src="js/app.js"></script>
-    <script>sessionStorage.removeItem('redirectToPost');</script>
+    <!-- Remove 'redirectToPost' item from sessionStorage -->
+    <script>
+        sessionStorage.removeItem('redirectToPost');
+    </script>
 </body>
+
 </html>

@@ -22,8 +22,9 @@ const { filterProfanity, containsProfanity } = require('./public/js/modules/mode
 
 
 let fetch;
-(async () => {
-    fetch = (await import('node-fetch')).default;
+(async() => {
+    fetch = (await
+        import ('node-fetch')).default;
 })();
 
 
@@ -76,7 +77,7 @@ wss.on('connection', ws => {
 // Handle server shutdown
 process.on('SIGINT', () => {
     console.log('Server is shutting down');
-    
+
     // Notify all connected WebSocket clients
     wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
@@ -99,7 +100,7 @@ app.get('/', (req, res) => {
 
 
 // Check Cpnnection
-app.get('/check-db-connection', async (req, res) => {
+app.get('/check-db-connection', async(req, res) => {
     try {
         await client.query('SELECT 1');
         res.status(200).json({ success: true, message: 'Database connection is successful' });
@@ -109,12 +110,12 @@ app.get('/check-db-connection', async (req, res) => {
 });
 
 // User registration
-app.post('/signup', async (req, res) => {
+app.post('/signup', async(req, res) => {
     const { username, email, password, date_of_birth, first_name, last_name } = req.body;
-    
+
     const dob = new Date(date_of_birth);
     const formattedDOB = dob.toISOString().split('T')[0];
-   
+
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -133,7 +134,7 @@ app.post('/signup', async (req, res) => {
 
             return res.status(201).json({ message: 'User created successfully' });
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error creating user:', error);
@@ -142,10 +143,10 @@ app.post('/signup', async (req, res) => {
 });
 
 // User login
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', async(req, res) => {
     const { email, password, recaptchaResponse } = req.body;
-    
-    
+
+
 
     try {
 
@@ -180,7 +181,7 @@ app.post('/api/login', async (req, res) => {
 
 
             const token = jwt.sign({ userId: user.id, username: user.username, role: user.user_role }, jwtSecretKey, { expiresIn: '1h' });
-           
+
             if (user.user_role === 'admin') {
                 console.log('Admin login successful');
                 return res.status(200).json({ token, role: 'admin' });
@@ -189,23 +190,23 @@ app.post('/api/login', async (req, res) => {
                 return res.status(200).json({ token, role: 'user' });
             }
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error logging in user:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-app.get('/api/users/:username', async (req, res) => {
+app.get('/api/users/:username', async(req, res) => {
     const username = req.params.username;
     try {
         const client = await pool.connect();
         try {
             const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
-            
+
             res.status(200).json(result.rows[0].id);
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error fetching user:', error);
@@ -213,7 +214,7 @@ app.get('/api/users/:username', async (req, res) => {
     }
 });
 
-app.post('/api/post', authenticateToken, upload.single('image'), async (req, res) => {
+app.post('/api/post', authenticateToken, upload.single('image'), async(req, res) => {
     let { title, content, subject } = req.body;
     const username = req.user.username; // Extract username from the token
     let image = null;
@@ -226,10 +227,10 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
     const modifiedContent = await filterProfanity(content);
     const titleHasProfanity = await containsProfanity(title);
     const contentHasProfanity = await containsProfanity(content);
-   
+
     if (titleHasProfanity || contentHasProfanity) {
         modifiedTitle += ' (The post content was changed due to it containing profanity)';
-        
+
     }
 
     try {
@@ -239,7 +240,7 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
             await client.query(insertQuery, [username, modifiedTitle, modifiedContent, subject, image]);
             res.status(201).json({ message: 'Post created successfully' });
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error creating post:', error);
@@ -248,17 +249,16 @@ app.post('/api/post', authenticateToken, upload.single('image'), async (req, res
 });
 
 
-app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
+app.delete('/api/Deletepost/:postId', authenticateToken, async(req, res) => {
     const postId = req.params.postId;
-    
+
     console.log(postId);
 
     const client = await pool.connect();
     try {
         // Check if the post exists and belongs to the authenticated user
         const postQuery = await client.query(
-            'SELECT * FROM posts WHERE id = $1',
-            [postId]
+            'SELECT * FROM posts WHERE id = $1', [postId]
         );
         const post = postQuery.rows[0];
         if (!post) {
@@ -266,9 +266,9 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
         }
 
         // Delete the post
-         client.query(
-            'DELETE FROM postvotes WHERE post_id = $1',[postId]
-         );
+        client.query(
+            'DELETE FROM postvotes WHERE post_id = $1', [postId]
+        );
 
         client.query(
             'DELETE FROM comments WHERE post_id = $1', [postId]
@@ -284,26 +284,26 @@ app.delete('/api/Deletepost/:postId', authenticateToken, async (req, res) => {
         console.error('Error deleting post:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     } finally {
-        client.release();  // Release the client back to the pool
+        client.release(); // Release the client back to the pool
     }
 });
-app.get('/api/posts', async (req, res) => {
-    
+app.get('/api/posts', async(req, res) => {
+
     let subject = req.query.subject;
-    
+
     if (!subject) {
         subject = "All";
     }
     const username = req.query.username; // Get the username from query params
-    
-    
+
+
 
     try {
         const client = await pool.connect();
         try {
             let result;
             if (username) {
-                
+
                 if (subject === "All") {
                     result = await client.query('SELECT * FROM posts WHERE username = $1', [username]);
                 } else {
@@ -314,10 +314,10 @@ app.get('/api/posts', async (req, res) => {
             } else {
                 result = await client.query('SELECT * FROM posts');
             }
-            
+
             res.status(200).json(result.rows);
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error fetching posts:', error);
@@ -327,7 +327,7 @@ app.get('/api/posts', async (req, res) => {
 
 
 
-app.get('/api/users/:username/posts', async (req, res) => {
+app.get('/api/users/:username/posts', async(req, res) => {
     const username = req.params.username;
     try {
         const client = await pool.connect();
@@ -335,7 +335,7 @@ app.get('/api/users/:username/posts', async (req, res) => {
             const result = await client.query('SELECT * FROM posts WHERE username = $1', [username]);
             res.status(200).json(result.rows);
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error fetching posts:', error);
@@ -343,7 +343,7 @@ app.get('/api/users/:username/posts', async (req, res) => {
     }
 
 })
-app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
+app.put('/api/posts/:postId', authenticateToken, async(req, res) => {
     const postId = req.params.postId;
     const username = req.user.username;
     const { title, content } = req.body;
@@ -355,10 +355,10 @@ app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
     const modifiedContent = await filterProfanity(content);
     const titleHasProfanity = await containsProfanity(title);
     const contentHasProfanity = await containsProfanity(content);
-    
+
     if (titleHasProfanity || contentHasProfanity) {
         modifiedTitle += ' (The post content was changed due to it containing profanity)';
-        
+
     }
 
     try {
@@ -367,7 +367,7 @@ app.put('/api/posts/:postId', authenticateToken, async (req, res) => {
             await client.query('UPDATE posts SET title = $1, content = $2 WHERE id = $3 AND username = $4', [modifiedTitle, modifiedContent, postId, username]);
             res.status(200).json({ message: 'Post updated successfully' });
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error updating post:', error);
@@ -389,7 +389,7 @@ async function getCommentsByPostId(postId) {
             console.error('Error fetching comments:', error);
             throw error;
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error fetching comments:', error);
@@ -397,7 +397,7 @@ async function getCommentsByPostId(postId) {
     }
 }
 
-app.delete('/api/post/:postId', authenticateToken, async (req, res) => {
+app.delete('/api/post/:postId', authenticateToken, async(req, res) => {
     const postId = req.params.postId;
     const username = req.user.username; // Extract username from the token
     try {
@@ -406,7 +406,7 @@ app.delete('/api/post/:postId', authenticateToken, async (req, res) => {
             const result = await client.query('DELETE FROM posts WHERE id = $1 AND username = $2', [postId, username]);
             res.status(200).json({ message: 'Post deleted successfully' });
         } finally {
-            client.release();  // Release the client back to the pool   
+            client.release(); // Release the client back to the pool   
         }
     } catch (error) {
         console.error('Error deleting post:', error);
@@ -425,7 +425,7 @@ async function getPostById(postId) {
             const result = await client.query(query, values);
             return result.rows[0];
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error fetching post:', error);
@@ -434,7 +434,7 @@ async function getPostById(postId) {
 }
 
 // Endpoint to get comments based on post ID
-app.get('/api/posts/:postId/comments', async (req, res) => {
+app.get('/api/posts/:postId/comments', async(req, res) => {
     const postId = req.params.postId;
 
     try {
@@ -445,7 +445,7 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
     }
 });
 
-app.get('/api/posts/:postId', async (req, res) => {
+app.get('/api/posts/:postId', async(req, res) => {
     const postId = req.params.postId;
 
     try {
@@ -454,7 +454,7 @@ app.get('/api/posts/:postId', async (req, res) => {
             const post = await getPostById(postId);
             res.status(200).json(post);
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error fetching post:', error);
@@ -462,7 +462,7 @@ app.get('/api/posts/:postId', async (req, res) => {
     }
 });
 
-app.get('/api/posts/:postId/comments', async (req, res) => {
+app.get('/api/posts/:postId/comments', async(req, res) => {
     const { postId } = req.params;
     try {
         const client = await pool.connect();
@@ -470,7 +470,7 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
             const comments = await getCommentsByPostId(postId);
             res.status(200).json(comments);
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error fetching comments:', error);
@@ -478,7 +478,7 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
     }
 });
 
-app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
+app.post('/api/posts/:postId/comments', authenticateToken, async(req, res) => {
     const { postId } = req.params;
     let { content, parentId } = req.body; // Include parentId in the request body
     const username = req.user.username; // Extract username from the token
@@ -493,15 +493,14 @@ app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
             }
             const result = await client.query(
                 `INSERT INTO comments (username, post_id, content, parent_id, created_at, updated_at)
-                 VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *`,
-                [username, postId, content, parentId]
+                 VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *`, [username, postId, content, parentId]
             );
             res.status(201).json(result.rows[0]);
         } catch (error) {
             console.error('Error inserting comment into database:', error);
             res.status(500).json({ error: 'Internal Server Error' });
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error connecting to database:', error);
@@ -509,7 +508,7 @@ app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
     }
 });
 
-app.post('/api/posts/:postId/upvote', authenticateToken, async (req, res) => {
+app.post('/api/posts/:postId/upvote', authenticateToken, async(req, res) => {
     const { postId } = req.params;
     const username = req.user.username;
 
@@ -543,14 +542,14 @@ app.post('/api/posts/:postId/upvote', authenticateToken, async (req, res) => {
             console.error('Error upvoting post:', error);
             res.status(500).json({ error: 'Internal Server Error' });
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error connecting to database:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-app.post('/api/posts/:postId/downvote', authenticateToken, async (req, res) => {
+app.post('/api/posts/:postId/downvote', authenticateToken, async(req, res) => {
     const { postId } = req.params;
     const username = req.user.username;
 
@@ -584,14 +583,14 @@ app.post('/api/posts/:postId/downvote', authenticateToken, async (req, res) => {
             console.error('Error upvoting post:', error);
             res.status(500).json({ error: 'Internal Server Error' });
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error connecting to database:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-app.get('/api/posts/:postId/votes', async (req, res) => {
+app.get('/api/posts/:postId/votes', async(req, res) => {
     const { postId } = req.params;
 
     try {
@@ -602,14 +601,14 @@ app.get('/api/posts/:postId/votes', async (req, res) => {
     }
 });
 
-app.get('/api/posts/:postId/hasUserLiked/:userId', authenticateToken, async (req, res) => {
+app.get('/api/posts/:postId/hasUserLiked/:userId', authenticateToken, async(req, res) => {
     const { postId } = req.params;
     const user_id = req.params.userId;
-    
+
 
     try {
         const hasUserLiked = await hasUserVoted(postId, user_id);
-        
+
         res.status(200).json({ postId, hasUserLiked });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -617,17 +616,17 @@ app.get('/api/posts/:postId/hasUserLiked/:userId', authenticateToken, async (req
 
 });
 
-app.get('/api/userInfo/:username', async (req, res) => {
+app.get('/api/userInfo/:username', async(req, res) => {
     const username = req.params.username;
 
     try {
         const client = await pool.connect();
         try {
             const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
-            
+
             res.status(200).json(result.rows[0]);
         } finally {
-            client.release();  // Release the client back to the pool
+            client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error fetching user:', error);
@@ -644,11 +643,10 @@ async function getPostVotes(postId) {
                  FROM 
                     postvotes 
                  WHERE 
-                    post_id = $1`,
-                [postId]
+                    post_id = $1`, [postId]
             );
 
-            
+
             return result.rows[0].total_votes;
         } catch (error) {
             console.error('Error fetching votes for post:', error);
@@ -662,7 +660,7 @@ async function getPostVotes(postId) {
     }
 }
 async function hasUserVoted(postId, userId) {
-    
+
 
     try {
         const client = await pool.connect();
