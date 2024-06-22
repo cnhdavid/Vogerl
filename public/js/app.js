@@ -3,12 +3,8 @@
  * It includes user authentication, post management, and WebSocket communication.
  */
 
-<<<<<<< HEAD
-import { checkToken, getUserIdFromToken, logout } from './modules/auth.js';
-=======
 // Import necessary functions from other modules
 import { checkToken, logout } from './modules/auth.js';
->>>>>>> 5c0f2ec (comments)
 import { fetchAndDisplayPosts, searchPosts } from './modules/posts.js';
 import { populateMenu, populateSidebar, populatePostsSidebar, getPostsByUsername } from './modules/posts.js';
 
@@ -173,49 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'login.html';
     });
 
-<<<<<<< HEAD
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Success:', data);
-        document.getElementById('postForm').reset();
-        fetchAndDisplayPosts();
-        populatePostsSidebar(getPostsByUsername(getUserIdFromToken(token)));
-      } else {
-        const errorData = await response.json();
-        alert(`Failed to submit post: ${errorData.message}`);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred. Please try again later.');
-    }
-  });
-
-  socket.addEventListener('message', event => {
-    console.log('Message from server:', event.data);
-    if (event.data === 'Server is shutting down') {
-      localStorage.removeItem('token');
-      socket.close();
-    }
-  });
-
-  socket.addEventListener('open', () => {
-    console.log('Connected to WebSocket server');
-  });
-
-  socket.addEventListener('close', () => {
-    console.log('Disconnected from WebSocket server');
-    
-    location.reload();
-  });
-
-  fetchAndDisplayPosts(null, null, null);
-  populateMenu();
-  populateSidebar();
-});
-=======
     // Initial data population
     fetchAndDisplayPosts(null, null, null);
     populateMenu();
     populateSidebar();
 });
->>>>>>> 5c0f2ec (comments)

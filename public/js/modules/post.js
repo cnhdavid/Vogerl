@@ -113,12 +113,7 @@ function displayPost(postId) {
 
       // If the user is the author of the post, allow them to delete or edit the post
       if (token && post.username == getUserIdFromToken(token)) {
-<<<<<<< HEAD
-        document.getElementById('deletePostButton').addEventListener('click', () => {
-          
-=======
         document.getElementById('confirmDelete').addEventListener('click', () => {
->>>>>>> 5c0f2ec (comments)
           deletePost(postId);
         });
 
