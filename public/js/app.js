@@ -142,9 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Success:', data);
-                document.getElementById('postForm').reset();
-                fetchAndDisplayPosts();
+                
+                window.location.reload();
             } else {
                 const errorData = await response.json();
                 alert(`Failed to submit post: ${errorData.message}`);

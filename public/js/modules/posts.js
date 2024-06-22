@@ -221,6 +221,7 @@ export async function createPostElement(post, comments) {
   if (post.image) {
       imageData = `data:image/jpeg;base64,${post.image}`;
   }
+  
 
   postElement.innerHTML = `
       <article class="media">
@@ -229,7 +230,7 @@ export async function createPostElement(post, comments) {
                   <div class="post-content">
                       <p>
                           <strong>${post.title}</strong> <small>@${post.username}</small>
-                          ${post.isAnswered ? '<span class="tag is-success is-pulled-right">Answered</span>' : ''}
+                          ${post.isanswered ? '<span class="tag is-success is-pulled-right">Answered</span>' : ''}
                           <br>
                           <em>${post.subject}</em>
                           <br>
