@@ -20,6 +20,7 @@ const upload = multer();
 const { filterProfanity, containsProfanity } = require('./public/js/modules/moderate');
 
 
+
 let fetch;
 (async () => {
     fetch = (await import('node-fetch')).default;
@@ -37,6 +38,7 @@ app.use(express.urlencoded({ limit: '20mb', extended: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 const sslCert = fs.readFileSync(path.resolve(__dirname, process.env.PG_SSL_CERT_PATH)).toString();
 const pool = new Pool({
@@ -87,6 +89,10 @@ process.on('SIGINT', () => {
         console.log('Server closed');
         process.exit(0);
     });
+});
+
+app.get('/', (req, res) => {
+    res.redirect('/dashboard.html');
 });
 
 

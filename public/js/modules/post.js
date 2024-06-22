@@ -107,7 +107,7 @@ function displayPost(postId) {
       }
 
       if (token && post.username == getUserIdFromToken(token)) {
-        document.getElementById('confirmDelete').addEventListener('click', () => {
+        document.getElementById('deletePostButton').addEventListener('click', () => {
           
           deletePost(postId);
         });
@@ -334,6 +334,7 @@ export async function deletePost(postId) {
             toggleModal();
             
           } else {
+            alert('Post deleted successfully');
             window.location.href = 'dashboard.html';
           }
         } else {

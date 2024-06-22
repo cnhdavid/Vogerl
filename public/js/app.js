@@ -1,6 +1,6 @@
 // js/app.js
 
-import { checkToken, logout } from './modules/auth.js';
+import { checkToken, getUserIdFromToken, logout } from './modules/auth.js';
 import { fetchAndDisplayPosts, searchPosts } from './modules/posts.js';
 import { populateMenu, populateSidebar, populatePostsSidebar, getPostsByUsername } from './modules/posts.js';
 
@@ -128,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Success:', data);
         document.getElementById('postForm').reset();
         fetchAndDisplayPosts();
+        populatePostsSidebar(getPostsByUsername(getUserIdFromToken(token)));
       } else {
         const errorData = await response.json();
         alert(`Failed to submit post: ${errorData.message}`);
@@ -152,8 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   socket.addEventListener('close', () => {
     console.log('Disconnected from WebSocket server');
-    alert('Server is shutting down. Please log in again.');
-    window.location.href = 'login.html';
+    
+    location.reload();
   });
 
   fetchAndDisplayPosts(null, null, null);

@@ -8,13 +8,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     fetchAndDisplayPosts()
-    document.getElementById("cancelDelete").addEventListener("click", () => {
-        document.getElementById("confirmationModal").classList.remove("is-active");
-    })
-    document.getElementById("confirmDelete").addEventListener("click", () => {
-        document.getElementById("confirmationModal").classList.remove("is-active");
-    })
-    document.getElementById("modalClose").addEventListener("click", () => {
-        document.getElementById("confirmationModal").classList.remove("is-active");
-    })
+    
 })
