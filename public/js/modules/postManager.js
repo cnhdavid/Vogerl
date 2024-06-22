@@ -140,7 +140,7 @@ export function submitComment(postId, content, parentId = null) {
                 document.getElementById('commentInput').value = '';
             }
             loadComments(postId);
-            fetchAndDisplayPosts();
+            
         })
         .catch(error => {
             console.error('Error submitting comment:', error.message);
@@ -242,8 +242,7 @@ export async function getPostVotes(postId) {
     try {
         const response = await fetch(`http://localhost:3000/api/posts/${postId}/votes`);
         if (response.status === 403 || response.status === 401) {
-            window.location.href = '/public/login.html';
-            alert('Please login first!');
+            
             return;
         }
         if (!response.ok) {
@@ -306,5 +305,35 @@ export function applyVoteAnimation(button, type) {
         button.classList.add('upvoted');
     } else if (type === 'downvote') {
         button.classList.add('downvoted');
+    }
+}
+
+// Mark Comment as answer and Post as answered
+
+export async function markCommentAsAnswer(commentId, postId) {
+    const authToken = localStorage.getItem('token');
+    try {
+        const response = await fetch(`http://localhost:3000/api/Comment/${commentId}/answer`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ postId })
+        });
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                alert('Please login first');
+                window.location.href = '/public/login.html';
+            }
+            console.log('Error fetching upvotes:', response.statusText);
+            throw new Error('Failed to fetch upvotes');
+        } else {
+            const data = await response.json();
+            console.log(data);
+            return data;
+        } 
+    } catch (error) {
+        console.error('Error fetching upvotes:', error);
     }
 }

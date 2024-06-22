@@ -54,7 +54,9 @@ export function populateNavbar(user) {
 }
 
 // Populate the navbar with user information if the user is logged in
-populateNavbar(checkToken());
+if (localStorage.getItem('token')) {
+  populateNavbar(checkToken());
+}
 
 // Mobile menu functionality
 document.addEventListener('DOMContentLoaded', () => {
@@ -165,8 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.addEventListener('close', () => {
         console.log('Disconnected from WebSocket server');
-        alert('Server is shutting down. Please log in again.');
-        window.location.href = 'login.html';
+        
     });
 
     // Initial data population

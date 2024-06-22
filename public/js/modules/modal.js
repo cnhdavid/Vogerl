@@ -46,9 +46,7 @@ export function editPost(postId, title, content) {
   })
     .then(response => response.json())
     .then(post => {
-      // You can add logic here to handle the response, e.g., updating the UI or redirecting
-      // Uncomment the following line if you want to re-open the post after editing
-      // openPost(postId);
+      openPost(postId);
     })
     .catch(error => console.error('Error editing post:', error));
 }

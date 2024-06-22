@@ -5,7 +5,7 @@ import { fetchComments, downvotePost, upvotePost, getPostVotes, hasUserVoted } f
 import { openPost } from './modal.js';
 import { getCommentCount, deletePost } from './post.js';
 import sidebarSubjects from './subjects.js';
-import { getUserId, getRoleFromToken } from './auth.js';
+import { getUserId, getRoleFromToken, getUserIdFromToken } from './auth.js';
 
 /**
  * Fetch posts from the API with optional filters for subject and username.
@@ -70,7 +70,7 @@ export function populateSidebar(username = null) {
         const listItem = document.createElement('li');
         const link = document.createElement('a');
         link.textContent = subject.title;
-        link.href = '#';
+        
         link.addEventListener('click', () => {
             fetchAndDisplayPosts(subject.title, username);
         });
@@ -179,6 +179,8 @@ export async function fetchAndDisplayPosts(subject = null, username = null, sear
         await Promise.all(posts.map(async(post, index) => {
             const postElement = await createPostElement(post, allComments[index]);
             postsContainer.appendChild(postElement);
+            await getCommentCount(post.id);
+            
         }));
     } catch (error) {
         console.error('Error displaying posts:', error);
@@ -202,6 +204,8 @@ export async function searchPosts(searchTerm) {
     });
     return filteredPosts;
 }
+// Filter posts by subject
+
 
 /**
  * Create a post element with comments and append it to the DOM.
@@ -210,91 +214,105 @@ export async function searchPosts(searchTerm) {
  * @returns {Promise<HTMLElement>} - A promise that resolves to the created post element.
  */
 export async function createPostElement(post, comments) {
-    const postElement = document.createElement('div');
-    postElement.classList.add('box');
+  const postElement = document.createElement('div');
+  postElement.classList.add('box');
 
-    let imageData = '';
-    if (post.image) {
-        imageData = `data:image/jpeg;base64,${post.image}`;
-    }
-
-    postElement.innerHTML = `
-    <article class="media">
-      <div class="media-content">
-        <div class="content">
-          <div class="post-content">
-            <p>
-              <strong>${post.title}</strong> <small>@${post.username}</small>
-              <br>
-              <em>${post.subject}</em>
-              <br>
-              ${post.content}
-            </p>
-            <i class="fa-solid fa-arrow-up is-fluid" id="upvote-${post.id}"></i>
-            <span id="upvote-count-${post.id}" class="upvote-count mx-3"> Loading...</span>
-            <i class="fa-solid fa-arrow-down is-fluid" id="downvote-${post.id}"></i>
-            <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment"></i></span>
-            <span id="comment-count-${post.id}"> Loading...</span>
-            ${getRoleFromToken(localStorage.getItem('token')) === 'admin' ? `<button class="button is-danger is-small is-pulled-right" id="deletePost-${post.id}">Delete Post</button>` : ''}
-          </div>
-        </div>
-      </div>
-      ${imageData ? `<img src="${imageData}" alt="Post Image" class="post-image" />` : ''}
-    </article>
-  `;
-
-  if (getRoleFromToken(localStorage.getItem('token')) === 'admin') {
-    const deleteButton = postElement.querySelector(`#deletePost-${post.id}`);
-    deleteButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      deletePost(post.id);
-    });
+  let imageData = '';
+  if (post.image) {
+      imageData = `data:image/jpeg;base64,${post.image}`;
   }
 
+  postElement.innerHTML = `
+      <article class="media">
+          <div class="media-content">
+              <div class="content">
+                  <div class="post-content">
+                      <p>
+                          <strong>${post.title}</strong> <small>@${post.username}</small>
+                          ${post.isAnswered ? '<span class="tag is-success is-pulled-right">Answered</span>' : ''}
+                          <br>
+                          <em>${post.subject}</em>
+                          <br>
+                          ${post.content}
+                      </p>
+                      <i class="fa-solid fa-arrow-up is-fluid" id="upvote-${post.id}"></i>
+                      <span id="upvote-count-${post.id}" class="upvote-count mx-3"> Loading...</span>
+                      <i class="fa-solid fa-arrow-down is-fluid" id="downvote-${post.id}"></i>
+                      <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment"></i></span>
+                      <span id="comment-count-${post.id}"> Loading...</span>
+                      ${localStorage.getItem('token') && getRoleFromToken(localStorage.getItem('token')) === 'admin' ? `<button class="button is-danger is-small is-pulled-right" id="deletePost-${post.id}">Delete Post</button>` : ''}
+                  </div>
+              </div>
+          </div>
+          ${imageData ? `<img src="${imageData}" alt="Post Image" class="post-image" />` : ''}
+      </article>
+  `;
+
   try {
-    const upvotes = await getPostVotes(post.id);
-    getCommentCount(post.id);
-    const upvoteCountElement = postElement.querySelector('.upvote-count');
-    upvoteCountElement.textContent = upvotes;
+      const upvotes = await getPostVotes(post.id);
+      const upvoteCountElement = postElement.querySelector('.upvote-count');
+      upvoteCountElement.textContent = upvotes;
+
+
+      
+
   } catch (error) {
-    console.error('Error fetching votes:', error);
+      console.error('Error fetching votes or comments:', error);
+  }
+  if (localStorage.getItem('token') && getRoleFromToken(localStorage.getItem('token')) === 'admin') {
+      const deleteButton = postElement.querySelector(`#deletePost-${post.id}`);
+      deleteButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          deletePost(post.id);
+      });
   }
 
   const upvoteButton = postElement.querySelector('.fa-arrow-up');
   const downvoteButton = postElement.querySelector('.fa-arrow-down');
   upvoteButton.addEventListener('click', (event) => {
-    event.stopPropagation();
-    upvotePost(post.id);
+      event.stopPropagation();
+      upvotePost(post.id);
   });
 
   downvoteButton.addEventListener('click', (event) => {
-    event.stopPropagation();
-    downvotePost(post.id);
+      event.stopPropagation();
+      downvotePost(post.id);
   });
 
-  getUserId(post.username)
-    .then(userId => {
-      hasUserVoted(post.id, userId)
-        .then(liked => {
-          if (liked === 'upvote') {
-            document.getElementById(`upvote-${post.id}`).classList.add('upvoted');
-          }
+  async function colorVoteButtons() {
+    if (localStorage.getItem('token')) {
+        try {
+            const userId = await getUserId(post.username);
+            const liked = await hasUserVoted(post.id, userId);
+            console.log(liked);
 
-          if (liked === 'downvote') {
-            document.getElementById(`downvote-${post.id}`).classList.add('downvoted');
-          }
-        });
-    })
-    .catch(error => {
-      console.error('Error fetching user ID:', error);
-    });
+            const upvoteElement = document.getElementById(`upvote-${post.id}`);
+            const downvoteElement = document.getElementById(`downvote-${post.id}`);
+
+            if (liked === 'upvote' && upvoteElement) {
+                upvoteElement.style.color = 'blue';
+                downvoteButton.style.color = 'none';
+            }
+
+            if (liked === 'downvote' && downvoteElement) {
+                downvoteElement.style.color = 'red';
+                upvoteButton.style.color = 'none';
+            }
+        } catch (error) {
+            console.error('Error fetching user ID or vote status:', error);
+        }
+    }
+}
+
+// Call this function after posts are rendered
+setTimeout(colorVoteButtons, 200); // Adjust the delay as needed
 
   if (imageData) {
-    const imageElement = postElement.querySelector('.post-image');
-    imageElement.addEventListener('click', () => {
-      const newTab = window.open();
-      newTab.document.body.innerHTML = `<img src="${imageData}" alt="Post Image" style="max-width: 100%; height: auto;" />`;
-    });
+      const imageElement = postElement.querySelector('.post-image');
+      imageElement.addEventListener('click', () => {
+          const newTab = window.open();
+          newTab.document.body.innerHTML = `<img src="${imageData}" alt="Post Image" style="max-width: 100%; height: auto;" />`;
+      });
   }
 
   postElement.addEventListener('click', () => openPost(post.id));

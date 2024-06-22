@@ -1,7 +1,7 @@
 // Import necessary functions from other modules
 import { getUserIdFromToken, checkToken, logout, getUserId, getRoleFromToken } from './auth.js';
 import { editPost } from './modal.js';
-import { getPostVotes, hasUserVoted, upvotePost, downvotePost } from './postManager.js';
+import { getPostVotes, hasUserVoted, upvotePost, downvotePost, markCommentAsAnswer } from './postManager.js';
 import { fetchAndDisplayPosts } from './posts.js';
 
 // Retrieve the postId from the URL query parameter
@@ -13,27 +13,30 @@ const postId = urlParams.get('postId');
  * @param {string} postId - The ID of the post to be displayed.
  */
 function displayPost(postId) {
-    fetch(`http://localhost:3000/api/posts/${postId}`)
-        .then(response => response.json())
-        .then(post => {
-                // Get the container where the post will be displayed
-                const postContainer = document.getElementById('post-container');
-                const token = localStorage.getItem('token');
-                const createdAt = post.created_at;
-                const date = new Date(createdAt);
+  fetch(`http://localhost:3000/api/posts/${postId}`)
+    .then(response => response.json())
+    .then(post => {
+      // Get the container where the post will be displayed
+      const postContainer = document.getElementById('post-container');
+      const token = localStorage.getItem('token');
+      const createdAt = post.created_at;
+      const date = new Date(createdAt);
 
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
 
-                const formattedDate = `${day}-${month}-${year} ${hours}:${minutes}`;
+      const formattedDate = `${day}-${month}-${year} ${hours}:${minutes}`;
 
-                // Generate HTML content for the post
-                postContainer.innerHTML = `
+      // Generate HTML content for the post
+      postContainer.innerHTML = `
         ${token && post.username === getUserIdFromToken(token) ? `<i id="editPostButton" class="fa-solid fa-pen-to-square is-pulled-right"></i>` : ''}
-        <h1 class="title">${post.title}</h1>
+        <div class="is-flex is-justify-content-flex-start mb-3 is-align-items-flex-start is-flex-direction-column ">
+          <h1 class="title">${post.title}</h1>
+          ${post.isanswered ? '<span class="tag is-success">Answered</span>' : ''}
+        </div>
         <div class="columns">
           <p class="subtitle column">posted by <strong>${post.username}</strong></p>
           <p class="subtitle is-pull-right">posted on ${formattedDate}</p>
@@ -113,7 +116,8 @@ function displayPost(postId) {
 
       // If the user is the author of the post, allow them to delete or edit the post
       if (token && post.username == getUserIdFromToken(token)) {
-        document.getElementById('confirmDelete').addEventListener('click', () => {
+        
+        document.getElementById('deletePostButton').addEventListener('click', () => {
           deletePost(postId);
         });
 
@@ -152,72 +156,70 @@ function displayPost(postId) {
       }
 
       // Display comments for the post
-      displayComments(post.id);
+      displayComments(post.id, post.username);
     });
 }
 
-  // Fetch and display the comments
-  function displayComments(postId) {
-    fetch(`http://localhost:3000/api/posts/${postId}/comments`)
-      .then(response => response.json())
-      .then(comments => {
-        
-        const commentsContainer = document.getElementById('comments-container');
-        commentsContainer.innerHTML = '';
-        comments.forEach(comment => {
-          
-          const commentElement = document.createElement('div');
-          commentElement.classList.add('box');
-          commentElement.innerHTML = `
+// Fetch and display the comments
+function displayComments(postId, postUsername) {
+  fetch(`http://localhost:3000/api/posts/${postId}/comments`)
+    .then(response => response.json())
+    .then(comments => {
+
+      const commentsContainer = document.getElementById('comments-container');
+      commentsContainer.innerHTML = '';
+      comments.forEach(comment => {
+
+        const commentElement = document.createElement('div');
+        commentElement.classList.add('box', 'p-3', 'my-3');
+        commentElement.innerHTML = `
+            ${comment.isanswer ? '<div class="is-pulled-right tag is-size-6 is-flex is-flex-direction-row is-success is-align-items-center is-justify-content-flex-space-between my-2"> This Comment was marked as a Valid Answer</div>' : ''}
+
             <h4 class="title is-6">${comment.username}</h4>
-            ${comment.isAnswer ? '<span class="is-pulled-right">Answer</span>' : ''}
             <p class="content">${comment.content}</p>
-            <button class="button is-primary my-2 replyButton is-pull-right">Reply</button>
-            <div class="reply-input" style="display: none;">
-              <textarea class="textarea" placeholder="Reply to comment"></textarea>
-               <div class="my-2">
-                <button class="button is-primary is-small submit-reply">Submit</button>
-                <button class="button is-danger is-small submit-close">Close</button>
-              </div>
+            ${localStorage.getItem('token') && postUsername === getUserIdFromToken(localStorage.getItem('token')) ? `<button id="deleteCommentButton-${comment.id}" class="button is-danger is-small my-2">Delete Comment</button>` : ''}
+            ${!comment.isanswer && postUsername === getUserIdFromToken(localStorage.getItem('token')) ? `<button id="MarkCommentAsAnswerButton-${comment.id}" class="button is-success is-small my-2">Mark as Answer</button>` : ''}
             </div>
           `;
-  
-          const replyButton = commentElement.querySelector('.replyButton');
-          replyButton.addEventListener('click', () => {
-            const replyInput = commentElement.querySelector('.reply-input');
-            replyInput.style.display = 'block';
+
+        const deleteCommentButton = commentElement.querySelector(`#deleteCommentButton-${comment.id}`);
+        if (deleteCommentButton) {
+          deleteCommentButton.addEventListener('click', () => {
+            deleteComment(comment.id);
           });
-  
-          const submitCloseButton = commentElement.querySelector('.submit-close');
-          submitCloseButton.addEventListener('click', () => {
-            const replyInput = commentElement.querySelector('.reply-input');
-            replyInput.style.display = 'none';
+        }
+
+        const MarkCommentAsAnswerButton = commentElement.querySelector(`#MarkCommentAsAnswerButton-${comment.id}`);
+        if (MarkCommentAsAnswerButton) {
+          MarkCommentAsAnswerButton.addEventListener('click', () => {
+            markCommentAsAnswer(comment.id, postId);
           });
-  
-          const submitReplyButton = commentElement.querySelector('.submit-reply');
-          submitReplyButton.addEventListener('click', () => {
-            const replyContent = commentElement.querySelector('.reply-input textarea').value;
-            submitComment(postId, replyContent, comment.id);
-          });
-  
-          commentsContainer.appendChild(commentElement);
-        });
-      })
-      .catch(error => console.error('Error fetching comments:', error));
-  }
+        }
+        commentsContainer.appendChild(commentElement);
+      });
+    })
+    .catch(error => console.error('Error fetching comments:', error));
+}
 
 /**
  * Get the count of comments for the post with the given postId.
  * @param {string} postId - The ID of the post.
  */
 export function getCommentCount(postId) {
-  fetch(`http://localhost:3000/api/posts/${postId}/comments`)
-    .then(response => response.json())
-    .then(comments => {
-      const commentCount = comments.length;
-      const commentCountElement = document.getElementById(`comment-count-${postId}`);
-      commentCountElement.textContent = commentCount;
-    });
+  return fetch(`http://localhost:3000/api/posts/${postId}/comments`)
+      .then(response => response.json())
+      .then(comments => {
+          const commentCount = comments.length;
+          const commentCountElement = document.getElementById(`comment-count-${postId}`);
+          if (commentCountElement) {
+              commentCountElement.textContent = commentCount;
+          } else {
+              console.error(`Element with id comment-count-${postId} not found`);
+          }
+      })
+      .catch(error => {
+          console.error('Error fetching comments:', error);
+      });
 }
 
 /**
@@ -227,53 +229,7 @@ export function getCommentCount(postId) {
  * @param {number} level - The level of nesting for the comments.
  * @param {string|null} replyTo - The username being replied to.
  */
-const renderComments = (comments, parentElement, level = 0, replyTo = null) => {
-  comments.forEach(comment => {
-    const commentElement = document.createElement('div');
-    commentElement.classList.add('comment');
-    commentElement.style.marginLeft = `${level * 20}px`;
-    const replyText = replyTo ? `<span class="replying-to-text">Replying to ${replyTo}</span>` : '';
-    commentElement.innerHTML = `
-      <p>
-        <strong>${comment.username}</strong> ${replyText}
-        <br>
-        ${comment.content}
-      </p>
-      <button class="button is-small is-light reply-button">Reply</button>
-      <div class="reply-input" style="display: none;">
-        <textarea class="textarea" placeholder="Reply to comment"></textarea>
-        <button class="button is-primary is-small submit-reply">Submit</button>
-        <button class="button is-danger is-small submit-close">Close</button>
-      </div>
-    `;
 
-    const replyButton = commentElement.querySelector('.reply-button');
-    const replyInput = commentElement.querySelector('.reply-input');
-    const submitReplyButton = commentElement.querySelector('.submit-reply');
-    const submitCloseButton = commentElement.querySelector('.submit-close');
-
-    replyButton.addEventListener('click', () => {
-      replyInput.style.display = 'block';
-    });
-
-    submitReplyButton.addEventListener('click', () => {
-      const replyContent = replyInput.querySelector('textarea').value;
-      submitComment(postId, replyContent, comment.id);
-      const commentsContainer = document.getElementById('comments-container');
-      const containerWidth = commentsContainer.offsetWidth;
-    });
-
-    submitCloseButton.addEventListener('click', () => {
-      replyInput.style.display = 'none';
-    });
-
-    parentElement.appendChild(commentElement);
-
-    if (comment.replies) {
-      renderReplies(comment.replies, commentElement, level + 1, comment.username);
-    }
-  });
-};
 
 /**
  * Submit a comment or reply to a comment on a post.
@@ -305,7 +261,7 @@ const submitComment = async (postId, content, parentId = null) => {
       const comment = await response.json();
       const commentsContainer = document.getElementById('comments-container');
       displayComments(postId);
-      renderComments([comment], commentsContainer);
+      
     } else {
       console.error('Error submitting comment:', response.statusText);
     }
@@ -358,9 +314,10 @@ export async function deletePost(postId) {
 }
 
 // Check if the user is logged in and update the navbar accordingly
-const user = checkToken();
 
-if (user) {
+
+if (localStorage.getItem('token')) {
+  const user = checkToken();
   const navbarEnd = document.getElementById('navbar-end');
   const username = user.username;
 

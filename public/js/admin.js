@@ -20,32 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // If not an admin, log the user out
         logout();
     }
-<<<<<<< HEAD
     
     fetchAndDisplayPosts()
     
 })
-=======
-
-    // Fetch and display posts
-    fetchAndDisplayPosts();
-
-    // Set up event listener to cancel the delete action
-    document.getElementById("cancelDelete").addEventListener("click", () => {
-        // Remove 'is-active' class from the confirmation modal to hide it
-        document.getElementById("confirmationModal").classList.remove("is-active");
-    });
-
-    // Set up event listener to confirm the delete action
-    document.getElementById("confirmDelete").addEventListener("click", () => {
-        // Remove 'is-active' class from the confirmation modal to hide it
-        document.getElementById("confirmationModal").classList.remove("is-active");
-    });
-
-    // Set up event listener to close the modal
-    document.getElementById("modalClose").addEventListener("click", () => {
-        // Remove 'is-active' class from the confirmation modal to hide it
-        document.getElementById("confirmationModal").classList.remove("is-active");
-    });
-});
->>>>>>> 5c0f2ec (comments)

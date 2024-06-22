@@ -718,6 +718,55 @@ function nestComments(comments) {
     return roots;
 }
 
+// Endpoint to Mark comment as answer
+app.post('/api/Comment/:commentId/answer', authenticateToken, async(req, res) => {
+    const commentId  = req.params;
+    const postId  = req.body;
+    console.log(commentId.commentId, postId.postId);
+    try {
+        const client = await pool.connect();
+        try {
+            const result = await client.query('UPDATE comments SET isanswer = true WHERE id = $1 AND post_id = $2', [commentId.commentId, postId.postId]);
+            try {
+                await markPostAsAnswered(postId.postId);
+            } catch (error) {
+                console.error('Error marking post as answered:', error);
+                return res.status(500).json({ message: 'Internal server error' });
+            }
+
+            if (result.rowCount === 0) {
+                return res.status(404).json({ message: 'Comment not found' });
+            }
+            return res.status(200).json({ message: 'Comment marked as answer' });
+        }
+         catch (error) {
+            console.error('Error marking comment as answer:', error);
+            return res.status(500).json({ message: 'Internal server error' });
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error('Error connecting to database:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+// Mark Post as Answered
+async function markPostAsAnswered(postId) {
+    console.log('Marking post as answered:', postId);
+    let client;
+    try {
+        client = await pool.connect();
+        const result = await client.query('UPDATE posts SET isanswered = true WHERE id = $1', [postId]);
+        // Process the result if needed
+    } catch (error) {
+        console.error('Error marking post as answered:', error);
+        // Handle the error
+    } finally {
+        if (client) {
+            client.release(); // Release the client back to the pool
+        }
+    }
+}
 server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
 });

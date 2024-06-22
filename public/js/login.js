@@ -49,8 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Store the token in localStorage
             localStorage.setItem('token', token);
-            console.log('Tokennn:', token);
-            console.log('Token:', localStorage.getItem('token'));
+            
 
             // Handle invalid email or password response
             if (response.status === 400) {
