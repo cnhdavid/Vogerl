@@ -52,9 +52,10 @@ export function populateNavbar(user) {
         populatePostsSidebar(getPostsByUsername(username));
     }
 }
-if (getRoleFromToken(localStorage.getItem('token')) === 'admin') {
-  window.location.href = 'admin.html';
-}
+if (localStorage.getItem('token')) {
+  if (getRoleFromToken(localStorage.getItem('token')) === 'admin' && localStorage) {
+    window.location.href = 'admin.html';
+  }}
 
 // Populate the navbar with user information if the user is logged in
 if (localStorage.getItem('token')) {
@@ -159,16 +160,20 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Message from server:', event.data);
         if (event.data === 'Server is shutting down') {
             localStorage.removeItem('token');
+            window.location.reload();
             socket.close();
+            
         }
     });
 
     socket.addEventListener('open', () => {
         console.log('Connected to WebSocket server');
+        
     });
 
     socket.addEventListener('close', () => {
         console.log('Disconnected from WebSocket server');
+        
         
     });
 
@@ -176,4 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndDisplayPosts(null, null, null);
     populateMenu();
     populateSidebar();
+
+
 });
