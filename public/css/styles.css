@@ -56,4 +56,7 @@
     color: inherit;
     transform: scale(1);
 }
+#toggleFormButton {
+    width: 30%;
+  }
 

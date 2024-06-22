@@ -161,55 +161,55 @@ function displayPost(postId) {
     });
 }
 
-/**
- * Fetch and display the comments for the post with the given postId.
- * @param {string} postId - The ID of the post.
- */
-function displayComments(postId) {
-  fetch(`http://localhost:3000/api/posts/${postId}/comments`)
-    .then(response => response.json())
-    .then(comments => {
-      const commentsContainer = document.getElementById('comments-container');
-      commentsContainer.innerHTML = '';
-      comments.forEach(comment => {
-        const commentElement = document.createElement('div');
-        commentElement.classList.add('box');
-        commentElement.innerHTML = `
-          <h4 class="title is-6">${comment.username}</h4>
-          <p class="content">${comment.content}</p>
-          <button class="button is-primary my-2 replyButton is-pull-right">Reply</button>
-          <div class="reply-input" style="display: none;">
-            <textarea class="textarea" placeholder="Reply to comment"></textarea>
-            <div class="my-2">
-              <button class="button is-primary is-small submit-reply">Submit</button>
-              <button class="button is-danger is-small submit-close">Close</button>
+  // Fetch and display the comments
+  function displayComments(postId) {
+    fetch(`http://localhost:3000/api/posts/${postId}/comments`)
+      .then(response => response.json())
+      .then(comments => {
+        
+        const commentsContainer = document.getElementById('comments-container');
+        commentsContainer.innerHTML = '';
+        comments.forEach(comment => {
+          
+          const commentElement = document.createElement('div');
+          commentElement.classList.add('box');
+          commentElement.innerHTML = `
+            <h4 class="title is-6">${comment.username}</h4>
+            ${comment.isAnswer ? '<span class="is-pulled-right">Answer</span>' : ''}
+            <p class="content">${comment.content}</p>
+            <button class="button is-primary my-2 replyButton is-pull-right">Reply</button>
+            <div class="reply-input" style="display: none;">
+              <textarea class="textarea" placeholder="Reply to comment"></textarea>
+               <div class="my-2">
+                <button class="button is-primary is-small submit-reply">Submit</button>
+                <button class="button is-danger is-small submit-close">Close</button>
+              </div>
             </div>
-          </div>
-        `;
-
-        const replyButton = commentElement.querySelector('.replyButton');
-        replyButton.addEventListener('click', () => {
-          const replyInput = commentElement.querySelector('.reply-input');
-          replyInput.style.display = 'block';
+          `;
+  
+          const replyButton = commentElement.querySelector('.replyButton');
+          replyButton.addEventListener('click', () => {
+            const replyInput = commentElement.querySelector('.reply-input');
+            replyInput.style.display = 'block';
+          });
+  
+          const submitCloseButton = commentElement.querySelector('.submit-close');
+          submitCloseButton.addEventListener('click', () => {
+            const replyInput = commentElement.querySelector('.reply-input');
+            replyInput.style.display = 'none';
+          });
+  
+          const submitReplyButton = commentElement.querySelector('.submit-reply');
+          submitReplyButton.addEventListener('click', () => {
+            const replyContent = commentElement.querySelector('.reply-input textarea').value;
+            submitComment(postId, replyContent, comment.id);
+          });
+  
+          commentsContainer.appendChild(commentElement);
         });
-
-        const submitCloseButton = commentElement.querySelector('.submit-close');
-        submitCloseButton.addEventListener('click', () => {
-          const replyInput = commentElement.querySelector('.reply-input');
-          replyInput.style.display = 'none';
-        });
-
-        const submitReplyButton = commentElement.querySelector('.submit-reply');
-        submitReplyButton.addEventListener('click', () => {
-          const replyContent = commentElement.querySelector('.reply-input textarea').value;
-          submitComment(postId, replyContent, comment.id);
-        });
-
-        commentsContainer.appendChild(commentElement);
-      });
-    })
-    .catch(error => console.error('Error fetching comments:', error));
-}
+      })
+      .catch(error => console.error('Error fetching comments:', error));
+  }
 
 /**
  * Get the count of comments for the post with the given postId.
@@ -401,10 +401,16 @@ function toggleModal() {
   modal.classList.toggle('is-active');
 }
 
-// Display the post on page load
-displayPost(postId);
-
-// Handle browser back button navigation
+document.addEventListener('DOMContentLoaded', () => {
+  const postContainer = document.getElementById('post-container');
+  if (postContainer) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get('postId');
+    if (postId) {
+      displayPost(postId);
+    }
+  }
+});
 window.addEventListener('popstate', () => {
   if (getRoleFromToken(localStorage.getItem('token')) === 'admin') {
     window.location.href = 'admin.html';
