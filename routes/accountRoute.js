@@ -4,7 +4,6 @@ const router = express.Router();
 const createPool = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const authenticateToken = require('../authenticate');
 const pool = createPool.createPool();
 
 

@@ -1,12 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const createPool = require('../db');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const authenticateToken = require('../authenticate');
 const pool = createPool.createPool();
-const multer = require('multer');
-const upload = multer();
 
 router.get('/:username', async(req, res) => {
     const username = req.params.username;

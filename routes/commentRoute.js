@@ -1,14 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const createPool = require('../db');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+c
 const authenticateToken = require('../authenticate');
 const pool = createPool.createPool();
-const multer = require('multer');
-const upload = multer();
 
-const { filterProfanity, containsProfanity } = require('../public/js/modules/moderate');
+const { containsProfanity } = require('../public/js/modules/moderate');
 
 router.get('/:postId', async(req, res) => {
     const postId = req.params.postId;

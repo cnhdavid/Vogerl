@@ -1,38 +1,23 @@
 require('dotenv').config();
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-
 const path = require('path');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
-const authenticateToken = require('./authenticate');
 const http = require('http');
 const WebSocket = require('ws');
 const createPool = require('./db');
-
-
-
-const { filterProfanity, containsProfanity } = require('./public/js/modules/moderate');
-
 const accountRoute = require('./routes/accountRoute');
 const postRoute = require('./routes/postRoute');
 const commentRoute = require('./routes/commentRoute');
 const voteRoute = require('./routes/voteRoute');
 const userRoute = require('./routes/userRoute');
-
-
 let fetch;
 (async() => {
     fetch = (await
         import ('node-fetch')).default;
 })();
-
 const app = express();
 const port = 3000;
-
 app.use(cors());
 app.use(express.json());
 app.use(express.json({ limit: '20mb' }));
@@ -46,7 +31,6 @@ app.use('/post', postRoute)
 app.use('/comments', commentRoute)
 app.use('/vote', voteRoute)
 app.use('/user', userRoute)
-
 const server = http.createServer(app);
 const pool = createPool.createPool();
 
@@ -54,16 +38,13 @@ const pool = createPool.createPool();
 const wss = new WebSocket.Server({ server });
 wss.on('connection', ws => {
     console.log('Client connected');
-
     ws.on('message', message => {
         console.log(`Received message: ${message}`);
     });
-
     // Send a message to the client when the server is shutting down
     ws.on('close', () => {
         console.log('Client disconnected');
     });
-
     // Send a welcome message
     ws.send('Welcome to the WebSocket server');
 });
@@ -71,14 +52,12 @@ wss.on('connection', ws => {
 // Handle server shutdown
 process.on('SIGINT', () => {
     console.log('Server is shutting down');
-
     // Notify all connected WebSocket clients
     wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
             client.send('Server is shutting down');
         }
     });
-
     // Close the server
     server.close(() => {
         console.log('Server closed');
@@ -89,13 +68,6 @@ process.on('SIGINT', () => {
 app.get('/', (req, res) => {
     res.redirect('/dashboard.html');
 });
-
-
-
-
-
-
-
 
 server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
