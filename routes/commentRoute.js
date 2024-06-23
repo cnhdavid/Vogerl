@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const createPool = require('../db');
-c
 const authenticateToken = require('../authenticate');
 const pool = createPool.createPool();
 
