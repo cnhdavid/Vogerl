@@ -14,48 +14,48 @@ import { getUserId, getRoleFromToken, getUserIdFromToken } from './auth.js';
  * @returns {Promise<Array>} - A promise that resolves to an array of posts.
  */
 async function fetchPosts(subject = null, username = null) {
-    let url = 'http://localhost:3000/post/posts';
+  let url = 'http://localhost:3000/post/posts';
 
-    if (subject) {
-        url += `?subject=${encodeURIComponent(subject)}`;
+  if (subject) {
+    url += `?subject=${encodeURIComponent(subject)}`;
+  }
+
+  if (username) {
+    url += subject ? `&username=${encodeURIComponent(username)}` : `?username=${encodeURIComponent(username)}`;
+  }
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    if (response.ok) {
+      return await response.json();
+    } else {
+      console.error('Error fetching posts:', response.status);
+      return [];
     }
-
-    if (username) {
-        url += subject ? `&username=${encodeURIComponent(username)}` : `?username=${encodeURIComponent(username)}`;
-    }
-
-    try {
-        const response = await fetch(url, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-        });
-
-        if (response.ok) {
-            return await response.json();
-        } else {
-            console.error('Error fetching posts:', response.status);
-            return [];
-        }
-    } catch (error) {
-        console.error('Error fetching posts:', error);
-        return [];
-    }
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return [];
+  }
 }
 
 /**
  * Populate the post menu with options from the sidebarSubjects array.
  */
 export function populateMenu() {
-    const selectElement = document.getElementById('postMenu');
+  const selectElement = document.getElementById('postMenu');
 
-    sidebarSubjects.forEach(subject => {
-        const option = document.createElement('option');
-        option.textContent = subject.title;
-        option.value = subject.title;
-        selectElement.appendChild(option);
-    });
+  sidebarSubjects.forEach(subject => {
+    const option = document.createElement('option');
+    option.textContent = subject.title;
+    option.value = subject.title;
+    selectElement.appendChild(option);
+  });
 }
 
 /**
@@ -63,20 +63,20 @@ export function populateMenu() {
  * @param {string|null} username - The username to filter posts by (optional).
  */
 export function populateSidebar(username = null) {
-    const sidebarMenu = document.getElementById('sidebarMenu');
-    sidebarMenu.innerHTML = '';
+  const sidebarMenu = document.getElementById('sidebarMenu');
+  sidebarMenu.innerHTML = '';
 
-    sidebarSubjects.forEach(subject => {
-        const listItem = document.createElement('li');
-        const link = document.createElement('a');
-        link.textContent = subject.title;
-        
-        link.addEventListener('click', () => {
-            fetchAndDisplayPosts(subject.title, username);
-        });
-        listItem.appendChild(link);
-        sidebarMenu.appendChild(listItem);
+  sidebarSubjects.forEach(subject => {
+    const listItem = document.createElement('li');
+    const link = document.createElement('a');
+    link.textContent = subject.title;
+
+    link.addEventListener('click', () => {
+      fetchAndDisplayPosts(subject.title, username);
     });
+    listItem.appendChild(link);
+    sidebarMenu.appendChild(listItem);
+  });
 }
 
 /**
@@ -85,24 +85,24 @@ export function populateSidebar(username = null) {
  * @returns {Promise<Array>} - A promise that resolves to an array of posts.
  */
 export async function fetchPostsByUsername(username) {
-    try {
-        const response = await fetch(`http://localhost:3000/user/${username}/posts`, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-        });
+  try {
+    const response = await fetch(`http://localhost:3000/user/${username}/posts`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
 
-        if (response.ok) {
-            return await response.json();
-        } else {
-            console.error('Error fetching posts:', response.status);
-            return [];
-        }
-    } catch (error) {
-        console.error('Error fetching posts:', error);
-        return [];
+    if (response.ok) {
+      return await response.json();
+    } else {
+      console.error('Error fetching posts:', response.status);
+      return [];
     }
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return [];
+  }
 }
 
 /**
@@ -110,19 +110,21 @@ export async function fetchPostsByUsername(username) {
  * @param {Promise<Array>} postsPromise - A promise that resolves to an array of posts.
  */
 export async function populatePostsSidebar(postsPromise) {
-    const posts = await postsPromise;
-    const sidebarMenu = document.getElementById('sidebarPostsMenu');
-    sidebarMenu.innerHTML = '';
+  const posts = await postsPromise;
+  const sidebarMenu = document.getElementById('sidebarPostsMenu');
+  sidebarMenu.innerHTML = '';
 
-    if (Array.isArray(posts)) {
-        posts.forEach(post => {
-            const listItem = document.createElement('li');
-            const postElement = document.createElement('div');
-            postElement.classList.add('box', 'is-clickable', 'my-3');
-            postElement.innerHTML = `
+  if (Array.isArray(posts)) {
+    posts.forEach(post => {
+      const listItem = document.createElement('li');
+      const postElement = document.createElement('div');
+      postElement.classList.add('box', 'is-clickable', 'my-3');
+      postElement.innerHTML = `
         <article class="media is-clickable">
           <div class="media-content">
             <div class="content">
+              ${post.isanswered ? '<span class="tag is-success is-pulled-right">Answered</span>' : ''}
+              <br>
               <p>
                 <strong>${post.title}</strong> 
                 <br>
@@ -134,16 +136,16 @@ export async function populatePostsSidebar(postsPromise) {
         </article>
       `;
 
-            listItem.addEventListener('click', () => {
-                openPost(post.id);
-            });
+      listItem.addEventListener('click', () => {
+        openPost(post.id);
+      });
 
-            listItem.appendChild(postElement);
-            sidebarMenu.appendChild(listItem);
-        });
-    } else {
-        console.error('Expected posts to be an array but received:', posts);
-    }
+      listItem.appendChild(postElement);
+      sidebarMenu.appendChild(listItem);
+    });
+  } else {
+    console.error('Expected posts to be an array but received:', posts);
+  }
 }
 
 /**
@@ -152,8 +154,8 @@ export async function populatePostsSidebar(postsPromise) {
  * @returns {Promise<Array>} - A promise that resolves to an array of posts.
  */
 export async function getPostsByUsername(username) {
-    const posts = await fetchPostsByUsername(username);
-    return posts;
+  const posts = await fetchPostsByUsername(username);
+  return posts;
 }
 
 /**
@@ -163,28 +165,28 @@ export async function getPostsByUsername(username) {
  * @param {string|null} searchTerm - The search term to filter posts by (optional).
  */
 export async function fetchAndDisplayPosts(subject = null, username = null, searchTerm = null) {
-    try {
-        let posts;
-        if (searchTerm) {
-            posts = await searchPosts(searchTerm);
-        } else {
-            posts = await fetchPosts(subject, username);
-        }
-        const postsContainer = document.getElementById('postsContainer');
-        postsContainer.innerHTML = '';
-
-        const commentsPromises = posts.map(post => fetchComments(post.id));
-        const allComments = await Promise.all(commentsPromises);
-
-        await Promise.all(posts.map(async(post, index) => {
-            const postElement = await createPostElement(post, allComments[index]);
-            postsContainer.appendChild(postElement);
-            await getCommentCount(post.id);
-            
-        }));
-    } catch (error) {
-        console.error('Error displaying posts:', error);
+  try {
+    let posts;
+    if (searchTerm) {
+      posts = await searchPosts(searchTerm);
+    } else {
+      posts = await fetchPosts(subject, username);
     }
+    const postsContainer = document.getElementById('postsContainer');
+    postsContainer.innerHTML = '';
+
+    const commentsPromises = posts.map(post => fetchComments(post.id));
+    const allComments = await Promise.all(commentsPromises);
+
+    await Promise.all(posts.map(async (post, index) => {
+      const postElement = await createPostElement(post, allComments[index]);
+      postsContainer.appendChild(postElement);
+      await getCommentCount(post.id);
+
+    }));
+  } catch (error) {
+    console.error('Error displaying posts:', error);
+  }
 }
 
 /**
@@ -193,16 +195,16 @@ export async function fetchAndDisplayPosts(subject = null, username = null, sear
  * @returns {Promise<Array>} - A promise that resolves to an array of filtered posts.
  */
 export async function searchPosts(searchTerm) {
-    const posts = await fetchPosts();
-    const filteredPosts = posts.filter(post => {
-        const titleMatch = post.title.toLowerCase().includes(searchTerm.toLowerCase());
-        const contentMatch = post.content.toLowerCase().includes(searchTerm.toLowerCase());
-        const subjectMatch = post.subject.toLowerCase().includes(searchTerm.toLowerCase());
-        const usernameMatch = post.username.toLowerCase().includes(searchTerm.toLowerCase());
+  const posts = await fetchPosts();
+  const filteredPosts = posts.filter(post => {
+    const titleMatch = post.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const contentMatch = post.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const subjectMatch = post.subject.toLowerCase().includes(searchTerm.toLowerCase());
+    const usernameMatch = post.username.toLowerCase().includes(searchTerm.toLowerCase());
 
-        return titleMatch || contentMatch || subjectMatch || usernameMatch;
-    });
-    return filteredPosts;
+    return titleMatch || contentMatch || subjectMatch || usernameMatch;
+  });
+  return filteredPosts;
 }
 // Filter posts by subject
 
@@ -219,9 +221,9 @@ export async function createPostElement(post, comments) {
 
   let imageData = '';
   if (post.image) {
-      imageData = `data:image/jpeg;base64,${post.image}`;
+    imageData = `data:image/jpeg;base64,${post.image}`;
   }
-  
+
 
   postElement.innerHTML = `
       <article class="media">
@@ -250,68 +252,68 @@ export async function createPostElement(post, comments) {
   `;
 
   try {
-      const upvotes = await getPostVotes(post.id);
-      const upvoteCountElement = postElement.querySelector('.upvote-count');
-      upvoteCountElement.textContent = upvotes;
+    const upvotes = await getPostVotes(post.id);
+    const upvoteCountElement = postElement.querySelector('.upvote-count');
+    upvoteCountElement.textContent = upvotes;
 
 
-      
+
 
   } catch (error) {
-      console.error('Error fetching votes or comments:', error);
+    console.error('Error fetching votes or comments:', error);
   }
   if (localStorage.getItem('token') && getRoleFromToken(localStorage.getItem('token')) === 'admin') {
-      const deleteButton = postElement.querySelector(`#deletePost-${post.id}`);
-      deleteButton.addEventListener('click', (event) => {
-          event.stopPropagation();
-          deletePost(post.id);
-      });
+    const deleteButton = postElement.querySelector(`#deletePost-${post.id}`);
+    deleteButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      deletePost(post.id);
+    });
   }
 
   const upvoteButton = postElement.querySelector('.fa-arrow-up');
   const downvoteButton = postElement.querySelector('.fa-arrow-down');
   upvoteButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      upvotePost(post.id);
+    event.stopPropagation();
+    upvotePost(post.id);
   });
 
   downvoteButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      downvotePost(post.id);
+    event.stopPropagation();
+    downvotePost(post.id);
   });
 
   async function colorVoteButtons() {
     if (localStorage.getItem('token')) {
-        try {
-            const userId = await getUserId(post.username);
-            const liked = await hasUserVoted(post.id, userId);
-            console.log(liked);
+      try {
+        const userId = await getUserId(post.username);
+        const liked = await hasUserVoted(post.id, userId);
+        console.log(liked);
 
-            const upvoteElement = document.getElementById(`upvote-${post.id}`);
-            const downvoteElement = document.getElementById(`downvote-${post.id}`);
+        const upvoteElement = document.getElementById(`upvote-${post.id}`);
+        const downvoteElement = document.getElementById(`downvote-${post.id}`);
 
-            if (liked === 'upvote' && upvoteElement) {
-                applyVoteAnimation(upvoteElement, 'upvote');
-            }
-
-            if (liked === 'downvote' && downvoteElement) {
-                applyVoteAnimation(downvoteElement, 'downvote');
-            }
-        } catch (error) {
-            console.error('Error fetching user ID or vote status:', error);
+        if (liked === 'upvote' && upvoteElement) {
+          applyVoteAnimation(upvoteElement, 'upvote');
         }
-    }
-}
 
-// Call this function after posts are rendered
-setTimeout(colorVoteButtons, 1000); // Adjust the delay as needed
+        if (liked === 'downvote' && downvoteElement) {
+          applyVoteAnimation(downvoteElement, 'downvote');
+        }
+      } catch (error) {
+        console.error('Error fetching user ID or vote status:', error);
+      }
+    }
+  }
+
+  // Call this function after posts are rendered
+  setTimeout(colorVoteButtons, 1000); // Adjust the delay as needed
 
   if (imageData) {
-      const imageElement = postElement.querySelector('.post-image');
-      imageElement.addEventListener('click', () => {
-          const newTab = window.open();
-          newTab.document.body.innerHTML = `<img src="${imageData}" alt="Post Image" style="max-width: 100%; height: auto;" />`;
-      });
+    const imageElement = postElement.querySelector('.post-image');
+    imageElement.addEventListener('click', () => {
+      const newTab = window.open();
+      newTab.document.body.innerHTML = `<img src="${imageData}" alt="Post Image" style="max-width: 100%; height: auto;" />`;
+    });
   }
 
   postElement.addEventListener('click', () => openPost(post.id));
