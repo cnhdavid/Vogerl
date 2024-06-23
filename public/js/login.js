@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Send the login request to the server
-            const response = await fetch('http://localhost:3000/api/login', {
+            const response = await fetch('http://localhost:3000/account/login', {
                 method: 'POST',
                 body: JSON.stringify({ email, password, recaptchaResponse }),
                 headers: {

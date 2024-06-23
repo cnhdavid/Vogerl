@@ -1,7 +1,7 @@
 // js/modules/post.js
 
 // Import necessary functions from other modules
-import { fetchComments, downvotePost, upvotePost, getPostVotes, hasUserVoted } from './postManager.js';
+import { fetchComments, downvotePost, upvotePost, getPostVotes, hasUserVoted, applyVoteAnimation } from './postManager.js';
 import { openPost } from './modal.js';
 import { getCommentCount, deletePost } from './post.js';
 import sidebarSubjects from './subjects.js';
@@ -14,7 +14,7 @@ import { getUserId, getRoleFromToken, getUserIdFromToken } from './auth.js';
  * @returns {Promise<Array>} - A promise that resolves to an array of posts.
  */
 async function fetchPosts(subject = null, username = null) {
-    let url = 'http://localhost:3000/api/posts';
+    let url = 'http://localhost:3000/post/posts';
 
     if (subject) {
         url += `?subject=${encodeURIComponent(subject)}`;
@@ -86,7 +86,7 @@ export function populateSidebar(username = null) {
  */
 export async function fetchPostsByUsername(username) {
     try {
-        const response = await fetch(`http://localhost:3000/api/users/${username}/posts`, {
+        const response = await fetch(`http://localhost:3000/user/${username}/posts`, {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -291,13 +291,11 @@ export async function createPostElement(post, comments) {
             const downvoteElement = document.getElementById(`downvote-${post.id}`);
 
             if (liked === 'upvote' && upvoteElement) {
-                upvoteElement.style.color = 'blue';
-                downvoteButton.style.color = 'none';
+                applyVoteAnimation(upvoteElement, 'upvote');
             }
 
             if (liked === 'downvote' && downvoteElement) {
-                downvoteElement.style.color = 'red';
-                upvoteButton.style.color = 'none';
+                applyVoteAnimation(downvoteElement, 'downvote');
             }
         } catch (error) {
             console.error('Error fetching user ID or vote status:', error);
@@ -306,7 +304,7 @@ export async function createPostElement(post, comments) {
 }
 
 // Call this function after posts are rendered
-setTimeout(colorVoteButtons, 200); // Adjust the delay as needed
+setTimeout(colorVoteButtons, 1000); // Adjust the delay as needed
 
   if (imageData) {
       const imageElement = postElement.querySelector('.post-image');

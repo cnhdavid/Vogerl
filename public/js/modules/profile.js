@@ -78,7 +78,7 @@ function cancelProfileEdit() {
 async function fetchUser() {
     const token = localStorage.getItem('token');
     const userId = getUserIdFromToken(token);
-    const response = await fetch(`http://localhost:3000/api/userInfo/${userId}`);
+    const response = await fetch(`http://localhost:3000/user/userInfo/${userId}`);
     const user = await response.json();
     return user;
 }

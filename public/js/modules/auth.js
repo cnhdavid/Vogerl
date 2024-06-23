@@ -41,7 +41,7 @@ export function logout() {
  */
 export async function getUserId(username) {
     try {
-        const response = await fetch(`http://localhost:3000/api/users/${username}`); // Fetch user data from the server
+        const response = await fetch(`http://localhost:3000/user/${username}`); // Fetch user data from the server
         if (!response.ok) {
             throw new Error('Failed to fetch user ID'); // Throw an error if the response is not ok
         }

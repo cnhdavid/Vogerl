@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const response = await fetch('http://localhost:3000/api/post', {
+            const response = await fetch('http://localhost:3000/post/create', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

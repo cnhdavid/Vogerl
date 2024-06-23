@@ -19,7 +19,7 @@ export function openPost(postId) {
   });
 
   // Fetch the post data from the server
-  fetch(`http://localhost:3000/api/posts/${postId}`)
+  fetch(`http://localhost:3000/post/${postId}`)
     .then(response => response.json())
     .then(post => {
       console.log('Post loaded, redirecting to:', `post.html?postId=${postId}`);
@@ -36,7 +36,7 @@ export function openPost(postId) {
  */
 export function editPost(postId, title, content) {
   // Send a PUT request to update the post on the server
-  fetch(`http://localhost:3000/api/posts/${postId}`, {
+  fetch(`http://localhost:3000/post/${postId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

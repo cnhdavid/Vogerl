@@ -10,7 +10,7 @@ import { getUserIdFromToken } from './auth.js';
  */
 export async function fetchComments(postId) {
     try {
-        const response = await fetch(`http://localhost:3000/api/posts/${postId}/comments`);
+        const response = await fetch(`http://localhost:3000/comments/${postId}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch comments for post ${postId}`);
         }
@@ -163,7 +163,7 @@ function resetVoteAnimation(button) {
 export function upvotePost(postId) {
     const authToken = localStorage.getItem('token');
 
-    fetch(`http://localhost:3000/api/posts/${postId}/upvote`, {
+    fetch(`http://localhost:3000/vote/${postId}/upvote`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -201,7 +201,7 @@ export function upvotePost(postId) {
 export function downvotePost(postId) {
     const authToken = localStorage.getItem('token');
 
-    fetch(`http://localhost:3000/api/posts/${postId}/downvote`, {
+    fetch(`http://localhost:3000/vote/${postId}/downvote`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -239,7 +239,7 @@ export function downvotePost(postId) {
  */
 export async function getPostVotes(postId) {
     try {
-        const response = await fetch(`http://localhost:3000/api/posts/${postId}/votes`);
+        const response = await fetch(`http://localhost:3000/vote/${postId}/votes`);
         if (response.status === 403 || response.status === 401) {
             
             return;
@@ -267,7 +267,7 @@ export async function hasUserVoted(postId, userId) {
 
     getUserIdFromToken(authToken);
     try {
-        const response = await fetch(`http://localhost:3000/api/posts/${postId}/hasUserLiked/${userId}`, {
+        const response = await fetch(`http://localhost:3000/user/${postId}/hasUserLiked/${userId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authToken}`
@@ -312,7 +312,7 @@ export function applyVoteAnimation(button, type) {
 export async function markCommentAsAnswer(commentId, postId) {
     const authToken = localStorage.getItem('token');
     try {
-        const response = await fetch(`http://localhost:3000/api/Comment/${commentId}/answer`, {
+        const response = await fetch(`http://localhost:3000/comments/${commentId}/answer`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -340,7 +340,7 @@ export async function markCommentAsAnswer(commentId, postId) {
 export async function deleteComment(commentId) {
     const authToken = localStorage.getItem('token');
     try {
-        const response = await fetch(`http://localhost:3000/api/Comment/${commentId}`, {
+        const response = await fetch(`http://localhost:3000/comments/${commentId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',

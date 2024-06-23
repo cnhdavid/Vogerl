@@ -13,7 +13,7 @@ const postId = urlParams.get('postId');
  * @param {string} postId - The ID of the post to be displayed.
  */
 function displayPost(postId) {
-  fetch(`http://localhost:3000/api/posts/${postId}`)
+  fetch(`http://localhost:3000/post/${postId}`)
     .then(response => response.json())
     .then(post => {
       // Get the container where the post will be displayed
@@ -162,7 +162,7 @@ function displayPost(postId) {
 
 // Fetch and display the comments
 function displayComments(postId, postUsername) {
-  fetch(`http://localhost:3000/api/posts/${postId}/comments`)
+  fetch(`http://localhost:3000/comments/${postId}`)
     .then(response => response.json())
     .then(comments => {
 
@@ -227,7 +227,7 @@ function confirmCommentDelete(commentId) {
  * @param {string} postId - The ID of the post.
  */
 export function getCommentCount(postId) {
-  return fetch(`http://localhost:3000/api/posts/${postId}/comments`)
+  return fetch(`http://localhost:3000/comments/${postId}`)
     .then(response => response.json())
     .then(comments => {
       const commentCount = comments.length;
@@ -263,7 +263,7 @@ const submitComment = async (postId, content, parentId = null) => {
     const token = localStorage.getItem('token');
     const userId = getUserIdFromToken(token);
 
-    const response = await fetch(`http://localhost:3000/api/posts/${postId}/comments`, {
+    const response = await fetch(`http://localhost:3000/comments/${postId}/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -302,7 +302,7 @@ export async function deletePost(postId) {
     document.getElementById('modalClose').addEventListener('click', toggleModal);
     document.getElementById('confirmDelete').addEventListener('click', async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/Deletepost/${postId}`, {
+        const response = await fetch(`http://localhost:3000/post/Deletepost/${postId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
