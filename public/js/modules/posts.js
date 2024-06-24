@@ -49,9 +49,11 @@ async function fetchPosts(subject = null, username = null) {
  */
 export function populateMenu() {
   const selectElement = document.getElementById('postMenu');
+  
 
   sidebarSubjects.forEach(subject => {
     const option = document.createElement('option');
+    
     option.textContent = subject.title;
     option.value = subject.title;
     selectElement.appendChild(option);
@@ -68,6 +70,7 @@ export function populateSidebar(username = null) {
 
   sidebarSubjects.forEach(subject => {
     const listItem = document.createElement('li');
+    listItem.classList.add('hvr-grow', 'fade-in-slide-up');
     const link = document.createElement('a');
     link.textContent = subject.title;
 
@@ -117,8 +120,9 @@ export async function populatePostsSidebar(postsPromise) {
   if (Array.isArray(posts)) {
     posts.forEach(post => {
       const listItem = document.createElement('li');
+      listItem.classList.add('my-3', 'hvr-grow');
       const postElement = document.createElement('div');
-      postElement.classList.add('box', 'is-clickable', 'my-3');
+      postElement.classList.add('box', 'is-clickable', 'my-3', 'fade-in-slide-up');
       postElement.innerHTML = `
         <article class="media is-clickable">
           <div class="media-content">
@@ -166,14 +170,19 @@ export async function getPostsByUsername(username) {
  */
 export async function fetchAndDisplayPosts(subject = null, username = null, searchTerm = null) {
   try {
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const postsContainer = document.getElementById('postsContainer');
+    
+    // Show the loading spinner
+    loadingSpinner.style.display = 'block';
+    postsContainer.innerHTML = '';
+
     let posts;
     if (searchTerm) {
       posts = await searchPosts(searchTerm);
     } else {
       posts = await fetchPosts(subject, username);
     }
-    const postsContainer = document.getElementById('postsContainer');
-    postsContainer.innerHTML = '';
 
     const commentsPromises = posts.map(post => fetchComments(post.id));
     const allComments = await Promise.all(commentsPromises);
@@ -182,10 +191,14 @@ export async function fetchAndDisplayPosts(subject = null, username = null, sear
       const postElement = await createPostElement(post, allComments[index]);
       postsContainer.appendChild(postElement);
       await getCommentCount(post.id);
-
     }));
+    
+    // Hide the loading spinner after all posts are added to the DOM
+    loadingSpinner.style.display = 'none';
   } catch (error) {
     console.error('Error displaying posts:', error);
+    // Hide the loading spinner in case of an error as well
+    loadingSpinner.style.display = 'none';
   }
 }
 
@@ -217,16 +230,19 @@ export async function searchPosts(searchTerm) {
  */
 export async function createPostElement(post, comments) {
   const postElement = document.createElement('div');
-  postElement.classList.add('box');
+  postElement.classList.add('box', 'is-clickable', 'my-3');
 
   let imageData = '';
   if (post.image) {
     imageData = `data:image/jpeg;base64,${post.image}`;
   }
+  const date = new Date(post.created_at);
+
+  const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 
 
   postElement.innerHTML = `
-      <article class="media">
+      <article class="media ">
           <div class="media-content">
               <div class="content">
                   <div class="post-content">
@@ -238,18 +254,21 @@ export async function createPostElement(post, comments) {
                           <br>
                           ${post.content}
                       </p>
-                      <i class="fa-solid fa-arrow-up is-fluid" id="upvote-${post.id}"></i>
+                      <i class="fa-solid fa-arrow-up is-fluid hvr-float" id="upvote-${post.id}"></i>
                       <span id="upvote-count-${post.id}" class="upvote-count mx-3"> Loading...</span>
-                      <i class="fa-solid fa-arrow-down is-fluid" id="downvote-${post.id}"></i>
+                      <i class="fa-solid fa-arrow-down is-fluid hvr-sink" id="downvote-${post.id}"></i>
                       <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment mx-3"></i></span>
                       <span id="comment-count-${post.id}"> Loading...</span>
                       ${localStorage.getItem('token') && getRoleFromToken(localStorage.getItem('token')) === 'admin' ? `<button class="button is-danger is-small is-pulled-right" id="deletePost-${post.id}">Delete Post</button>` : ''}
                   </div>
+                   <p class="is-pulled-left my-2 subtitle is-6">posted on ${formattedDate}</p>
               </div>
           </div>
-          ${imageData ? `<img src="${imageData}" alt="Post Image" class="post-image" />` : ''}
+          ${post.image ? `<figure class="image is-128x128 hvr-grow"><img src="${imageData}" alt="Post Image"  /> </figure>` : ''}
+         
       </article>
   `;
+  postElement.classList.add('fade-in-slide-up');
 
   try {
     const upvotes = await getPostVotes(post.id);
@@ -309,7 +328,7 @@ export async function createPostElement(post, comments) {
   setTimeout(colorVoteButtons, 1000); // Adjust the delay as needed
 
   if (imageData) {
-    const imageElement = postElement.querySelector('.post-image');
+    const imageElement = postElement.querySelector('.image');
     imageElement.addEventListener('click', () => {
       const newTab = window.open();
       newTab.document.body.innerHTML = `<img src="${imageData}" alt="Post Image" style="max-width: 100%; height: auto;" />`;

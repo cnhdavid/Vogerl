@@ -26,29 +26,40 @@ export function populateNavbar(user) {
 
         const logoutButton = document.createElement('button');
         logoutButton.setAttribute('id', 'logout-button');
-        logoutButton.classList.add('navbar-item', 'button', 'is-danger', 'is-normal');
+        logoutButton.classList.add('navbar-item', 'button', 'is-danger', 'is-normal', 'ml-2');
         logoutButton.textContent = 'Logout';
         logoutButton.style.color = '#000000';
         logoutButton.addEventListener('click', logout);
 
         const profileButton = document.createElement('button');
         profileButton.setAttribute('id', 'profile-button');
-        profileButton.classList.add('navbar-item', 'button', 'is-info', 'is-normal');
+        profileButton.classList.add('navbar-item', 'button', 'is-info', 'is-normal', 'ml-2');
         profileButton.textContent = 'Profile';
         profileButton.style.color = '#000000';
         profileButton.addEventListener('click', () => {
             window.location.href = 'profile.html';
         });
 
+
+        
+
+       
+        
+
         const buttonContainer = document.createElement('div');
-        buttonContainer.classList.add('buttons');
+        buttonContainer.classList.add( 'navbar-item');
         buttonContainer.appendChild(profileButton);
         buttonContainer.appendChild(logoutButton);
 
         navbarEnd.innerHTML = '';
         navbarEnd.appendChild(welcomeMessage);
         navbarEnd.appendChild(buttonContainer);
-
+        
+        
+        const navbarItems = document.querySelectorAll('.navbar-item');
+        navbarItems.forEach(item => {
+            item.classList.add('hvr-grow')
+        });
         populatePostsSidebar(getPostsByUsername(username));
     }
 }

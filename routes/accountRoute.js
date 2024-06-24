@@ -80,7 +80,7 @@ router.post('/login', async(req, res) => {
 
 
 
-            const token = jwt.sign({ userId: user.id, username: user.username, role: user.user_role }, jwtSecretKey, { expiresIn: '1h' });
+            const token = jwt.sign({ userId: user.id, username: user.username, role: user.user_role}, jwtSecretKey, { expiresIn: '1h' });
 
             if (user.user_role === 'admin') {
                 console.log('Admin login successful');

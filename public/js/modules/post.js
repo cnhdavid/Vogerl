@@ -13,6 +13,10 @@ const postId = urlParams.get('postId');
  * @param {string} postId - The ID of the post to be displayed.
  */
 function displayPost(postId) {
+  const loadingSpinner = document.getElementById('loadingSpinner');
+  const postContainer = document.getElementById('post-container');
+  loadingSpinner.style.display = 'block';
+  postContainer.innerHTML = '';
   fetch(`http://localhost:3000/post/${postId}`)
     .then(response => response.json())
     .then(post => {
@@ -42,18 +46,18 @@ function displayPost(postId) {
           <p class="subtitle is-pull-right">posted on ${formattedDate}</p>
         </div>
         <p class="subtitle">Subject: ${post.subject}</p>
-        ${post.image ? `<img src="data:image/jpeg;base64,${post.image}" alt="Post Image" class="post-image is-pulled-right" />` : ''}
+        ${post.image ? `<figure class="image is-pulled-right mb-6"><img src="data:image/jpeg;base64,${post.image}" alt="Post Image" class="post-image " /></figure>` : ''}
         <div class="content">
           <p><strong>${post.content}</strong></p>
         </div>
         ${token ? `<i id="upvote-${post.id}" class="fa-solid fa-arrow-up mx-2"></i>` : ''}
         <span id="upvote-count-${post.id}" class="upvote-count"> Loading...</span>
         ${token ? `<i id="downvote-${post.id}" class="fa-solid fa-arrow-down ml-2"></i>` : ''}
-        <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment"></i></span>
+        <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment mx-3"></i></span>
         <span id="comment-count-${post.id}"> Loading...</span>
         <div class="comments-container" id="comments-container"></div>
         ${token ? ` 
-          <textarea id="commentInput" class="textarea my-2" placeholder="Add a comment"></textarea>
+          <textarea id="commentInput" class="textarea my-4" placeholder="Add a comment"></textarea>
           <button id="submitComment" class="button is-primary my-2"><i class="fa-solid fa-check mx-2"></i>Submit</button>
         ` : `
           <p>Please log in to add a comment.</p>
@@ -61,6 +65,7 @@ function displayPost(postId) {
         `}
         ${token && post.username === getUserIdFromToken(token) ? `<button id="deletePostButton" class="button is-danger my-2 is-pulled-right">Delete Post</button>` : ''}
       `;
+      postContainer.classList.add('fade-in-slide-up');
 
       // Fetch and display upvote count
       try {
@@ -207,6 +212,7 @@ function displayComments(postId, postUsername) {
         }
         commentsContainer.appendChild(commentElement);
       });
+      loadingSpinner.style.display = 'none';
     })
     .catch(error => console.error('Error fetching comments:', error));
 }

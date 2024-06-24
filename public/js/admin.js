@@ -4,8 +4,8 @@
  */
 
 // Import necessary functions from other modules
-import { checkToken, logout, getRoleFromToken } from './modules/auth.js';
-import { fetchAndDisplayPosts, searchPosts } from './modules/posts.js';
+import {  logout, getRoleFromToken } from './modules/auth.js';
+import { fetchAndDisplayPosts } from './modules/posts.js';
 
 /**
  * Main function that runs when the DOM content is fully loaded.
@@ -22,5 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     fetchAndDisplayPosts()
+
+    // remove upvote elements
+   
+
+    // remove downvote elements
     
 })

@@ -17,7 +17,7 @@
     <header>
         <nav class="navbar" aria-label="main navigation">
             <div class="navbar-brand">
-                <a class="navbar-item" href="/dashboard.html">
+                <a class="navbar-item" href="#">
                     <img src="/images/Vogerl.png" alt="Vogerl Logo" height="100">
                 </a>
                 <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
@@ -28,7 +28,7 @@
             </div>
             <div id="navbarBasicExample" class="navbar-menu">
                 <div class="navbar-start">
-                    <a class="navbar-item" href="/dashboard.html">Home</a>
+                    <a class="navbar-item" href="#">Home</a>
                     <div class="navbar-item">
                         <input class="input is-normal" id="searchInput" type="text" placeholder="Search...">
                     </div>
@@ -117,10 +117,7 @@
 
     <!-- Include JavaScript file for admin functionalities -->
     <script type="module" src="js/admin.js"></script>
-    <!-- Remove 'redirectToPost' item from sessionStorage -->
-    <script>
-        sessionStorage.removeItem('redirectToPost');
-    </script>
+    
 </body>
 
 </html>

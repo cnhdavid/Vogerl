@@ -111,6 +111,7 @@ async function fetchUser() {
  * Populate the profile section with user information.
  */
 function populateProfile() {
+    
     fetchUser().then(user => {
         document.getElementById('aboutText').innerText = user.about;
         document.getElementById('username').innerText = "@" + user.username;
@@ -120,6 +121,7 @@ function populateProfile() {
         if (user.profilepic){
             imageData = `data:image/png;base64,${user.profilepic}`;
             document.getElementById('profilePic').src = imageData;
+            document.getElementById('profileBox').style.display = 'block';
         }
     });
 }
@@ -149,6 +151,7 @@ function handleProfilePicUpload(event) {
  * Initialize the application on DOMContentLoaded.
  */
 document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('profileBox').style.display = 'none';
     const user = checkToken();
     if (user) {
         setupNavbar(user);
