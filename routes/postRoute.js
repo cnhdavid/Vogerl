@@ -83,14 +83,20 @@ router.delete('/Deletepost/:postId', authenticateToken, async (req, res) => {
     }
 });
 
-router.get('/posts', async(req, res) => {
+router.get('/posts/:subject/:username', async(req, res) => {
 
-    let subject = req.query.subject;
+    let subject = req.params.subject;
+
 
     if (!subject) {
         subject = "All";
     }
-    const username = req.query.username; // Get the username from query params
+    const username = req.params.username; // Get the username from query params
+    if (!username) {
+        username = null;
+    }
+    console.log(username, subject);
+    
 
     const cacheKey = `allPosts`;
     const cachedPosts = myCache.get(cacheKey);
@@ -115,7 +121,7 @@ router.get('/posts', async(req, res) => {
         }
 
         myCache.set(cacheKey, result.rows);
-        
+        console.log(result.rows);
         res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error fetching posts:', error);
@@ -156,6 +162,7 @@ router.put('/:postId', authenticateToken, async(req, res) => {
 
 router.get('/:postId', async(req, res) => {
     const postId = req.params.postId;
+    console.log(postId);
 
     try {
         const client = await pool.connect();

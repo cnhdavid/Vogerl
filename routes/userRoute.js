@@ -59,13 +59,14 @@ router.get('/userInfo/:username', async(req, res) => {
     
         try {
             const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
-            console.log(result.rows[0]);
+            
             res.status(200).json(result.rows[0]);
         }catch (error) {
         console.error('Error fetching user:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 })
+
 
 async function hasUserVoted(postId, userId) {
 
@@ -99,6 +100,16 @@ async function hasUserVoted(postId, userId) {
         } 
     } 
 
+    router.get('/:username/profile', async(req, res) => {
+        const username = req.params.username;
+        try {
+            const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+            res.status(200).json(result.rows[0]);
+        }catch (error) {
+        console.error('Error fetching user:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+    })
 
 
 module.exports = router

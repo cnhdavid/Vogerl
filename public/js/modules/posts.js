@@ -14,16 +14,21 @@ import { getUserId, getRoleFromToken, getUserIdFromToken } from './auth.js';
  * @returns {Promise<Array>} - A promise that resolves to an array of posts.
  */
 async function fetchPosts(subject = null, username = null) {
-  let url = 'http://localhost:3000/post/posts';
+  let url = 'http://localhost:3000/posts';
 
   if (subject) {
-    url += `?subject=${encodeURIComponent(subject)}`;
+    url += `/${encodeURIComponent(subject)}`;
+  } else {
+    url += '/All';
   }
 
   if (username) {
-    url += subject ? `&username=${encodeURIComponent(username)}` : `?username=${encodeURIComponent(username)}`;
+    url += `/${encodeURIComponent(username)}`;
+  } else {
+    url += '/null';
   }
-
+  
+  console.log(url);
   try {
     const response = await fetch(url, {
       headers: {
@@ -76,6 +81,7 @@ export function populateSidebar(username = null) {
 
     link.addEventListener('click', () => {
       fetchAndDisplayPosts(subject.title, username);
+      console.log(subject.title);
     });
     listItem.appendChild(link);
     sidebarMenu.appendChild(listItem);
@@ -181,6 +187,7 @@ export async function fetchAndDisplayPosts(subject = null, username = null, sear
     if (searchTerm) {
       posts = await searchPosts(searchTerm);
     } else {
+      console.log(subject, username);
       posts = await fetchPosts(subject, username);
     }
 
@@ -228,7 +235,7 @@ export async function searchPosts(searchTerm) {
  * @param {Array} comments - The array of comments for the post.
  * @returns {Promise<HTMLElement>} - A promise that resolves to the created post element.
  */
-export async function createPostElement(post, comments) {
+export async function createPostElement(post) {
   const postElement = document.createElement('div');
   postElement.classList.add('box', 'is-clickable', 'my-3');
 

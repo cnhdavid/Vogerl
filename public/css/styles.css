@@ -138,4 +138,11 @@
   .fade-in-slide-up {
     animation: fadeIn 0.5s ease-out, slideUp 0.5s ease-out;
   }
+
+  #profilePic {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 50%;
+    
+}
   

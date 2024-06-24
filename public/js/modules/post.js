@@ -37,6 +37,7 @@ function displayPost(postId) {
       // Generate HTML content for the post
       postContainer.innerHTML = `
         ${token && post.username === getUserIdFromToken(token) ? `<i id="editPostButton" class="fa-solid fa-pen-to-square is-pulled-right"></i>` : ''}
+        <figure class="image is-128x128 is-pulled-left mb-6"><img id="profilePic" class="" src="https://bulma.io/assets/images/placeholders/256x256.png" alt="Author's Profile Image" class="profile-image" /></figure>
         <div class="is-flex is-justify-content-flex-start mb-3 is-align-items-flex-start is-flex-direction-column ">
           <h1 class="title">${post.title}</h1>
           ${post.isanswered ? '<span class="tag is-success">Answered</span>' : ''}
@@ -66,6 +67,7 @@ function displayPost(postId) {
         ${token && post.username === getUserIdFromToken(token) ? `<button id="deletePostButton" class="button is-danger my-2 is-pulled-right">Delete Post</button>` : ''}
       `;
       postContainer.classList.add('fade-in-slide-up');
+      displayProfilePicture(post.username);
 
       // Fetch and display upvote count
       try {
@@ -397,3 +399,19 @@ window.addEventListener('popstate', () => {
     window.location.href = 'dashboard.html';
   }
 });
+
+function displayProfilePicture(username) {
+  fetch(`http://localhost:3000/user/userInfo/${username}`)
+    .then(response => response.json())
+    .then(response => {
+      const profilePicture = document.getElementById('profilePic');
+      let imageData;
+      if (profilePicture) {
+        imageData = `data:image/png;base64,${response.profilepic}`;
+        profilePicture.src = imageData;
+        
+      }
+    })
+    .catch(error => console.error('Error:', error));
+}
+

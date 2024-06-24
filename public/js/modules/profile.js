@@ -99,7 +99,7 @@ function cancelProfileEdit() {
  * Fetch user information based on the token.
  * @returns {Promise<Object>} - A promise that resolves to the user object.
  */
-async function fetchUser() {
+ async function fetchUser() {
     const token = localStorage.getItem('token');
     const userId = getUserIdFromToken(token);
     const response = await fetch(`http://localhost:3000/user/userInfo/${userId}`);
@@ -113,6 +113,7 @@ async function fetchUser() {
 function populateProfile() {
     
     fetchUser().then(user => {
+        document.getElementById('questionTitle').innerText = `Questions by @${user.username}`;
         document.getElementById('aboutText').innerText = user.about;
         document.getElementById('username').innerText = "@" + user.username;
         document.getElementById('firstName').innerText = user.first_name;
@@ -121,8 +122,9 @@ function populateProfile() {
         if (user.profilepic){
             imageData = `data:image/png;base64,${user.profilepic}`;
             document.getElementById('profilePic').src = imageData;
-            document.getElementById('profileBox').style.display = 'block';
+            
         }
+        document.getElementById('profileBox').style.display = 'block';
     });
 }
 
@@ -158,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         populateProfile();
     }
     populateSidebar(getUserIdFromToken(localStorage.getItem('token')));
-    fetchAndDisplayPosts(null, getUserIdFromToken(localStorage.getItem('token')));
+    fetchAndDisplayPosts('all', getUserIdFromToken(localStorage.getItem('token')));
     populateSidebar(getUserIdFromToken(localStorage.getItem('token')));
 });
 
