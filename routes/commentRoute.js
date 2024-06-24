@@ -7,13 +7,13 @@ const myCache = require('../cache');
 
 const { containsProfanity } = require('../public/js/modules/moderate');
 
-router.get('/:postId', async(req, res) => {
+router.get('/:postId', async (req, res) => {
     const postId = req.params.postId;
     const cacheKey = `comments_${postId}`;
     const cachedComments = myCache.get(postId);
 
     if (cachedComments) {
-        return res.status(200).json(cachedComments);
+        return res.formatResponse(cachedComments, 200);
     }
 
     try {
@@ -24,17 +24,17 @@ router.get('/:postId', async(req, res) => {
             const comments = commentsResult.rows;
 
             myCache.set(cacheKey, comments);
-            res.status(200).json(comments);
+            res.formatResponse(comments, 200);
         } finally {
             client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error fetching comments:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.formatResponse({ error: 'Internal Server Error' }, 500);
     }
 });
 
-router.post('/:postId/create', authenticateToken, async(req, res) => {
+router.post('/:postId/create', authenticateToken, async (req, res) => {
     const { postId } = req.params;
     let { content, parentId } = req.body; // Include parentId in the request body
     const username = req.user.username; // Extract username from the token
@@ -53,22 +53,22 @@ router.post('/:postId/create', authenticateToken, async(req, res) => {
             );
             const myCacheKey = `comments_${postId}`;
             myCache.del(myCacheKey);
-            res.status(201).json(result.rows[0]);
+            res.formatResponse(result.rows[0], 201);
         } catch (error) {
             console.error('Error inserting comment into database:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.formatResponse({ error: 'Internal Server Error' }, 500);
         } finally {
             client.release(); // Release the client back to the pool
         }
     } catch (error) {
         console.error('Error connecting to database:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.formatResponse({ error: 'Internal Server Error' }, 500);
     }
 });
-// Endpoint to Mark comment as answer
-router.post('/:commentId/answer', authenticateToken, async(req, res) => {
-    const commentId  = req.params;
-    const postId  = req.body;
+
+router.post('/:commentId/answer', authenticateToken, async (req, res) => {
+    const commentId = req.params;
+    const postId = req.body;
     console.log(commentId.commentId, postId.postId);
     try {
         const client = await pool.connect();
@@ -78,26 +78,25 @@ router.post('/:commentId/answer', authenticateToken, async(req, res) => {
                 await markPostAsAnswered(postId.postId);
             } catch (error) {
                 console.error('Error marking post as answered:', error);
-                return res.status(500).json({ message: 'Internal server error' });
+                return res.formatResponse({ message: 'Internal server error' }, 500);
             }
 
             if (result.rowCount === 0) {
-                return res.status(404).json({ message: 'Comment not found' });
+                return res.formatResponse({ message: 'Comment not found' }, 404);
             }
-            return res.status(200).json({ message: 'Comment marked as answer' });
-        }
-         catch (error) {
+            return res.formatResponse({ message: 'Comment marked as answer' }, 200);
+        } catch (error) {
             console.error('Error marking comment as answer:', error);
-            return res.status(500).json({ message: 'Internal server error' });
+            return res.formatResponse({ message: 'Internal server error' }, 500);
         } finally {
             client.release();
         }
     } catch (error) {
         console.error('Error connecting to database:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return res.formatResponse({ message: 'Internal server error' }, 500);
     }
 });
-// Mark Post as Answered
+
 async function markPostAsAnswered(postId) {
     console.log('Marking post as answered:', postId);
     let client;
@@ -115,28 +114,26 @@ async function markPostAsAnswered(postId) {
     }
 }
 
-// Delete Comment
-router.delete('/:commentId', authenticateToken, async(req, res) => {
+router.delete('/:commentId', authenticateToken, async (req, res) => {
     const commentId = req.params.commentId;
     try {
         const client = await pool.connect();
         try {
             const result = await client.query('DELETE FROM comments WHERE id = $1', [commentId]);
             if (result.rowCount === 0) {
-                return res.status(404).json({ message: 'Comment not found' });
+                return res.formatResponse({ message: 'Comment not found' }, 404);
             }
-            return res.status(200).json({ message: 'Comment deleted successfully' });
+            return res.formatResponse({ message: 'Comment deleted successfully' }, 200);
         } catch (error) {
             console.error('Error deleting comment:', error);
-            return res.status(500).json({ message: 'Internal server error' });
+            return res.formatResponse({ message: 'Internal server error' }, 500);
         } finally {
             client.release();
         }
     } catch (error) {
         console.error('Error connecting to database:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return res.formatResponse({ message: 'Internal server error' }, 500);
     }
 });
 
-
-module.exports = router
+module.exports = router;
