@@ -28,6 +28,7 @@
 .create-post{
     cursor: pointer;
     height: 50px;
+    width: 200px;
 }
 /* CSS for the upvote animation */
 .upvoted {
@@ -146,3 +147,9 @@
     
 }
   
+@media screen and (max-width: 768px) {
+    #logout-button {
+        margin-block: 10px;
+    }
+    
+}

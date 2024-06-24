@@ -113,6 +113,7 @@ function cancelProfileEdit() {
 function populateProfile() {
     
     fetchUser().then(user => {
+        document.getElementById('userSince').innerText = `user since ${new Date(user.created_at).toLocaleDateString()}`;
         document.getElementById('questionTitle').innerText = `Questions by @${user.username}`;
         document.getElementById('aboutText').innerText = user.about;
         document.getElementById('username').innerText = "@" + user.username;
