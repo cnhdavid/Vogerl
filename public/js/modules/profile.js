@@ -50,13 +50,37 @@ function editProfile() {
  */
 function saveProfile() {
     const aboutText = document.getElementById('aboutTextarea').value;
-    document.getElementById('aboutText').innerText = aboutText;
-    document.getElementById('aboutText').style.display = 'block';
-    document.getElementById('aboutTextarea').style.display = 'none';
-    document.getElementById('fileInputContainer').style.display = 'none';
-    document.getElementById('editButton').style.display = 'inline-block';
-    document.getElementById('saveButton').style.display = 'none';
-    document.getElementById('cancelButton').style.display = 'none';
+    const image = document.getElementById('uploadProfilePic').files[0];
+    const formData = new FormData();
+    const username = getUserIdFromToken(localStorage.getItem('token'));
+    formData.append('about', aboutText);
+
+    if (username) {
+        formData.append('username', username);
+    }
+
+    if (image) {
+        formData.append('image', image);
+    }
+    console.log(aboutText);
+
+    fetch('http://localhost:3000/account/editProfile', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: formData
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to update profile');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+            window.location.reload();
+        })
 }
 
 /**
@@ -92,7 +116,11 @@ function populateProfile() {
         document.getElementById('username').innerText = "@" + user.username;
         document.getElementById('firstName').innerText = user.first_name;
         document.getElementById('lastName').innerText = user.last_name;
-        document.getElementById('profilePic').src = user.profilePic;
+        let imageData = '';
+        if (user.profilepic){
+            imageData = `data:image/png;base64,${user.profilepic}`;
+            document.getElementById('profilePic').src = imageData;
+        }
     });
 }
 
@@ -115,38 +143,7 @@ function handleProfilePicUpload(event) {
 /**
  * Update user information with the new profile data.
  */
-async function updateUserInfo() {
-    const about = document.getElementById('aboutTextarea').value;
-    const firstName = document.getElementById('firstNameInput').value;
-    const lastName = document.getElementById('lastNameInput').value;
-    const token = localStorage.getItem('token');
 
-    try {
-        const response = await fetch(`http://localhost:3000/api/users/${username}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ firstName, lastName, about }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to update user info: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-
-        if (result.message === 'User updated successfully') {
-            alert('User info updated successfully');
-        } else {
-            alert('Error updating user info: ' + result.message);
-        }
-    } catch (error) {
-        console.error('Error updating user info:', error);
-        alert('Error updating user info: ' + error.message);
-    }
-}
 
 /**
  * Initialize the application on DOMContentLoaded.

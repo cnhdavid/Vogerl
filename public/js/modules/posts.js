@@ -241,7 +241,7 @@ export async function createPostElement(post, comments) {
                       <i class="fa-solid fa-arrow-up is-fluid" id="upvote-${post.id}"></i>
                       <span id="upvote-count-${post.id}" class="upvote-count mx-3"> Loading...</span>
                       <i class="fa-solid fa-arrow-down is-fluid" id="downvote-${post.id}"></i>
-                      <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment"></i></span>
+                      <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment mx-3"></i></span>
                       <span id="comment-count-${post.id}"> Loading...</span>
                       ${localStorage.getItem('token') && getRoleFromToken(localStorage.getItem('token')) === 'admin' ? `<button class="button is-danger is-small is-pulled-right" id="deletePost-${post.id}">Delete Post</button>` : ''}
                   </div>

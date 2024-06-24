@@ -3,11 +3,18 @@ const router = express.Router();
 const createPool = require('../db');
 const authenticateToken = require('../authenticate');
 const pool = createPool.createPool();
+const myCache = require('../cache');
 
 const { containsProfanity } = require('../public/js/modules/moderate');
 
 router.get('/:postId', async(req, res) => {
     const postId = req.params.postId;
+    const cacheKey = `comments_${postId}`;
+    const cachedComments = myCache.get(postId);
+
+    if (cachedComments) {
+        return res.status(200).json(cachedComments);
+    }
 
     try {
         const client = await pool.connect();
@@ -15,6 +22,8 @@ router.get('/:postId', async(req, res) => {
             const commentsQuery = 'SELECT * FROM comments WHERE post_id = $1';
             const commentsResult = await client.query(commentsQuery, [postId]);
             const comments = commentsResult.rows;
+
+            myCache.set(cacheKey, comments);
             res.status(200).json(comments);
         } finally {
             client.release(); // Release the client back to the pool
@@ -42,6 +51,8 @@ router.post('/:postId/create', authenticateToken, async(req, res) => {
                 `INSERT INTO comments (username, post_id, content, parent_id, created_at, updated_at)
                  VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *`, [username, postId, content, parentId]
             );
+            const myCacheKey = `comments_${postId}`;
+            myCache.del(myCacheKey);
             res.status(201).json(result.rows[0]);
         } catch (error) {
             console.error('Error inserting comment into database:', error);

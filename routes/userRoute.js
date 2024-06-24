@@ -56,16 +56,12 @@ router.get('/:postId/hasUserLiked/:userId', authenticateToken, async(req, res) =
 router.get('/userInfo/:username', async(req, res) => {
     const username = req.params.username;
 
-    try {
-        const client = await pool.connect();
+    
         try {
-            const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
-
+            const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+            console.log(result.rows[0]);
             res.status(200).json(result.rows[0]);
-        } finally {
-            client.release(); // Release the client back to the pool
-        }
-    } catch (error) {
+        }catch (error) {
         console.error('Error fetching user:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
@@ -74,8 +70,7 @@ router.get('/userInfo/:username', async(req, res) => {
 async function hasUserVoted(postId, userId) {
 
 
-    try {
-        const client = await pool.connect();
+  
         try {
             // Query the PostVotes table to check if the user has voted on the post
             const voteResult = await pool.query('SELECT * FROM PostVotes WHERE post_id = $1 AND user_id = $2', [postId, userId]);
@@ -101,14 +96,9 @@ async function hasUserVoted(postId, userId) {
             console.error('Error checking if user has voted on post:', error);
             // Handle the error as needed
             throw new Error('Error checking if user has voted on post');
-        } finally {
-            client.release();
-        }
-    } catch (error) {
-        console.error('Error connecting to database:', error);
-        throw new Error('Internal Server Error');
-    }
+        } 
+    } 
 
-}
+
 
 module.exports = router
