@@ -3,8 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const WebSocket = require('ws');
-const createPool = require('./db');
-const pool = createPool.createPool();
+
 const path = require('path');
 const xml2js = require('xml2js');
 

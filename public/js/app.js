@@ -6,7 +6,7 @@
 // Import necessary functions from other modules
 import { checkToken, getRoleFromToken, logout } from './modules/auth.js';
 import { fetchAndDisplayPosts, searchPosts } from './modules/posts.js';
-import { populateMenu, populateSidebar, populatePostsSidebar, getPostsByUsername } from './modules/posts.js';
+import { populateMenu, populateSidebar, populatePostsSidebar, getPostsByUsername, populateFilterDropdown } from './modules/posts.js';
 
 // Establish a WebSocket connection to the server
 const socket = new WebSocket('ws://localhost:3000');
@@ -186,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndDisplayPosts(null, null, null);
     populateMenu();
     populateSidebar();
+    populateFilterDropdown();
 
 
 });

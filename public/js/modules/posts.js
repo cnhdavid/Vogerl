@@ -24,7 +24,7 @@ async function fetchPosts(subject = null, username = null) {
   if (params.toString()) {
     url += `?${params.toString()}`;
   }
-  
+
   console.log(url);
   try {
     const response = await fetch(url, {
@@ -51,11 +51,11 @@ async function fetchPosts(subject = null, username = null) {
  */
 export function populateMenu() {
   const selectElement = document.getElementById('postMenu');
-  
+
 
   sidebarSubjects.forEach(subject => {
     const option = document.createElement('option');
-    
+
     option.textContent = subject.title;
     option.value = subject.title;
     selectElement.appendChild(option);
@@ -82,6 +82,27 @@ export function populateSidebar(username = null) {
     });
     listItem.appendChild(link);
     sidebarMenu.appendChild(listItem);
+  });
+}
+export function populateFilterDropdown() {
+  const filterDropdownButton = document.getElementById('filterDropdownButton');
+  filterDropdownButton.addEventListener('click', () => {
+    const filterDropdown = document.getElementById('filterDropdownMenu');
+    filterDropdown.classList.toggle('is-active');
+  })
+  const selectElement = document.getElementById('filterDropdown');
+  sidebarSubjects.forEach(subject => {
+    const div = document.createElement('div');
+    div.classList.add('dropdown-item', 'hvr-grow');
+    div.textContent = subject.title;
+    div.value = subject.title;
+    div.addEventListener('click', () => {
+      fetchAndDisplayPosts(subject.title);
+      filterDropdownButton.textContent = "Showing posts in " + subject.title;
+      const filterDropdown = document.getElementById('filterDropdownMenu');
+      filterDropdown.classList.toggle('is-active');
+    })
+    selectElement.appendChild(div);
   });
 }
 
@@ -175,7 +196,7 @@ export async function fetchAndDisplayPosts(subject = null, username = null, sear
   try {
     const loadingSpinner = document.getElementById('loadingSpinner');
     const postsContainer = document.getElementById('postsContainer');
-    
+
     // Show the loading spinner
     loadingSpinner.style.display = 'block';
     postsContainer.innerHTML = '';
@@ -187,16 +208,23 @@ export async function fetchAndDisplayPosts(subject = null, username = null, sear
       console.log(subject, username);
       posts = await fetchPosts(subject, username);
     }
+    if (posts.length === 0) {
 
+      postsContainer.innerHTML = 'No posts found.';
+      loadingSpinner.style.display = 'none';
+      return;
+    }
     const commentsPromises = posts.map(post => fetchComments(post.id));
     const allComments = await Promise.all(commentsPromises);
 
     await Promise.all(posts.map(async (post, index) => {
+
+
       const postElement = await createPostElement(post, allComments[index]);
       postsContainer.appendChild(postElement);
       await getCommentCount(post.id);
     }));
-    
+
     // Hide the loading spinner after all posts are added to the DOM
     loadingSpinner.style.display = 'none';
   } catch (error) {
@@ -232,6 +260,13 @@ export async function searchPosts(searchTerm) {
  * @param {Array} comments - The array of comments for the post.
  * @returns {Promise<HTMLElement>} - A promise that resolves to the created post element.
  */
+
+function truncateText(text, maxLength) {
+  if (text.length > maxLength) {
+    return text.slice(0, maxLength) + '...';
+  }
+  return text;
+}
 export async function createPostElement(post) {
   const postElement = document.createElement('div');
   postElement.classList.add('box', 'is-clickable', 'my-3');
@@ -245,30 +280,36 @@ export async function createPostElement(post) {
   const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 
 
+  const truncatedTitle = truncateText(post.title, 50); // Limit title to 50 characters
+  const truncatedContent = truncateText(post.content, 150); // Limit content to 200 characters
   postElement.innerHTML = `
       <article class="media ">
           <div class="media-content">
               <div class="content">
-                  <div class="post-content">
+                  <div class="post-content ">
                       <p>
-                          <strong>${post.title}</strong> <small>@${post.username}</small>
+                          <strong>${truncatedTitle}</strong> <small>@${post.username}</small>
                           ${post.isanswered ? '<span class="tag is-success is-pulled-right">Answered</span>' : ''}
                           <br>
                           <em>${post.subject}</em>
                           <br>
-                          ${post.content}
+                          ${truncatedContent}
+                          ${post.image ? `<figure class="image is-128x128 hvr-grow is-pulled-right is-pulled-right-mobile"><img src="${imageData}" alt="Post Image"  /> </figure>` : ''}
+                          <small>${formattedDate}</small>
                       </p>
+                      <div>
                       <i class="fa-solid fa-arrow-up is-fluid hvr-float" id="upvote-${post.id}"></i>
                       <span id="upvote-count-${post.id}" class="upvote-count mx-3"> Loading...</span>
                       <i class="fa-solid fa-arrow-down is-fluid hvr-sink" id="downvote-${post.id}"></i>
                       <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment mx-3"></i></span>
                       <span id="comment-count-${post.id}"> Loading...</span>
+                      </div>
+                      
                       ${localStorage.getItem('token') && getRoleFromToken(localStorage.getItem('token')) === 'admin' ? `<button class="button is-danger is-small is-pulled-right" id="deletePost-${post.id}">Delete Post</button>` : ''}
                   </div>
-                   <p class="is-pulled-left my-2 subtitle is-6">posted on ${formattedDate}</p>
+                   
               </div>
           </div>
-          ${post.image ? `<figure class="image is-128x128 hvr-grow"><img src="${imageData}" alt="Post Image"  /> </figure>` : ''}
          
       </article>
   `;
@@ -310,7 +351,7 @@ export async function createPostElement(post) {
       try {
         const userId = await getUserId(post.username);
         const liked = await hasUserVoted(post.id, userId);
-        console.log(liked);
+
 
         const upvoteElement = document.getElementById(`upvote-${post.id}`);
         const downvoteElement = document.getElementById(`downvote-${post.id}`);

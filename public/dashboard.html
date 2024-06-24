@@ -20,6 +20,23 @@
                 <a class="navbar-item" href="/">
                     <img src="/images/Vogerl.png" alt="Vogerl Logo" height="100">
                 </a>
+                <a class="navbar-item" >
+                    <div class="dropdown is-hidden-desktop" id="filterDropdownMenu">
+                        <div class="dropdown-trigger">
+                          <button class="button" id="filterDropdownButton" aria-haspopup="true" aria-controls="dropdown-menu">
+                            <span>All</span>
+                            <span class="icon is-small">
+                              <i class="fas fa-angle-down" aria-hidden="true"></i>
+                            </span>
+                          </button>
+                        </div>
+                        <div class="dropdown-menu"  role="menu">
+                          <div class="dropdown-content"id="filterDropdown">
+                            
+                          </div>
+                        </div>
+                      </div>
+                </a>
                 <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
                     <span aria-hidden="true"></span>
                     <span aria-hidden="true"></span>
@@ -34,6 +51,7 @@
                         <input class="input is-normal" id="searchInput" type="text" placeholder="Search...">
                     </div>
                     <a class="navbar-item" id="searchButton"><i class="fa-solid fa-magnifying-glass"></i></a>
+                   
                 </div>
                 <div id="navbar-end" class="navbar-end">
                     <div class="navbar-item" id="auth-buttons">

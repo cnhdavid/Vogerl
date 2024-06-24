@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const createPool = require('../db');
+const { executeQuery } = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const pool = createPool.createPool();
+
 const authenticateToken = require('../authenticate');
 const multer = require('multer');
 const storage = multer.memoryStorage();
@@ -18,17 +18,17 @@ router.post('/signup', async(req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    pool.connect();
+    
     try {
         const userCheckQuery = 'SELECT * FROM users WHERE email = $1';
-        const userCheckResult = await client.query(userCheckQuery, [email]);
+        const userCheckResult = await executeQuery(userCheckQuery, [email]);
 
         if (userCheckResult.rows.length > 0) {
             return res.formatResponse({ message: 'Email already exists' }, 400);
         }
 
         const insertQuery = 'INSERT INTO users (username, email, password, date_of_birth, first_name, last_name) VALUES ($1, $2, $3, $4, $5, $6)';
-        await pool.query(insertQuery, [username, email, hashedPassword, formattedDOB, first_name, last_name]);
+        await executeQuery(insertQuery, [username, email, hashedPassword, formattedDOB, first_name, last_name]);
 
         return res.formatResponse({ message: 'User created successfully' }, 201);
     } catch (error) {
@@ -52,7 +52,7 @@ router.post('/login', async(req, res) => {
 
     try {
         const userCheckQuery = 'SELECT * FROM users WHERE email = $1';
-        const userCheckResult = await pool.query(userCheckQuery, [email]);
+        const userCheckResult = await executeQuery(userCheckQuery, [email]);
 
         if (userCheckResult.rows.length === 0) {
             return res.formatResponse({ message: 'Invalid email or password' }, 400);
@@ -91,15 +91,15 @@ router.post('/editProfile', authenticateToken, upload.single('image'), async(req
         image = req.file.buffer.toString('base64');
     }
 
-    const client = await pool.connect();
+    
     try {
         let updateQuery;
         if (image === null) {
             updateQuery = 'UPDATE users SET about = $1 WHERE username = $2';
-            await client.query(updateQuery, [about, username]);
+            await executeQuery(updateQuery, [about, username]);
         } else {
             updateQuery = 'UPDATE users SET about = $1, profilepic = $2 WHERE username = $3';
-            await client.query(updateQuery, [about, image, username]);
+            await executeQuery(updateQuery, [about, image, username]);
         }
 
         return res.formatResponse({ message: 'Profile updated successfully' }, 200);
