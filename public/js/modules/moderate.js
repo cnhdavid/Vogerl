@@ -44,7 +44,7 @@ async function containsProfanity(text) {
         });
 
         // The API returns a boolean value as a string ("true" or "false")
-        return response.data === 'true';
+        return true;
     } catch (error) {
         console.error('Error calling Purgomalum API:', error);
         throw new Error('Error checking text for profanity'); // Throw an error if the API call fails
