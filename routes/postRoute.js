@@ -9,7 +9,7 @@ const upload = multer();
 
 const { filterProfanity, containsProfanity } = require('../public/js/modules/moderate');
 
-router.post('/create', authenticateToken, upload.single('image'), async(req, res) => {
+router.post('/create', authenticateToken, upload.single('image'), async (req, res) => {
     let { title, content, subject } = req.body;
     const username = req.user.username; // Extract username from the token
     let image = null;
@@ -83,53 +83,59 @@ router.delete('/Deletepost/:postId', authenticateToken, async (req, res) => {
     }
 });
 
-router.get('/posts/:subject/:username', async(req, res) => {
-
-    let subject = req.params.subject;
+router.get('/posts', async (req, res) => {
 
 
-    if (!subject) {
-        subject = "All";
-    }
-    const username = req.params.username; // Get the username from query params
-    if (!username) {
-        username = null;
-    }
-    console.log(username, subject);
+    let subject = req.query.subject || 'All';
+    let username = req.query.username || null;
+    console.log(subject)
+    const cacheKey = `allPosts`;
+  const cachedPosts = myCache.get(cacheKey);
+
+  if (cachedPosts && subject === "All" && username === null) {
+    console.log("returing from cache");
+    // sort by date
+    cachedPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    return res.status(200).json(cachedPosts);
+  }
+
+
     
 
-    const cacheKey = `allPosts`;
-    const cachedPosts = myCache.get(cacheKey);
-
-    if (cachedPosts) {
-        return res.status(200).json(cachedPosts);
-    }
+    
 
     try {
         let result;
-        if (username) {
-
+        if (username!==null) {
+            
             if (subject === "All") {
                 result = await pool.query('SELECT * FROM posts WHERE username = $1', [username]);
             } else {
+                
                 result = await pool.query('SELECT * FROM posts WHERE username = $1 AND subject = $2', [username, subject]);
             }
         } else if (subject && subject !== "All") {
+            console.log(subject);
             result = await pool.query('SELECT * FROM posts WHERE subject = $1', [subject]);
+            
+
         } else {
+            console.log("updating cache");
             result = await pool.query('SELECT * FROM posts');
+            result.rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            myCache.set(cacheKey, result.rows);
         }
 
-        myCache.set(cacheKey, result.rows);
-        console.log(result.rows);
+        
+        
         res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error fetching posts:', error);
         res.status(500).json({ error: 'Internal Server Error' });
-    } 
+    }
 });
 
-router.put('/:postId', authenticateToken, async(req, res) => {
+router.put('/:postId', authenticateToken, async (req, res) => {
     const postId = req.params.postId;
     const username = req.user.username;
     const { title, content } = req.body;
@@ -146,21 +152,21 @@ router.put('/:postId', authenticateToken, async(req, res) => {
         modifiedTitle += ' (The post content was changed due to it containing profanity)';
 
     }
-    
-        try {
-            await client.query('UPDATE posts SET title = $1, content = $2 WHERE id = $3 AND username = $4', [modifiedTitle, modifiedContent, postId, username]);
 
-            const myCacheKey = `allPosts`;
-            myCache.del(myCacheKey);
-            res.status(200).json({ message: 'Post updated successfully' });
-        } catch (error) {
-            console.error('Error updating post:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-     
+    try {
+        await client.query('UPDATE posts SET title = $1, content = $2 WHERE id = $3 AND username = $4', [modifiedTitle, modifiedContent, postId, username]);
+
+        const myCacheKey = `allPosts`;
+        myCache.del(myCacheKey);
+        res.status(200).json({ message: 'Post updated successfully' });
+    } catch (error) {
+        console.error('Error updating post:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+
 });
 
-router.get('/:postId', async(req, res) => {
+router.get('/:postId', async (req, res) => {
     const postId = req.params.postId;
     console.log(postId);
 

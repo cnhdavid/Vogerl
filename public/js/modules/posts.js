@@ -14,18 +14,15 @@ import { getUserId, getRoleFromToken, getUserIdFromToken } from './auth.js';
  * @returns {Promise<Array>} - A promise that resolves to an array of posts.
  */
 async function fetchPosts(subject = null, username = null) {
-  let url = 'http://localhost:3000/posts';
+  let url = 'http://localhost:3000/post/posts';
 
-  if (subject) {
-    url += `/${encodeURIComponent(subject)}`;
-  } else {
-    url += '/All';
-  }
+  const params = new URLSearchParams();
+  if (subject) params.append('subject', subject);
+  if (!subject) params.append('subject', 'All');
+  if (username) params.append('username', username);
 
-  if (username) {
-    url += `/${encodeURIComponent(username)}`;
-  } else {
-    url += '/null';
+  if (params.toString()) {
+    url += `?${params.toString()}`;
   }
   
   console.log(url);

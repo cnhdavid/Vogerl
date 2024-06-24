@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         populateProfile();
     }
     populateSidebar(getUserIdFromToken(localStorage.getItem('token')));
-    fetchAndDisplayPosts('all', getUserIdFromToken(localStorage.getItem('token')));
+    fetchAndDisplayPosts(null, getUserIdFromToken(localStorage.getItem('token')));
     populateSidebar(getUserIdFromToken(localStorage.getItem('token')));
 });
 
