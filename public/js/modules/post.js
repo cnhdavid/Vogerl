@@ -283,7 +283,7 @@ const submitComment = async (postId, content, parentId = null) => {
 
     if (response.status === 403 || response.status === 401) {
       window.location.href = 'login.html';
-      alert('Please login first');
+      
       return;
     }
 

@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('token');
 
             if (!token) {
-                alert('You are not logged in. Please log in first.');
+                window.location.href = 'login.html';
                 return;
             }
 
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: formData
             });
             if (response.status === 403) {
-                alert('You are not authorized to create a post.');
+                
                 window.location.href = 'login.html';
             }
 
