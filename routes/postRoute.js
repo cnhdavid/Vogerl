@@ -123,38 +123,45 @@ router.get('/posts', async (req, res) => {
     }
 });
 
-router.put('/:postId', authenticateToken, async (req, res) => {
-    const postId = req.params.postId;
-    const username = req.user.username;
-    const { title, content } = req.body;
+router.patch('/:postId', authenticateToken, upload.none(), async (req, res) => {
+    const { postId } = req.params;
+    const { username } = req.user;  // Extracted from token in `authenticateToken` middleware
+    const updates = req.body;
 
-    if (!title || !content) {
-        return res.status(400).send('Title and content are required');
+    // Prepare updates, checking for profanity and adjusting fields as necessary
+    const fieldsToUpdate = {};
+    if (updates.title) {
+        let modifiedTitle = await filterProfanity(updates.title);
+        if (await containsProfanity(updates.title)) {
+            modifiedTitle += ' (Modified due to profanity)';
+        }
+        fieldsToUpdate.title = modifiedTitle;
     }
-    let modifiedTitle = await filterProfanity(title);
-    let modifiedContent = await filterProfanity(content);
-    
-    const titleHasProfanity = await containsProfanity(title);
-    console.log(titleHasProfanity);
-    const contentHasProfanity = await containsProfanity(content);
-
-    if (titleHasProfanity || contentHasProfanity) {
-        modifiedTitle += ' (The post content was changed due to it containing profanity)';
-        modifiedContent += ' (The post content was changed due to it containing profanity)';
-        console.log("here");
-
-
+    if (updates.content) {
+        let modifiedContent = await filterProfanity(updates.content);
+        if (await containsProfanity(updates.content)) {
+            modifiedContent += ' (Modified due to profanity)';
+        }
+        fieldsToUpdate.content = modifiedContent;
     }
 
-    try {
-        await pool.query('UPDATE posts SET title = $1, content = $2 WHERE id = $3 AND username = $4', [modifiedTitle, modifiedContent, postId, username]);
+    // Generate SQL based on fields provided
+    const setClause = Object.keys(fieldsToUpdate)
+        .map((key, index) => `${key} = $${index + 1}`)
+        .join(', ');
+    const values = [...Object.values(fieldsToUpdate), postId, username];
 
-        const myCacheKey = `allPosts`;
-        myCache.del(myCacheKey);
-        res.status(200).json({ message: 'Post updated successfully' });
-    } catch (error) {
-        console.error('Error updating post:', error);
-        res.formatResponse({ error: 'Internal Server Error' }, 500);
+    if (Object.keys(fieldsToUpdate).length > 0) {
+        try {
+            const queryText = `UPDATE posts SET ${setClause} WHERE id = $${Object.keys(fieldsToUpdate).length + 1} AND username = $${Object.keys(fieldsToUpdate).length + 2}`;
+            await pool.query(queryText, values);
+            res.status(200).json({ message: 'Post updated successfully' });
+        } catch (error) {
+            console.error('Error updating post:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    } else {
+        res.status(400).json({ error: 'No valid fields provided for update' });
     }
 });
 
