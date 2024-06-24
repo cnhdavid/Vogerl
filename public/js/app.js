@@ -40,12 +40,6 @@ export function populateNavbar(user) {
             window.location.href = 'profile.html';
         });
 
-
-        
-
-       
-        
-
         const buttonContainer = document.createElement('div');
         buttonContainer.classList.add( 'navbar-item');
         buttonContainer.appendChild(profileButton);
