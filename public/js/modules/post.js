@@ -196,6 +196,8 @@ function displayComments(postId, postUsername) {
             <h4 class="title is-6">${comment.username}</h4>
             <p class="content">${comment.content}</p>
             ${localStorage.getItem('token') && (postUsername === getUserIdFromToken(localStorage.getItem('token')) || getRoleFromToken(localStorage.getItem('token')) === 'admin') ? `<button id="deleteCommentButton-${comment.id}" class="button is-danger is-small my-2">Delete Comment</button>` : ''}            ${!comment.isanswer && postUsername === getUserIdFromToken(localStorage.getItem('token')) ? `<button id="MarkCommentAsAnswerButton-${comment.id}" class="button is-success is-small my-2">Mark as Answer</button>` : ''}
+            ${localStorage.getItem('token') && (comment.username === getUserIdFromToken(localStorage.getItem('token'))) ? `<button id="deleteCommentButton-${comment.id}" class="button is-danger is-small my-2">Delete Comment</button>` : ''}           
+
             </div>
           `;
 

@@ -25,6 +25,8 @@ router.post('/create', authenticateToken, upload.single('image'), async (req, re
 
     if (titleHasProfanity || contentHasProfanity) {
         modifiedTitle += ' (The post content was changed due to it containing profanity)';
+        modifiedContent += ' (The post content was changed due to it containing profanity)';
+
     }
 
     try {
@@ -130,24 +132,26 @@ router.put('/:postId', authenticateToken, async (req, res) => {
         return res.status(400).send('Title and content are required');
     }
     let modifiedTitle = await filterProfanity(title);
-    const modifiedContent = await filterProfanity(content);
+    let modifiedContent = await filterProfanity(content);
+    
     const titleHasProfanity = await containsProfanity(title);
+    console.log(titleHasProfanity);
     const contentHasProfanity = await containsProfanity(content);
 
     if (titleHasProfanity || contentHasProfanity) {
         modifiedTitle += ' (The post content was changed due to it containing profanity)';
+        modifiedContent += ' (The post content was changed due to it containing profanity)';
+        console.log("here");
+
+
     }
 
     try {
-        const client = await pool.connect();
-        try {
-            await client.query('UPDATE posts SET title = $1, content = $2 WHERE id = $3 AND username = $4', [modifiedTitle, modifiedContent, postId, username]);
-            const myCacheKey = `allPosts`;
-            myCache.del(myCacheKey);
-            res.formatResponse({ message: 'Post updated successfully' }, 200);
-        } finally {
-            client.release(); // Release the client back to the pool
-        }
+        await pool.query('UPDATE posts SET title = $1, content = $2 WHERE id = $3 AND username = $4', [modifiedTitle, modifiedContent, postId, username]);
+
+        const myCacheKey = `allPosts`;
+        myCache.del(myCacheKey);
+        res.status(200).json({ message: 'Post updated successfully' });
     } catch (error) {
         console.error('Error updating post:', error);
         res.formatResponse({ error: 'Internal Server Error' }, 500);
@@ -158,23 +162,20 @@ router.get('/:postId', async (req, res) => {
     const postId = req.params.postId;
     console.log(postId);
 
-    try {
-        const client = await pool.connect();
+    
         try {
-            const result = await client.query('SELECT * FROM posts WHERE id = $1', [postId]);
+            const result = await pool.query('SELECT * FROM posts WHERE id = $1', [postId]);
             const post = result.rows[0];
             if (!post) {
                 return res.formatResponse({ error: 'Post not found' }, 404);
             }
             myCache.del(`allposts`);
-            res.formatResponse(post, 200);
-        } finally {
-            client.release(); // Release the client back to the pool
-        }
-    } catch (error) {
+            res.status(200).json(post);
+        } catch (error) {
         console.error('Error fetching post:', error);
         res.formatResponse({ error: 'Internal Server Error' }, 500);
     }
+
 });
 
 module.exports = router;
