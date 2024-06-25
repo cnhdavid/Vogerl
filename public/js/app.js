@@ -5,7 +5,7 @@
 
 // Import necessary functions from other modules
 import { checkToken, getRoleFromToken, logout } from "./modules/auth.js";
-import { fetchAndDisplayPosts, searchPosts } from "./modules/posts.js";
+import { fetchAndDisplayPosts } from "./modules/posts.js";
 import {
   populateMenu,
   populateSidebar,

@@ -1,6 +1,4 @@
 // js/modules/modal.js
-
-import { response } from 'express';
 import { loadComments, submitComment } from './postManager.js';
 
 /**
