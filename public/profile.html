@@ -1,190 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Include Bulma CSS framework and custom styles -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
     <title>Vogerl</title>
     <!-- Include Font Awesome for icons -->
-    <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
+    <script
+      src="https://kit.fontawesome.com/0dde1341bf.js"
+      crossorigin="anonymous"
+    ></script>
     <style>
-        .box {
-            position: relative;
-        }
-        
-        .navbar-end {
-            display: flex;
-            align-items: center;
-        }
-        
-        .navbar-end .navbar-item {
-            display: flex;
-            align-items: center;
-        }
-        
-        .navbar-end .buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .button {
-            margin: 0 5px;
-        }
-        
-        .has-text-weight-semibold {
-            font-weight: 600;
-        }
-        
-        #profileContainer {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        
-        #profileContainer #username {
-            margin-right: 10%;
-            text-align: left;
-        }
-        
-        #profileContainer #nameContainer {
-            margin-right: 10px;
-            text-align: left;
-        }
-        
-        #profilePic {
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .about-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-    </style>
-</head>
+      .box {
+        position: relative;
+      }
 
-<body>
+      .navbar-end {
+        display: flex;
+        align-items: center;
+      }
+
+      .navbar-end .navbar-item {
+        display: flex;
+        align-items: center;
+      }
+
+      .navbar-end .buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      .button {
+        margin: 0 5px;
+      }
+
+      .has-text-weight-semibold {
+        font-weight: 600;
+      }
+
+      #profileContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      #profileContainer #username {
+        margin-right: 10%;
+        text-align: left;
+      }
+
+      #profileContainer #nameContainer {
+        margin-right: 10px;
+        text-align: left;
+      }
+
+      #profilePic {
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+
+      .about-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    </style>
+  </head>
+
+  <body>
     <!-- Header and Navbar -->
     <header>
-        <nav class="navbar" aria-label="main navigation">
-            <div class="navbar-brand">
-                <a class="navbar-item" href="/">
-                    <img src="/images/Vogerl.png" alt="Vogerl Logo" height="100">
-                </a>
-                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                </a>
+      <nav class="navbar" aria-label="main navigation">
+        <div class="navbar-brand">
+          <a class="navbar-item" href="/">
+            <img src="/images/Vogerl.png" alt="Vogerl Logo" height="100" />
+          </a>
+          <a
+            role="button"
+            class="navbar-burger"
+            aria-label="menu"
+            aria-expanded="false"
+            data-target="navbarBasicExample"
+          >
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+        </div>
+        <div id="navbarBasicExample" class="navbar-menu">
+          <div class="navbar-start">
+            <a class="navbar-item" href="/dashboard.html">Home</a>
+            <a class="navbar-item" href="/news.html"
+              >World News (a free service from Vogerl)</a
+            >
+            <div class="navbar-item">
+              <input
+                class="input is-normal"
+                type="text"
+                placeholder="Search..."
+              />
             </div>
-            <div id="navbarBasicExample" class="navbar-menu">
-                <div class="navbar-start">
-                    <a class="navbar-item" href="/dashboard.html">Home</a>
-                    <a class="navbar-item" href="/news.html">World News (a free service from Vogerl)</a>
-                    <div class="navbar-item">
-                        <input class="input is-normal" type="text" placeholder="Search...">
-                    </div>
-                    <a class="navbar-item"><i class="fa-solid fa-magnifying-glass"></i></a>
-                </div>
-                <div id="navbar-end" class="navbar-end">
-                    <div class="navbar-item" id="auth-buttons">
-                        <div class="buttons">
-                            <a class="button is-light" href="login.html" id="login-button">
-                                Log in
-                            </a>
-                            <a class="button is-primary" href="signup.html" id="signup-button">
-                                <strong>Sign up</strong>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="navbar-item" id="user-greeting" style="display: none;">
-                        <span id="greeting"></span>
-                        <a class="button is-light" href="#" id="logout-button">Log out</a>
-                    </div>
-                </div>
+            <a class="navbar-item"
+              ><i class="fa-solid fa-magnifying-glass"></i
+            ></a>
+          </div>
+          <div id="navbar-end" class="navbar-end">
+            <div class="navbar-item" id="auth-buttons">
+              <div class="buttons">
+                <a class="button is-light" href="login.html" id="login-button">
+                  Log in
+                </a>
+                <a
+                  class="button is-primary"
+                  href="signup.html"
+                  id="signup-button"
+                >
+                  <strong>Sign up</strong>
+                </a>
+              </div>
             </div>
-        </nav>
+            <div class="navbar-item" id="user-greeting" style="display: none">
+              <span id="greeting"></span>
+              <a class="button is-light" href="#" id="logout-button">Log out</a>
+            </div>
+          </div>
+        </div>
+      </nav>
     </header>
 
     <!-- Main Content Section -->
     <div class="section">
-        <div class="container">
-            <div class="columns">
-                <!-- Sidebar for Categories -->
-                <aside class="column is-one-quarter is-hidden-mobile">
-                    <div class="menu">
-                        <p class="menu-label">Categories</p>
-                        <ul class="menu-list" id="sidebarMenu">
-                            <!-- Categories will be dynamically inserted here -->
-                        </ul>
-                    </div>
-                </aside>
-
-                <div class="column is-three-quarters">
-                    <main>
-                        <div class="box" id="profileBox">
-                            <div class="columns is-multiline">
-                                <div class="column is-one-third has-text-centered">
-                                    <div id="profileContainer">
-                                        <p class="subtitle is-pulled-right" id="username">username</p>
-                                        <figure class="image is-128x128">
-                                            <img class="is-rounded" id="profilePic" src="https://bulma.io/assets/images/placeholders/128x128.png" alt="Profile Picture">
-                                        </figure>
-                                        <div id="nameContainer">
-                                            <p class="title" id="firstName">firstname</p>
-                                            <p class="subtitle" id="lastName">lastname</p>
-                                            <small><span id="userSince"></span></small>
-                                        </div>
-                                    </div>
-                                    <div class="file has-name is-small mt-2" id="fileInputContainer" style="display: none;">
-                                        <label class="file-label">
-                                            <input class="file-input" type="file" name="resume" id="uploadProfilePic">
-                                            <span class="file-cta">
-                                                <span class="file-label">Choose a file…</span>
-                                            </span>
-                                            <span class="file-name" id="file-name">No file uploaded</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="column is-two-thirds">
-                                    <div class="about-header">
-                                        <h1 class="title">About</h1>
-                                        <div class="edit-button-container">
-                                            <button class="button is-primary is-small" id="editButton">Edit</button>
-                                            <button class="button is-primary is-small" id="saveButton" style="display: none;">Save</button>
-                                            <button class="button is-light is-small" id="cancelButton" style="display: none;">Cancel</button>
-                                        </div>
-                                    </div>
-                                    <p id="aboutText">Brief description about the user...</p>
-                                    <textarea class="textarea" id="aboutTextarea" style="display: none;"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <section id="postsDisplay">
-                            <h2 class="title is-4" id="questionTitle">Questions</h2>
-                            <div id="postsContainer"></div>
-                            <div id="loadingSpinner" style="display: none;">
-                                <div class="mainCss">
-                                    <div class="dotsCss">
-                                      <div class="dot"></div>
-                                      <div class="dot"></div>
-                                      <div class="dot"></div>
-                                    </div>
-                                  </div>
-                            </div>
-                        </section>
-                    </main>
-                </div>
+      <div class="container">
+        <div class="columns">
+          <!-- Sidebar for Categories -->
+          <aside class="column is-one-quarter is-hidden-mobile">
+            <div class="menu">
+              <p class="menu-label">Categories</p>
+              <ul class="menu-list" id="sidebarMenu">
+                <!-- Categories will be dynamically inserted here -->
+              </ul>
             </div>
+          </aside>
+
+          <div class="column is-three-quarters">
+            <main>
+              <div class="box" id="profileBox">
+                <div class="columns is-multiline">
+                  <div class="column is-one-third has-text-centered">
+                    <div id="profileContainer">
+                      <p class="subtitle is-pulled-right" id="username">
+                        username
+                      </p>
+                      <figure class="image is-128x128">
+                        <img
+                          class="is-rounded"
+                          id="profilePic"
+                          src="https://bulma.io/assets/images/placeholders/128x128.png"
+                          alt="Profile Picture"
+                        />
+                      </figure>
+                      <div id="nameContainer">
+                        <p class="title" id="firstName">firstname</p>
+                        <p class="subtitle" id="lastName">lastname</p>
+                        <small><span id="userSince"></span></small>
+                      </div>
+                    </div>
+                    <div
+                      class="file has-name is-small mt-2"
+                      id="fileInputContainer"
+                      style="display: none"
+                    >
+                      <label class="file-label">
+                        <input
+                          class="file-input"
+                          type="file"
+                          name="resume"
+                          id="uploadProfilePic"
+                        />
+                        <span class="file-cta">
+                          <span class="file-label">Choose a file…</span>
+                        </span>
+                        <span class="file-name" id="file-name"
+                          >No file uploaded</span
+                        >
+                      </label>
+                    </div>
+                  </div>
+                  <div class="column is-two-thirds">
+                    <div class="about-header">
+                      <h1 class="title">About</h1>
+                      <div class="edit-button-container">
+                        <button
+                          class="button is-primary is-small"
+                          id="editButton"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          class="button is-primary is-small"
+                          id="saveButton"
+                          style="display: none"
+                        >
+                          Save
+                        </button>
+                        <button
+                          class="button is-light is-small"
+                          id="cancelButton"
+                          style="display: none"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                    <p id="aboutText">Brief description about the user...</p>
+                    <textarea
+                      class="textarea"
+                      id="aboutTextarea"
+                      style="display: none"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+              <section id="postsDisplay">
+                <h2 class="title is-4" id="questionTitle">Questions</h2>
+                <div id="postsContainer"></div>
+                <div id="loadingSpinner" style="display: none">
+                  <div class="mainCss">
+                    <div class="dotsCss">
+                      <div class="dot"></div>
+                      <div class="dot"></div>
+                      <div class="dot"></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </main>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Include JavaScript file for profile functionalities -->
     <script type="module" src="js/modules/profile.js"></script>
-</body>
-
+  </body>
 </html>

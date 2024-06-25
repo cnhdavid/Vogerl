@@ -194,11 +194,11 @@ export function upvotePost(postId) {
         let currentCount = parseInt(upvoteCount.textContent);
         let newCount;
         if (currentCount === -1) {
-           newCount = (currentCount + 2).toString().padStart(2, " ");
+          newCount = (currentCount + 2).toString().padStart(2, " ");
         } else {
-           newCount = (currentCount + 1).toString().padStart(2, " ");
+          newCount = (currentCount + 1).toString().padStart(2, " ");
         }
-        
+
         upvoteCount.textContent = newCount;
       } catch (error) {
         console.error("Error fetching votes:", error);
@@ -241,7 +241,7 @@ export function downvotePost(postId) {
         } else {
           newCount = (currentCount - 1).toString().padStart(2, " ");
         }
-        
+
         upvoteCount.textContent = newCount;
       } catch (error) {
         console.error("Error fetching votes:", error);

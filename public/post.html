@@ -1,50 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Post</title>
     <!-- Include Bulma CSS framework and custom styles -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
     <!-- Include JavaScript file for post functionalities -->
     <script type="module" src="js/modules/post.js"></script>
     <!-- Include Font Awesome for icons -->
-    <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
+    <script
+      src="https://kit.fontawesome.com/0dde1341bf.js"
+      crossorigin="anonymous"
+    ></script>
   </head>
 
   <body>
     <!-- Header and Navbar -->
     <header>
-        <nav class="navbar is-fixed-top" aria-label="main navigation">
-            <div class="navbar-brand">
-                <a class="navbar-item" href="/">
-                    <img src="/images/Vogerl.png" alt="Vogerl Logo" height="100">
-                </a>
-                <a class="navbar-item" href="dashboard.html">Home</a>
-                
-                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                </a>
+      <nav class="navbar is-fixed-top" aria-label="main navigation">
+        <div class="navbar-brand">
+          <a class="navbar-item" href="/">
+            <img src="/images/Vogerl.png" alt="Vogerl Logo" height="100" />
+          </a>
+          <a class="navbar-item" href="dashboard.html">Home</a>
+
+          <a
+            role="button"
+            class="navbar-burger"
+            aria-label="menu"
+            aria-expanded="false"
+            data-target="navbarBasicExample"
+          >
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+        </div>
+        <div id="navbarBasicExample" class="navbar-menu">
+          <div class="navbar-start">
+            <a class="navbar-item" href="news.html"
+              >World News (a free service from Vogerl)</a
+            >
+          </div>
+          <div id="navbar-end" class="navbar-end">
+            <div class="navbar-item" id="auth-buttons">
+              <div class="buttons">
+                <a class="button is-light" href="login.html" id="login-button"
+                  >Log in</a
+                >
+                <a
+                  class="button is-primary"
+                  href="signup.html"
+                  id="signup-button"
+                  ><strong>Sign up</strong></a
+                >
+              </div>
             </div>
-            <div id="navbarBasicExample" class="navbar-menu">
-                <div class="navbar-start">
-                    
-                    <a class="navbar-item" href="news.html">World News (a free service from Vogerl)</a>
-                    
-                </div>
-                <div id="navbar-end" class="navbar-end">
-                    <div class="navbar-item" id="auth-buttons">
-                        <div class="buttons">
-                            <a class="button is-light" href="login.html" id="login-button">Log in</a>
-                            <a class="button is-primary" href="signup.html" id="signup-button"><strong>Sign up</strong></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </nav>
+          </div>
+        </div>
+      </nav>
     </header>
 
     <!-- Main Content Section -->
@@ -80,7 +99,9 @@
             <p>Are you sure you want to delete this post?</p>
           </div>
           <footer class="modal-card-foot">
-            <button id="confirmDelete" class="button mx-6 is-danger">Delete</button>
+            <button id="confirmDelete" class="button mx-6 is-danger">
+              Delete
+            </button>
             <button id="cancelDelete" class="button mx-6">Cancel</button>
           </footer>
         </div>
@@ -94,7 +115,7 @@
             <div class="field">
               <label class="label">Title</label>
               <div class="control">
-                <input id="editPostTitle" class="input" type="text" value="">
+                <input id="editPostTitle" class="input" type="text" value="" />
               </div>
             </div>
             <div class="field">
@@ -105,10 +126,14 @@
             </div>
             <div class="field is-grouped">
               <div class="control">
-                <button id="confirmEditButton" class="button is-primary">Confirm</button>
+                <button id="confirmEditButton" class="button is-primary">
+                  Confirm
+                </button>
               </div>
               <div class="control">
-                <button id="cancelEditButton" class="button is-light">Cancel</button>
+                <button id="cancelEditButton" class="button is-light">
+                  Cancel
+                </button>
               </div>
             </div>
           </div>

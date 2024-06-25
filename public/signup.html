@@ -1,147 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Include Bulma CSS framework and Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+    />
     <title>Sign Up - Q&A Forum</title>
     <style>
-        html {
-            font-size: 15px;
-        }
-        
-        .box {
-            box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
-        }
-        
-        .back-link {
-            margin-top: 10px;
-            display: inline-block;
-            background: #3273dc;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        
-        .back-link:hover {
-            background-color: #2366b1;
-        }
+      html {
+        font-size: 15px;
+      }
+
+      .box {
+        box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1),
+          0 0 0 1px rgba(10, 10, 10, 0.1);
+      }
+
+      .back-link {
+        margin-top: 10px;
+        display: inline-block;
+        background: #3273dc;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+      }
+
+      .back-link:hover {
+        background-color: #2366b1;
+      }
     </style>
     <!-- Include Font Awesome kit for additional icons -->
-    <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
-</head>
+    <script
+      src="https://kit.fontawesome.com/0dde1341bf.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
 
-<body>
+  <body>
     <section class="section">
-        <div class="container">
-            <div class="columns is-centered">
-                <div class="column is-5-tablet is-4-desktop is-3-widescreen">
-                    <!-- Sign Up Form -->
-                    <form id="signup-form" action="#" class="box">
-                        <h1 class="title has-text-centered">Sign Up for Q&A Forum</h1>
+      <div class="container">
+        <div class="columns is-centered">
+          <div class="column is-5-tablet is-4-desktop is-3-widescreen">
+            <!-- Sign Up Form -->
+            <form id="signup-form" action="#" class="box">
+              <h1 class="title has-text-centered">Sign Up for Q&A Forum</h1>
 
-                        <!-- First Name Field -->
-                        <div class="field">
-                            <label class="label" for="registerFirstName">First Name</label>
-                            <div class="control has-icons-left">
-                                <input class="input is-medium" type="text" id="registerFirstName" placeholder="First Name" required>
-                                <span class="icon is-small is-left">
-                                    <i class="fas fa-user"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Last Name Field -->
-                        <div class="field">
-                            <label class="label" for="registerLastName">Last Name</label>
-                            <div class="control has-icons-left">
-                                <input class="input is-medium" type="text" id="registerLastName" placeholder="Last Name" required>
-                                <span class="icon is-small is-left">
-                                    <i class="fas fa-user"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Birthdate Field -->
-                        <div class="field">
-                            <label class="label" for="registerBirthdate">Birthdate</label>
-                            <div class="control has-icons-left">
-                                <input class="input is-medium" type="date" id="registerBirthdate" required>
-                                <span class="icon is-small is-left">
-                                    <i class="fas fa-birthday-cake"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Username Field -->
-                        <div class="field">
-                            <label class="label" for="registerUsername">Username</label>
-                            <div class="control has-icons-left">
-                                <input class="input is-medium" type="text" id="registerUsername" placeholder="Username" required>
-                                <span class="icon is-small is-left">
-                                    <i class="fas fa-user"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Email Field -->
-                        <div class="field">
-                            <label class="label" for="registerEmail">Email</label>
-                            <div class="control has-icons-left">
-                                <input class="input is-medium" type="email" id="registerEmail" placeholder="Email" required>
-                                <span class="icon is-small is-left">
-                                    <i class="fas fa-envelope"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Password Field -->
-                        <div class="field">
-                            <label class="label" for="registerPassword">Password</label>
-                            <div class="control has-icons-left">
-                                <input class="input is-medium" type="password" id="registerPassword" placeholder="Password" required>
-                                <span class="icon is-small is-left">
-                                    <i class="fas fa-lock"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Confirm Password Field -->
-                        <div class="field">
-                            <label class="label" for="confirmPassword">Confirm Password</label>
-                            <div class="control has-icons-left">
-                                <input class="input is-medium" type="password" id="confirmPassword" placeholder="Confirm Password" required>
-                                <span class="icon is-small is-left">
-                                    <i class="fas fa-lock"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Sign Up Button -->
-                        <div class="field">
-                            <div class="control">
-                                <button id="signUp" class="button is-link is-medium" type="submit">Sign Up</button>
-                            </div>
-                        </div>
-                    </form>
-
-                    <!-- Links to Login and Home Page -->
-                    <p class="has-text-centered">
-                        <a href="login.html" class="back-link">Go to Login</a>
-                    </p>
-                    <p class="has-text-centered">
-                        <a href="dashboard.html" class="back-link">Back to Home</a>
-                    </p>
+              <!-- First Name Field -->
+              <div class="field">
+                <label class="label" for="registerFirstName">First Name</label>
+                <div class="control has-icons-left">
+                  <input
+                    class="input is-medium"
+                    type="text"
+                    id="registerFirstName"
+                    placeholder="First Name"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-user"></i>
+                  </span>
                 </div>
-            </div>
+              </div>
+
+              <!-- Last Name Field -->
+              <div class="field">
+                <label class="label" for="registerLastName">Last Name</label>
+                <div class="control has-icons-left">
+                  <input
+                    class="input is-medium"
+                    type="text"
+                    id="registerLastName"
+                    placeholder="Last Name"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-user"></i>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Birthdate Field -->
+              <div class="field">
+                <label class="label" for="registerBirthdate">Birthdate</label>
+                <div class="control has-icons-left">
+                  <input
+                    class="input is-medium"
+                    type="date"
+                    id="registerBirthdate"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-birthday-cake"></i>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Username Field -->
+              <div class="field">
+                <label class="label" for="registerUsername">Username</label>
+                <div class="control has-icons-left">
+                  <input
+                    class="input is-medium"
+                    type="text"
+                    id="registerUsername"
+                    placeholder="Username"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-user"></i>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Email Field -->
+              <div class="field">
+                <label class="label" for="registerEmail">Email</label>
+                <div class="control has-icons-left">
+                  <input
+                    class="input is-medium"
+                    type="email"
+                    id="registerEmail"
+                    placeholder="Email"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-envelope"></i>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Password Field -->
+              <div class="field">
+                <label class="label" for="registerPassword">Password</label>
+                <div class="control has-icons-left">
+                  <input
+                    class="input is-medium"
+                    type="password"
+                    id="registerPassword"
+                    placeholder="Password"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-lock"></i>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Confirm Password Field -->
+              <div class="field">
+                <label class="label" for="confirmPassword"
+                  >Confirm Password</label
+                >
+                <div class="control has-icons-left">
+                  <input
+                    class="input is-medium"
+                    type="password"
+                    id="confirmPassword"
+                    placeholder="Confirm Password"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-lock"></i>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Sign Up Button -->
+              <div class="field">
+                <div class="control">
+                  <button
+                    id="signUp"
+                    class="button is-link is-medium"
+                    type="submit"
+                  >
+                    Sign Up
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <!-- Links to Login and Home Page -->
+            <p class="has-text-centered">
+              <a href="login.html" class="back-link">Go to Login</a>
+            </p>
+            <p class="has-text-centered">
+              <a href="dashboard.html" class="back-link">Back to Home</a>
+            </p>
+          </div>
         </div>
+      </div>
     </section>
     <!-- Include the signup JavaScript file -->
     <script src="js/signup.js"></script>
-</body>
-
+  </body>
 </html>

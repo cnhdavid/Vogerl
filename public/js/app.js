@@ -4,7 +4,12 @@
  */
 
 // Import necessary functions from other modules
-import { checkToken, getRoleFromToken, getUserIdFromToken, logout } from "./modules/auth.js";
+import {
+  checkToken,
+  getRoleFromToken,
+  getUserIdFromToken,
+  logout,
+} from "./modules/auth.js";
 import { fetchAndDisplayPosts } from "./modules/posts.js";
 import {
   populateMenu,
@@ -46,7 +51,6 @@ export function populateNavbar(user) {
     buttonContainer.classList.add("navbar-item");
     console.log(getRoleFromToken(localStorage.getItem("token")));
     if (getRoleFromToken(localStorage.getItem("token")) !== "admin") {
-    
       const profileButton = document.createElement("button");
       profileButton.setAttribute("id", "profile-button");
       profileButton.classList.add(
@@ -64,8 +68,6 @@ export function populateNavbar(user) {
       buttonContainer.appendChild(profileButton);
     }
 
-    
-   
     buttonContainer.appendChild(logoutButton);
 
     navbarEnd.innerHTML = "";
@@ -76,7 +78,6 @@ export function populateNavbar(user) {
     navbarItems.forEach((item) => {
       item.classList.add("hvr-grow");
     });
-   
   }
 }
 if (localStorage.getItem("token")) {
@@ -92,7 +93,6 @@ if (localStorage.getItem("token")) {
 if (localStorage.getItem("token")) {
   populateNavbar(checkToken());
   populatePostsSidebar(checkToken());
-
 }
 
 // Mobile menu functionality
@@ -200,7 +200,6 @@ document.addEventListener("DOMContentLoaded", () => {
   socket.addEventListener("message", (event) => {
     console.log("Message from server:", event.data);
     if (event.data === "Server is shutting down") {
-      
       window.location.reload();
       socket.close();
     }

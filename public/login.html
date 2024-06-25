@@ -1,99 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Include Bulma CSS framework -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+    />
     <!-- Include Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+    />
     <title>Log In - Q&A Forum</title>
     <!-- Include Font Awesome kit for additional icons -->
-    <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
+    <script
+      src="https://kit.fontawesome.com/0dde1341bf.js"
+      crossorigin="anonymous"
+    ></script>
     <!-- Include Google reCAPTCHA API -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
-        html {
-            font-size: 15px;
-        }
-        
-        .box {
-            box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
-        }
-        
-        .back-link {
-            margin-top: 20px;
-            display: inline-block;
-            background: #3273dc;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        
-        .back-link:hover {
-            background-color: #2366b1;
-        }
+      html {
+        font-size: 15px;
+      }
+
+      .box {
+        box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1),
+          0 0 0 1px rgba(10, 10, 10, 0.1);
+      }
+
+      .back-link {
+        margin-top: 20px;
+        display: inline-block;
+        background: #3273dc;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+      }
+
+      .back-link:hover {
+        background-color: #2366b1;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <section class="section">
-        <div class="container">
-            <div class="columns is-centered">
-                <div class="column is-5-tablet is-4-desktop is-3-widescreen">
-                    <!-- Login Form -->
-                    <form action="#" class="box" id="loginForm">
-                        <h1 class="title has-text-centered">Log In for Q&A Forum</h1>
+      <div class="container">
+        <div class="columns is-centered">
+          <div class="column is-5-tablet is-4-desktop is-3-widescreen">
+            <!-- Login Form -->
+            <form action="#" class="box" id="loginForm">
+              <h1 class="title has-text-centered">Log In for Q&A Forum</h1>
 
-                        <!-- Email Field -->
-                        <div class="field">
-                            <label class="label" for="registerEmail">Email</label>
-                            <div class="control has-icons-left">
-                                <input class="input is-medium" type="email" id="registerEmail" placeholder="Email" required>
-                                <span class="icon is-small is-left">
-                                    <i class="fas fa-envelope"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Password Field -->
-                        <div class="field">
-                            <label class="label" for="registerPassword">Password</label>
-                            <div class="control has-icons-left">
-                                <input class="input is-medium" type="password" id="registerPassword" placeholder="Password" required>
-                                <span class="icon is-small is-left">
-                                    <i class="fas fa-lock"></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- reCAPTCHA -->
-                        <div class="field">
-                            <div class="g-recaptcha" data-sitekey="6Lf75vQpAAAAAC8YVgzi54SRTktaPB1gBQ-aii7V"></div>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <div class="field">
-                            <div class="control">
-                                <button class="button is-link is-medium" type="submit">Log In</button>
-                            </div>
-                        </div>
-                    </form>
-                    <!-- Links for signup and back to home -->
-                    <p class="has-text-centered">
-                        <a href="signup.html" class="back-link">Create new Account</a>
-                    </p>
-                    <p class="has-text-centered">
-                        <a href="dashboard.html" class="back-link">Back to Home</a>
-                    </p>
+              <!-- Email Field -->
+              <div class="field">
+                <label class="label" for="registerEmail">Email</label>
+                <div class="control has-icons-left">
+                  <input
+                    class="input is-medium"
+                    type="email"
+                    id="registerEmail"
+                    placeholder="Email"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-envelope"></i>
+                  </span>
                 </div>
-            </div>
+              </div>
+
+              <!-- Password Field -->
+              <div class="field">
+                <label class="label" for="registerPassword">Password</label>
+                <div class="control has-icons-left">
+                  <input
+                    class="input is-medium"
+                    type="password"
+                    id="registerPassword"
+                    placeholder="Password"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-lock"></i>
+                  </span>
+                </div>
+              </div>
+
+              <!-- reCAPTCHA -->
+              <div class="field">
+                <div
+                  class="g-recaptcha"
+                  data-sitekey="6Lf75vQpAAAAAC8YVgzi54SRTktaPB1gBQ-aii7V"
+                ></div>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="field">
+                <div class="control">
+                  <button class="button is-link is-medium" type="submit">
+                    Log In
+                  </button>
+                </div>
+              </div>
+            </form>
+            <!-- Links for signup and back to home -->
+            <p class="has-text-centered">
+              <a href="signup.html" class="back-link">Create new Account</a>
+            </p>
+            <p class="has-text-centered">
+              <a href="dashboard.html" class="back-link">Back to Home</a>
+            </p>
+          </div>
         </div>
+      </div>
     </section>
     <!-- Include the login JavaScript file -->
     <script src="js/login.js"></script>
-</body>
-
+  </body>
 </html>

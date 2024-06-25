@@ -4,35 +4,27 @@
  */
 
 // Import necessary functions from other modules
-import {  logout, getRoleFromToken } from './modules/auth.js';
-import { fetchAndDisplayPosts } from './modules/posts.js';
+import { logout, getRoleFromToken } from "./modules/auth.js";
+import { fetchAndDisplayPosts } from "./modules/posts.js";
 
 /**
  * Main function that runs when the DOM content is fully loaded.
  * It checks the user's role, fetches and displays posts, and sets up event listeners for modal interactions.
  */
-document.addEventListener('DOMContentLoaded', () => {
-    // Get the token from localStorage
-    const token = localStorage.getItem('token');
+document.addEventListener("DOMContentLoaded", () => {
+  // Get the token from localStorage
+  const token = localStorage.getItem("token");
 
-    // Check if the user has the 'admin' role
-    console.log(getRoleFromToken(token))
-    if (getRoleFromToken(token) !== 'admin') {
-        // If not an admin, log the user out
-        logout();
-    }
-    fetchAndDisplayPosts()
+  // Check if the user has the 'admin' role
+  console.log(getRoleFromToken(token));
+  if (getRoleFromToken(token) !== "admin") {
+    // If not an admin, log the user out
+    logout();
+  }
+  fetchAndDisplayPosts();
 
-    const profileButton = document.getElementById('profile-button')
-    if (profileButton) {
-        profileButton.remove()
-    }
-    // remove profile button
-     
-
-    // remove upvote elements
-   
-
-    // remove downvote elements
-    
-})
+  const profileButton = document.getElementById("profile-button");
+  if (profileButton) {
+    profileButton.remove();
+  }
+});

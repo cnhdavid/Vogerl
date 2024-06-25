@@ -57,11 +57,7 @@ function displayPost(postId) {
       <figure class="image is-128x128 is-pulled-left mb-6"><img id="profilePic" class="" src="https://bulma.io/assets/images/placeholders/256x256.png" alt="Author's Profile Image" class="profile-image" /></figure>
       <div class="is-flex is-justify-content-flex-start mb-3 is-align-items-flex-start is-flex-direction-column ">
         <h1 id="post-title" class="title">${post.title}</h1>
-        ${
-          post.isanswered
-            ? '<span class="tag is-success">Answered</span>'
-            : ""
-        }
+        ${post.isanswered ? '<span class="tag is-success">Answered</span>' : ""}
       </div>
       <div class="columns">
         <p class="subtitle column">posted by <strong>${
@@ -83,9 +79,7 @@ function displayPost(postId) {
           ? `<i id="upvote-${post.id}" class="fa-solid fa-arrow-up mx-2"></i>`
           : ""
       }
-      <span id="upvote-count-${
-        post.id
-      }" class="upvote-count"> Loading...</span>
+      <span id="upvote-count-${post.id}" class="upvote-count"> Loading...</span>
       ${
         token
           ? `<i id="downvote-${post.id}" class="fa-solid fa-arrow-down ml-2"></i>`
@@ -199,7 +193,6 @@ function displayPost(postId) {
             editPost(postId, editPostTitle, editPostContent);
             const editPostModal = document.getElementById("editPostModal");
             editPostModal.style.display = "none";
-            
           } catch (error) {
             console.error("Error editing post:", error);
           }
@@ -342,7 +335,6 @@ export function getCommentCount(postId) {
       console.error("Error fetching comments:", error);
     });
 }
-
 
 /**
  * Submit a comment or reply to a comment on a post.
@@ -508,19 +500,19 @@ function displayProfilePicture(username) {
     .catch((error) => console.error("Error:", error));
 }
 
-  const $navbarBurgers = Array.prototype.slice.call(
-    document.querySelectorAll(".navbar-burger"),
-    0
-  );
+const $navbarBurgers = Array.prototype.slice.call(
+  document.querySelectorAll(".navbar-burger"),
+  0
+);
 
-  if ($navbarBurgers.length > 0) {
-    $navbarBurgers.forEach((el) => {
-      el.addEventListener("click", () => {
-        const target = el.dataset.target;
-        const $target = document.getElementById(target);
+if ($navbarBurgers.length > 0) {
+  $navbarBurgers.forEach((el) => {
+    el.addEventListener("click", () => {
+      const target = el.dataset.target;
+      const $target = document.getElementById(target);
 
-        el.classList.toggle("is-active");
-        $target.classList.toggle("is-active");
-      });
+      el.classList.toggle("is-active");
+      $target.classList.toggle("is-active");
     });
-  }
+  });
+}

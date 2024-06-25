@@ -1,30 +1,30 @@
 // js/modules/modal.js
-import { loadComments, submitComment } from './postManager.js';
+import { loadComments, submitComment } from "./postManager.js";
 
 /**
  * Opens a post by its ID, updating the URL and fetching post data.
  * @param {string} postId - The ID of the post to open.
  */
 export function openPost(postId) {
-  console.log('Opening post:', postId);
+  console.log("Opening post:", postId);
 
   // Update the URL to reflect the opened post
-  history.pushState({}, '', `post.html?postId=${postId}`);
+  history.pushState({}, "", `post.html?postId=${postId}`);
 
   // Add event listener for the browser's back/forward navigation
-  window.addEventListener('popstate', () => {
-    console.log('Popstate event triggered, redirecting to dashboard.');
-    window.location.href = 'dashboard.html'; // Redirect to the dashboard page on popstate
+  window.addEventListener("popstate", () => {
+    console.log("Popstate event triggered, redirecting to dashboard.");
+    window.location.href = "dashboard.html"; // Redirect to the dashboard page on popstate
   });
 
   // Fetch the post data from the server
   fetch(`http://localhost:3000/post/${postId}`)
-    .then(response => response.json())
-    .then(post => {
-      console.log('Post loaded, redirecting to:', `post.html?postId=${postId}`);
+    .then((response) => response.json())
+    .then((post) => {
+      console.log("Post loaded, redirecting to:", `post.html?postId=${postId}`);
       window.location.href = `post.html?postId=${postId}`; // Redirect to the post page
     })
-    .catch(error => console.error('Error fetching post:', error));
+    .catch((error) => console.error("Error fetching post:", error));
 }
 
 /**
@@ -36,25 +36,27 @@ export function openPost(postId) {
 export function editPost(postId, title, content) {
   // Send a PATCH request to update the post on the server
   fetch(`http://localhost:3000/post/${postId}`, {
-    method: 'PATCH',
+    method: "PATCH",
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the authorization token
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`, // Include the authorization token
     },
     body: JSON.stringify({ title, content }), // Send the updated title and content
   })
-    .then(response => {
+    .then((response) => {
       if (!response.ok) {
-        return response.json().then(err => { throw new Error(err.message) });
+        return response.json().then((err) => {
+          throw new Error(err.message);
+        });
       }
       return response.json();
     })
-    .then(post => {
+    .then((post) => {
       // Update the post on the page
       if (post) {
         window.location.reload();
-        console.log('Post updated:', post);
+        console.log("Post updated:", post);
       }
     })
-    .catch(error => console.error('Error editing post:', error));
+    .catch((error) => console.error("Error editing post:", error));
 }

@@ -1,70 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Include Bulma CSS framework and custom styles -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
     <title>World News - Vogerl</title>
     <!-- Include Font Awesome for icons -->
-    <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
-</head>
+    <script
+      src="https://kit.fontawesome.com/0dde1341bf.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
 
-<body>
+  <body>
     <!-- Header and Navbar -->
     <header>
-        <nav class="navbar" aria-label="main navigation">
-            <div class="navbar-brand">
-                <a class="navbar-item" href="/">
-                    <img src="/images/Vogerl.png" alt="Vogerl Logo" height="100">
-                </a>
-                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                </a>
+      <nav class="navbar" aria-label="main navigation">
+        <div class="navbar-brand">
+          <a class="navbar-item" href="/">
+            <img src="/images/Vogerl.png" alt="Vogerl Logo" height="100" />
+          </a>
+          <a
+            role="button"
+            class="navbar-burger"
+            aria-label="menu"
+            aria-expanded="false"
+            data-target="navbarBasicExample"
+          >
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+        </div>
+        <div id="navbarBasicExample" class="navbar-menu">
+          <div class="navbar-start">
+            <a class="navbar-item" href="/dashboard.html">Home</a>
+            <div class="navbar-item">
+              <input
+                class="input is-normal"
+                id="searchInput"
+                type="text"
+                placeholder="Search..."
+              />
             </div>
-            <div id="navbarBasicExample" class="navbar-menu">
-                <div class="navbar-start">
-                    <a class="navbar-item" href="/dashboard.html">Home</a>
-                    <div class="navbar-item">
-                        <input class="input is-normal" id="searchInput" type="text" placeholder="Search...">
-                    </div>
-                    <a class="navbar-item" id="searchButton"><i class="fa-solid fa-magnifying-glass"></i></a>
-                </div>
-                <div id="navbar-end" class="navbar-end">
-                    <div class="navbar-item" id="auth-buttons">
-                        <div class="buttons">
-                            <a class="button is-light" href="login.html" id="login-button">Log in</a>
-                            <a class="button is-primary" href="signup.html" id="signup-button"><strong>Sign up</strong></a>
-                        </div>
-                    </div>
-                </div>
+            <a class="navbar-item" id="searchButton"
+              ><i class="fa-solid fa-magnifying-glass"></i
+            ></a>
+          </div>
+          <div id="navbar-end" class="navbar-end">
+            <div class="navbar-item" id="auth-buttons">
+              <div class="buttons">
+                <a class="button is-light" href="login.html" id="login-button"
+                  >Log in</a
+                >
+                <a
+                  class="button is-primary"
+                  href="signup.html"
+                  id="signup-button"
+                  ><strong>Sign up</strong></a
+                >
+              </div>
             </div>
-        </nav>
+          </div>
+        </div>
+      </nav>
     </header>
 
     <!-- Main content -->
     <main>
-        <section class="section">
-            <div class="container">
-                <div class="columns">
-                    <!-- Main content -->
-                    <div class="column">
-                        <h2 class="title" id="newsTitle">World News</h2>
-                        <div id="newsContainer" class="columns is-multiline">
-                            <!-- News articles will be inserted here -->
-                        </div>
-                    </div>
-                </div>
+      <section class="section">
+        <div class="container">
+          <div class="columns">
+            <!-- Main content -->
+            <div class="column">
+              <h2 class="title" id="newsTitle">World News</h2>
+              <div id="newsContainer" class="columns is-multiline">
+                <!-- News articles will be inserted here -->
+              </div>
             </div>
-        </section>
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- Include the JavaScript file for fetching and displaying news articles -->
     <script type="module" src="js/modules/news.js"></script>
-</body>
-
+  </body>
 </html>

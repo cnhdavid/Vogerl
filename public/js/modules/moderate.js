@@ -1,5 +1,5 @@
-const axios = require('axios'); // Import axios for making HTTP requests
-const xml2js = require('xml2js'); // Import xml2js for parsing XML responses
+const axios = require("axios"); // Import axios for making HTTP requests
+const xml2js = require("xml2js"); // Import xml2js for parsing XML responses
 
 /**
  * Filters profanity from the provided text using the Purgomalum API.
@@ -8,24 +8,24 @@ const xml2js = require('xml2js'); // Import xml2js for parsing XML responses
  * @throws {Error} - Throws an error if the API call fails.
  */
 async function filterProfanity(text) {
-    try {
-        // Send a request to the Purgomalum API to filter profanity from the text
-        const response = await axios.get('https://www.purgomalum.com/service/xml', {
-            params: {
-                text: text // The text to be filtered is passed as a query parameter
-            }
-        });
+  try {
+    // Send a request to the Purgomalum API to filter profanity from the text
+    const response = await axios.get("https://www.purgomalum.com/service/xml", {
+      params: {
+        text: text, // The text to be filtered is passed as a query parameter
+      },
+    });
 
-        // Parse the XML response from the Purgomalum API
-        const parser = new xml2js.Parser();
-        const result = await parser.parseStringPromise(response.data);
-        
-        // Extract and return the filtered text from the parsed XML response
-        return result.PurgoMalum.result[0];
-    } catch (error) {
-        console.error('Error calling Purgomalum API:', error);
-        throw new Error('Error filtering text'); // Throw an error if the API call fails
-    }
+    // Parse the XML response from the Purgomalum API
+    const parser = new xml2js.Parser();
+    const result = await parser.parseStringPromise(response.data);
+
+    // Extract and return the filtered text from the parsed XML response
+    return result.PurgoMalum.result[0];
+  } catch (error) {
+    console.error("Error calling Purgomalum API:", error);
+    throw new Error("Error filtering text"); // Throw an error if the API call fails
+  }
 }
 
 /**
@@ -35,20 +35,23 @@ async function filterProfanity(text) {
  * @throws {Error} - Throws an error if the API call fails.
  */
 async function containsProfanity(text) {
-    try {
-        // Send a request to the Purgomalum API's containsprofanity endpoint
-        const response = await axios.get('https://www.purgomalum.com/service/containsprofanity', {
-            params: {
-                text: text // The text to be checked is passed as a query parameter
-            }
-        });
+  try {
+    // Send a request to the Purgomalum API's containsprofanity endpoint
+    const response = await axios.get(
+      "https://www.purgomalum.com/service/containsprofanity",
+      {
+        params: {
+          text: text, // The text to be checked is passed as a query parameter
+        },
+      }
+    );
 
-        // The API returns a boolean value as a string ("true" or "false")
-        return response.data;
-    } catch (error) {
-        console.error('Error calling Purgomalum API:', error);
-        throw new Error('Error checking text for profanity'); // Throw an error if the API call fails
-    }
+    // The API returns a boolean value as a string ("true" or "false")
+    return response.data;
+  } catch (error) {
+    console.error("Error calling Purgomalum API:", error);
+    throw new Error("Error checking text for profanity"); // Throw an error if the API call fails
+  }
 }
 
 module.exports = { filterProfanity, containsProfanity }; // Export the functions for use in other modules
