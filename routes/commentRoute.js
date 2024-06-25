@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {executeQuery} = require('../db');
 const authenticateToken = require('../authenticate');
-const pool = createPool.createPool();
+
 const myCache = require('../cache');
 
 const { containsProfanity } = require('../public/js/modules/moderate');
@@ -83,16 +83,12 @@ async function markPostAsAnswered(postId) {
     console.log('Marking post as answered:', postId);
     let client;
     try {
-        client = await pool.connect();
+        
         const result = await executeQuery('UPDATE posts SET isanswered = true WHERE id = $1', [postId]);
         // Process the result if needed
     } catch (error) {
         console.error('Error marking post as answered:', error);
         // Handle the error
-    } finally {
-        if (client) {
-            client.release(); // Release the client back to the pool
-        }
     }
 }
 
