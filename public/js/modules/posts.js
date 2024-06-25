@@ -349,9 +349,9 @@ export async function createPostElement(
               <div class="content">
                   <div class="post-content">
                       <p>
-                          <strong>${truncatedTitle}</strong> <small>@${
-    post.username
-  }</small>
+                          <strong>${truncatedTitle}</strong> 
+                          <br><small>@${post.username}</small>
+                          <br>
                           ${
                             post.isanswered
                               ? '<span class="tag is-success is-pulled-right">Answered</span>'
@@ -360,13 +360,15 @@ export async function createPostElement(
                           <br>
                           <em>${post.subject}</em>
                           <br>
-                          ${truncatedContent}
+                          <strong>${truncatedContent}</strong>
                           ${
                             post.image
                               ? `<figure class="image is-128x128 hvr-grow is-pulled-right is-pulled-right-mobile"><img src="${imageData}" alt="Post Image" /></figure>`
                               : ""
                           }
+                          <br>
                           <small>${formattedDate}</small>
+                          <br>
                       </p>
                       <div>
                           <i class="fa-solid fa-arrow-up is-fluid hvr-float" id="upvote-${
@@ -375,8 +377,8 @@ export async function createPostElement(
                           <span id="upvote-count-${
                             post.id
                           }" class="upvote-count mx-3">${
-    voteData[post.id] || 0
-  }</span>
+                            voteData[post.id] || 0
+                          }</span>
                           <i class="fa-solid fa-arrow-down is-fluid hvr-sink" id="downvote-${
                             post.id
                           }"></i>
@@ -384,8 +386,8 @@ export async function createPostElement(
                             post.id
                           }"><i class="fa-solid fa-comment mx-3"></i></span>
                           <span id="comment-count-${post.id}">${
-    commentCounts[post.id] || 0
-  }</span>
+                            commentCounts[post.id] || 0
+                          }</span>
                       </div>
                       ${
                         role === "admin"
