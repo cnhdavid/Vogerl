@@ -173,7 +173,7 @@ function resetVoteAnimation(button) {
 export function upvotePost(postId) {
   const authToken = localStorage.getItem("token");
 
-  let upvoteCount = document.getElementById(`upvote-count-${postId}`);
+  
 
   fetch(`http://localhost:3000/vote/${postId}/upvote`, {
     method: "POST",
@@ -184,20 +184,23 @@ export function upvotePost(postId) {
   })
     .then((response) => response.json())
     .then((data) => {
-      const upvoteButton = document.querySelector(`#upvote-${postId}`);
-      applyVoteAnimation(upvoteButton, "upvote");
-
-      // Reset the downvote button state
-      const downvoteButton = document.querySelector(`#downvote-${postId}`);
-      resetVoteAnimation(downvoteButton);
-
       try {
+        const upvoteButton = document.querySelector(`#upvote-${postId}`);
         if (upvoteButton.classList.contains("upvoted")) {
+          console.log("Already upvoted");
           return;
         } else {
+          let upvoteCount = document.getElementById(`upvote-count-${postId}`);
           let currentCount = parseInt(upvoteCount.textContent);
+          console.log(currentCount);
           let newCount = (currentCount + 1).toString().padStart(2, " ");
           upvoteCount.textContent = newCount;
+          
+          applyVoteAnimation(upvoteButton, "upvote");
+
+          // Reset the downvote button state
+          const downvoteButton = document.querySelector(`#downvote-${postId}`);
+          resetVoteAnimation(downvoteButton);
         }
       } catch (error) {
         console.error("Error updating upvote count:", error);
@@ -215,7 +218,7 @@ export function upvotePost(postId) {
 export function downvotePost(postId) {
   const authToken = localStorage.getItem("token");
 
-  let upvoteCount = document.getElementById(`upvote-count-${postId}`);
+  
 
   fetch(`http://localhost:3000/vote/${postId}/downvote`, {
     method: "POST",
@@ -226,20 +229,22 @@ export function downvotePost(postId) {
   })
     .then((response) => response.json())
     .then((data) => {
-      const downvoteButton = document.querySelector(`#downvote-${postId}`);
-      applyVoteAnimation(downvoteButton, "downvote");
-
-      // Reset the upvote button state
-      const upvoteButton = document.querySelector(`#upvote-${postId}`);
-      resetVoteAnimation(upvoteButton);
-
       try {
+        const downvoteButton = document.querySelector(`#downvote-${postId}`);
         if (downvoteButton.classList.contains("downvoted")) {
           return;
         } else {
+          let upvoteCount = document.getElementById(`upvote-count-${postId}`);
           let currentCount = parseInt(upvoteCount.textContent);
+          console.log(currentCount);
           let newCount = (currentCount - 1).toString().padStart(2, " ");
           upvoteCount.textContent = newCount;
+          
+          applyVoteAnimation(downvoteButton, "downvote");
+
+          // Reset the upvote button state
+          const upvoteButton = document.querySelector(`#upvote-${postId}`);
+          resetVoteAnimation(upvoteButton);
         }
       } catch (error) {
         console.error("Error updating downvote count:", error);
