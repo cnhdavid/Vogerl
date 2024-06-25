@@ -190,10 +190,16 @@ export function upvotePost(postId) {
       resetVoteAnimation(downvoteButton);
 
       try {
-        getPostVotes(postId).then((upvotes) => {
-          const upvoteCount = document.getElementById(`upvote-count-${postId}`);
-          upvoteCount.textContent = upvotes;
-        });
+        const upvoteCount = document.getElementById(`upvote-count-${postId}`);
+        let currentCount = parseInt(upvoteCount.textContent);
+        let newCount;
+        if (currentCount === -1) {
+           newCount = (currentCount + 2).toString().padStart(2, " ");
+        } else {
+           newCount = (currentCount + 1).toString().padStart(2, " ");
+        }
+        
+        upvoteCount.textContent = newCount;
       } catch (error) {
         console.error("Error fetching votes:", error);
       }
@@ -227,10 +233,16 @@ export function downvotePost(postId) {
       resetVoteAnimation(upvoteButton);
 
       try {
-        getPostVotes(postId).then((upvotes) => {
-          const upvoteCount = document.getElementById(`upvote-count-${postId}`);
-          upvoteCount.textContent = upvotes;
-        });
+        let upvoteCount = document.getElementById(`upvote-count-${postId}`);
+        let currentCount = parseInt(upvoteCount.textContent);
+        let newCount;
+        if (currentCount === 1) {
+          newCount = (currentCount - 2).toString().padStart(2, " ");
+        } else {
+          newCount = (currentCount - 1).toString().padStart(2, " ");
+        }
+        
+        upvoteCount.textContent = newCount;
       } catch (error) {
         console.error("Error fetching votes:", error);
       }
@@ -299,6 +311,23 @@ export async function hasUserVoted(postId, userId) {
     console.error("Error fetching upvotes:", error);
     return false;
   }
+}
+
+export async function fetchCommentCountsForPosts(postIds) {
+  const response = await fetch("/comments/commentCounts", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ postIds }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch comment counts");
+  }
+
+  const data = await response.json();
+  return data.commentCounts;
 }
 
 /**

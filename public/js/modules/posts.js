@@ -1,11 +1,12 @@
 // js/modules/post.js
 
 // Import necessary functions from other modules
-import { fetchComments, downvotePost, upvotePost, getPostVotes, hasUserVoted, applyVoteAnimation } from './postManager.js';
+import { fetchComments, downvotePost, upvotePost, getPostVotes, hasUserVoted, applyVoteAnimation, fetchCommentCountsForPosts } from './postManager.js';
 import { openPost } from './modal.js';
 import { getCommentCount, deletePost } from './post.js';
 import sidebarSubjects from './subjects.js';
 import { getUserId, getRoleFromToken, getUserIdFromToken } from './auth.js';
+import { fetchVotesForPosts, fetchUserVotesForPosts } from './voteManager.js';
 
 /**
  * Fetch posts from the API with optional filters for subject and username.
@@ -195,43 +196,47 @@ export async function getPostsByUsername(username) {
  */
 export async function fetchAndDisplayPosts(subject = null, username = null, searchTerm = null) {
   try {
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const postsContainer = document.getElementById('postsContainer');
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const postsContainer = document.getElementById('postsContainer');
 
-    // Show the loading spinner
-    loadingSpinner.style.display = 'block';
-    postsContainer.innerHTML = '';
+      // Show the loading spinner
+      loadingSpinner.style.display = 'block';
+      postsContainer.innerHTML = '';
 
-    let posts;
-    if (searchTerm) {
-      posts = await searchPosts(searchTerm);
-    } else {
-      console.log(subject, username);
-      posts = await fetchPosts(subject, username);
-    }
-    if (posts.length === 0) {
+      let posts;
+      if (searchTerm) {
+          posts = await searchPosts(searchTerm);
+      } else {
+          console.log(subject, username);
+          posts = await fetchPosts(subject, username);
+      }
 
-      postsContainer.innerHTML = 'No posts found.';
+      if (posts.length === 0) {
+          postsContainer.innerHTML = 'No posts found.';
+          loadingSpinner.style.display = 'none';
+          return;
+      }
+
+      const postIds = posts.map(post => post.id);
+
+      // Fetch votes, comment counts, and user votes concurrently
+      const [votes, commentCounts, userVotes] = await Promise.all([
+          fetchVotesForPosts(postIds),
+          fetchCommentCountsForPosts(postIds),
+          fetchUserVotesForPosts(postIds)
+      ]);
+
+      await Promise.all(posts.map(async (post) => {
+          const postElement = await createPostElement(post, votes, commentCounts, userVotes);
+          postsContainer.appendChild(postElement);
+      }));
+
+      // Hide the loading spinner after all posts are added to the DOM
       loadingSpinner.style.display = 'none';
-      return;
-    }
-    const commentsPromises = posts.map(post => fetchComments(post.id));
-    const allComments = await Promise.all(commentsPromises);
-
-    await Promise.all(posts.map(async (post, index) => {
-
-
-      const postElement = await createPostElement(post, allComments[index]);
-      postsContainer.appendChild(postElement);
-      await getCommentCount(post.id);
-    }));
-
-    // Hide the loading spinner after all posts are added to the DOM
-    loadingSpinner.style.display = 'none';
   } catch (error) {
-    console.error('Error displaying posts:', error);
-    // Hide the loading spinner in case of an error as well
-    loadingSpinner.style.display = 'none';
+      console.error('Error displaying posts:', error);
+      // Hide the loading spinner in case of an error as well
+      loadingSpinner.style.display = 'none';
   }
 }
 
@@ -268,21 +273,20 @@ function truncateText(text, maxLength) {
   }
   return text;
 }
-export async function createPostElement(post) {
+export async function createPostElement(post, voteData, commentCounts, userVotes) {
   const postElement = document.createElement('div');
   postElement.classList.add('box', 'is-clickable', 'my-3');
 
   let imageData = '';
   if (post.image) {
-    imageData = `data:image/jpeg;base64,${post.image}`;
+      imageData = `data:image/jpeg;base64,${post.image}`;
   }
   const date = new Date(post.created_at);
-
   const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-
 
   const truncatedTitle = truncateText(post.title, 50); // Limit title to 50 characters
   const truncatedContent = truncateText(post.content, 150); // Limit content to 200 characters
+
   postElement.innerHTML = `
       <article class="media ">
           <div class="media-content">
@@ -300,10 +304,10 @@ export async function createPostElement(post) {
                       </p>
                       <div>
                       <i class="fa-solid fa-arrow-up is-fluid hvr-float" id="upvote-${post.id}"></i>
-                      <span id="upvote-count-${post.id}" class="upvote-count mx-3"> Loading...</span>
+                      <span id="upvote-count-${post.id}" class="upvote-count mx-3">${voteData[post.id] || 0}</span>
                       <i class="fa-solid fa-arrow-down is-fluid hvr-sink" id="downvote-${post.id}"></i>
                       <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment mx-3"></i></span>
-                      <span id="comment-count-${post.id}"> Loading...</span>
+                      <span id="comment-count-${post.id}">${commentCounts[post.id] || 0}</span>
                       </div>
                       
                       ${localStorage.getItem('token') && getRoleFromToken(localStorage.getItem('token')) === 'admin' ? `<button class="button is-danger is-small is-pulled-right" id="deletePost-${post.id}">Delete Post</button>` : ''}
@@ -316,69 +320,39 @@ export async function createPostElement(post) {
   `;
   postElement.classList.add('fade-in-slide-up');
 
-  try {
-    const upvotes = await getPostVotes(post.id);
-    const upvoteCountElement = postElement.querySelector('.upvote-count');
-    upvoteCountElement.textContent = upvotes;
-
-
-
-
-  } catch (error) {
-    console.error('Error fetching votes or comments:', error);
-  }
   if (localStorage.getItem('token') && getRoleFromToken(localStorage.getItem('token')) === 'admin') {
-    const deleteButton = postElement.querySelector(`#deletePost-${post.id}`);
-    deleteButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      deletePost(post.id);
-    });
+      const deleteButton = postElement.querySelector(`#deletePost-${post.id}`);
+      deleteButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          deletePost(post.id);
+      });
   }
 
   const upvoteButton = postElement.querySelector('.fa-arrow-up');
   const downvoteButton = postElement.querySelector('.fa-arrow-down');
   upvoteButton.addEventListener('click', (event) => {
-    event.stopPropagation();
-    upvotePost(post.id);
+      event.stopPropagation();
+      upvotePost(post.id);
   });
 
   downvoteButton.addEventListener('click', (event) => {
-    event.stopPropagation();
-    downvotePost(post.id);
+      event.stopPropagation();
+      downvotePost(post.id);
   });
 
-  async function colorVoteButtons() {
-    if (localStorage.getItem('token')) {
-      try {
-        const userId = await getUserId(post.username);
-        const liked = await hasUserVoted(post.id, userId);
-
-
-        const upvoteElement = document.getElementById(`upvote-${post.id}`);
-        const downvoteElement = document.getElementById(`downvote-${post.id}`);
-
-        if (liked === 'upvote' && upvoteElement) {
-          applyVoteAnimation(upvoteElement, 'upvote');
-        }
-
-        if (liked === 'downvote' && downvoteElement) {
-          applyVoteAnimation(downvoteElement, 'downvote');
-        }
-      } catch (error) {
-        console.error('Error fetching user ID or vote status:', error);
-      }
-    }
+  // Apply vote colors based on user votes
+  if (userVotes[post.id] === 1) {
+      upvoteButton.classList.add('upvoted'); // Add a class to indicate upvoted
+  } else if (userVotes[post.id] === -1) {
+      downvoteButton.classList.add('downvoted'); // Add a class to indicate downvoted
   }
 
-  // Call this function after posts are rendered
-  setTimeout(colorVoteButtons, 1000); // Adjust the delay as needed
-
   if (imageData) {
-    const imageElement = postElement.querySelector('.image');
-    imageElement.addEventListener('click', () => {
-      const newTab = window.open();
-      newTab.document.body.innerHTML = `<img src="${imageData}" alt="Post Image" style="max-width: 100%; height: auto;" />`;
-    });
+      const imageElement = postElement.querySelector('.image');
+      imageElement.addEventListener('click', () => {
+          const newTab = window.open();
+          newTab.document.body.innerHTML = `<img src="${imageData}" alt="Post Image" style="max-width: 100%; height: auto;" />`;
+      });
   }
 
   postElement.addEventListener('click', () => openPost(post.id));

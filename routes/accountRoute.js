@@ -82,7 +82,7 @@ router.post('/login', async(req, res) => {
     }
 });
 
-router.post('/editProfile', authenticateToken, upload.single('image'), async(req, res) => {
+router.put('/editProfile', authenticateToken, upload.single('image'), async(req, res) => {
     let { about, username } = req.body;
     let image = null;
     console.log(about, username);

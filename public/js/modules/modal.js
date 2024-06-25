@@ -34,24 +34,27 @@ export function openPost(postId) {
  * @param {string} content - The new content of the post.
  */
 export function editPost(postId, title, content) {
-  // Send a PUT request to update the post on the server
+  // Send a PATCH request to update the post on the server
   fetch(`http://localhost:3000/post/${postId}`, {
-    method: 'PUT',
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`, // Include the authorization token
     },
     body: JSON.stringify({ title, content }), // Send the updated title and content
   })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => { throw new Error(err.message) });
+      }
+      return response.json();
+    })
     .then(post => {
       // Update the post on the page
-      if (response.ok) {
+      if (post) {
+        window.location.reload();
         console.log('Post updated:', post);
-      } else {
-        console.error('Error updating post:', post);
       }
     })
     .catch(error => console.error('Error editing post:', error));
-    
 }

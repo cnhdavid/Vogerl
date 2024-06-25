@@ -4,7 +4,7 @@
  */
 
 // Import necessary functions from other modules
-import { checkToken, getRoleFromToken, logout } from "./modules/auth.js";
+import { checkToken, getRoleFromToken, getUserIdFromToken, logout } from "./modules/auth.js";
 import { fetchAndDisplayPosts } from "./modules/posts.js";
 import {
   populateMenu,
@@ -76,7 +76,7 @@ export function populateNavbar(user) {
     navbarItems.forEach((item) => {
       item.classList.add("hvr-grow");
     });
-    populatePostsSidebar(getPostsByUsername(username));
+   
   }
 }
 if (localStorage.getItem("token")) {
@@ -217,4 +217,5 @@ document.addEventListener("DOMContentLoaded", () => {
   populateMenu();
   populateSidebar();
   populateFilterDropdown();
+  populatePostsSidebar(getPostsByUsername(getUserIdFromToken(localStorage.getItem('token'))));
 });

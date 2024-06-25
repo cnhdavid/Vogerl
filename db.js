@@ -9,12 +9,23 @@ let poolInstance = null;
 
 // Function to create a PostgreSQL connection pool
 function createPool() {
-    
-    const pool = new Pool({
-        connectionString: connectionString
-    });
-    return pool;
+    if (!poolInstance) {
+        poolInstance = new Pool({
+            connectionString: connectionString,
+            max: 20, // Adjust the max number of clients in the pool
+            idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+            connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
+        });
+
+        // Handle pool errors
+        poolInstance.on('error', (err) => {
+            console.error('Unexpected error on idle client', err);
+            process.exit(-1);
+        });
+    }
+    return poolInstance;
 }
+
 
 // Function to execute a query using the pool
 async function executeQuery(text, params) {
@@ -29,4 +40,4 @@ async function executeQuery(text, params) {
 }
 
 // Export the executeQuery function
-module.exports = { executeQuery };
+module.exports = { executeQuery, createPool };

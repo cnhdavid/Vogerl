@@ -65,7 +65,7 @@ function saveProfile() {
     console.log(aboutText);
 
     fetch('http://localhost:3000/account/editProfile', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },

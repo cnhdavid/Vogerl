@@ -117,6 +117,8 @@ router.patch('/:postId', authenticateToken, upload.none(), async (req, res) => {
     const { username } = req.user;  // Extracted from token in `authenticateToken` middleware
     const updates = req.body;
 
+    console.log('Received updates:', updates);
+
     // Prepare updates, checking for profanity and adjusting fields as necessary
     const fieldsToUpdate = {};
     if (updates.title) {
@@ -134,11 +136,15 @@ router.patch('/:postId', authenticateToken, upload.none(), async (req, res) => {
         fieldsToUpdate.content = modifiedContent;
     }
 
+    console.log('Fields to update:', fieldsToUpdate);
+
     // Generate SQL based on fields provided
     const setClause = Object.keys(fieldsToUpdate)
         .map((key, index) => `${key} = $${index + 1}`)
         .join(', ');
     const values = [...Object.values(fieldsToUpdate), postId, username];
+
+    console.log('Query:', `UPDATE posts SET ${setClause} WHERE id = $${Object.keys(fieldsToUpdate).length + 1} AND username = $${Object.keys(fieldsToUpdate).length + 2}`, 'Values:', values);
 
     if (Object.keys(fieldsToUpdate).length > 0) {
         try {
