@@ -106,8 +106,6 @@ router.put('/editProfile', authenticateToken, upload.single('image'), async(req,
     } catch (error) {
         console.error('Error updating profile:', error);
         return res.formatResponse({ message: 'Internal server error' }, 500);
-    } finally {
-        client.release(); // Release the client back to the pool
     }
 });
 

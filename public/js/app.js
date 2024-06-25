@@ -91,7 +91,7 @@ if (localStorage.getItem("token")) {
 // Populate the navbar with user information if the user is logged in
 if (localStorage.getItem("token")) {
   populateNavbar(checkToken());
-  populatePostsSidebar(getPostsByUsername(getUserIdFromToken(localStorage.getItem('token'))));
+  populatePostsSidebar(checkToken());
 
 }
 
