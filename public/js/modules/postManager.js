@@ -173,6 +173,8 @@ function resetVoteAnimation(button) {
 export function upvotePost(postId) {
   const authToken = localStorage.getItem("token");
 
+  let upvoteCount = document.getElementById(`upvote-count-${postId}`);
+
   fetch(`http://localhost:3000/vote/${postId}/upvote`, {
     method: "POST",
     headers: {
@@ -190,18 +192,15 @@ export function upvotePost(postId) {
       resetVoteAnimation(downvoteButton);
 
       try {
-        const upvoteCount = document.getElementById(`upvote-count-${postId}`);
-        let currentCount = parseInt(upvoteCount.textContent);
-        let newCount;
-        if (currentCount === -1) {
-          newCount = (currentCount + 2).toString().padStart(2, " ");
+        if (upvoteButton.classList.contains("upvoted")) {
+          return;
         } else {
-          newCount = (currentCount + 1).toString().padStart(2, " ");
+          let currentCount = parseInt(upvoteCount.textContent);
+          let newCount = (currentCount + 1).toString().padStart(2, " ");
+          upvoteCount.textContent = newCount;
         }
-
-        upvoteCount.textContent = newCount;
       } catch (error) {
-        console.error("Error fetching votes:", error);
+        console.error("Error updating upvote count:", error);
       }
     })
     .catch((error) => {
@@ -215,6 +214,8 @@ export function upvotePost(postId) {
  */
 export function downvotePost(postId) {
   const authToken = localStorage.getItem("token");
+
+  let upvoteCount = document.getElementById(`upvote-count-${postId}`);
 
   fetch(`http://localhost:3000/vote/${postId}/downvote`, {
     method: "POST",
@@ -233,18 +234,15 @@ export function downvotePost(postId) {
       resetVoteAnimation(upvoteButton);
 
       try {
-        let upvoteCount = document.getElementById(`upvote-count-${postId}`);
-        let currentCount = parseInt(upvoteCount.textContent);
-        let newCount;
-        if (currentCount === 1) {
-          newCount = (currentCount - 2).toString().padStart(2, " ");
+        if (downvoteButton.classList.contains("downvoted")) {
+          return;
         } else {
-          newCount = (currentCount - 1).toString().padStart(2, " ");
+          let currentCount = parseInt(upvoteCount.textContent);
+          let newCount = (currentCount - 1).toString().padStart(2, " ");
+          upvoteCount.textContent = newCount;
         }
-
-        upvoteCount.textContent = newCount;
       } catch (error) {
-        console.error("Error fetching votes:", error);
+        console.error("Error updating downvote count:", error);
       }
     })
     .catch((error) => {
