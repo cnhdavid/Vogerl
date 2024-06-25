@@ -147,12 +147,12 @@ export async function fetchPostsByUsername(username) {
  * Populate the sidebar with posts fetched from the given promise.
  * @param {Promise<Array>} postsPromise - A promise that resolves to an array of posts.
  */
-export async function populatePostsSidebar(postsPromise) {
-  const posts = await postsPromise;
+export async function populatePostsSidebar(username) {
+  const posts = await fetchPostsByUsername(username);
   const sidebarMenu = document.getElementById("sidebarPostsMenu");
   sidebarMenu.innerHTML = "";
 
-  if (Array.isArray(posts)) {
+  if (posts) {
     posts.forEach((post) => {
       const listItem = document.createElement("li");
       listItem.classList.add("my-3", "hvr-grow");
