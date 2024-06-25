@@ -7,6 +7,15 @@ const multer = require('multer');
 const upload = multer();
 const { filterProfanity, containsProfanity } = require('../public/js/modules/moderate');
 
+/**
+ * @route POST /create
+ * @desc Create a new post
+ * @param {string} title - The title of the post
+ * @param {string} content - The content of the post
+ * @param {string} subject - The subject of the post
+ * @param {file} image - Optional image file uploaded with the post
+ * @returns {object} message - Success or error message
+ */
 router.post('/create', authenticateToken, upload.single('image'), async (req, res) => {
     let { title, content, subject } = req.body;
     const username = req.user.username; // Extract username from the token
@@ -38,6 +47,12 @@ router.post('/create', authenticateToken, upload.single('image'), async (req, re
     }
 });
 
+/**
+ * @route DELETE /Deletepost/:postId
+ * @desc Delete a specific post
+ * @param {string} postId - The ID of the post to delete
+ * @returns {object} message - Success or error message
+ */
 router.delete('/Deletepost/:postId', authenticateToken, async (req, res) => {
     const postId = req.params.postId;
 
@@ -73,16 +88,22 @@ router.delete('/Deletepost/:postId', authenticateToken, async (req, res) => {
     }
 });
 
+/**
+ * @route GET /posts
+ * @desc Fetch posts based on subject and/or username
+ * @param {string} subject - Optional filter for posts by subject
+ * @param {string} username - Optional filter for posts by username
+ * @returns {array} posts - Array of posts matching the filters
+ */
 router.get('/posts', async (req, res) => {
     let subject = req.query.subject || 'All';
     let username = req.query.username || null;
-    console.log(subject);
+
     const cacheKey = `allPosts`;
     const cachedPosts = myCache.get(cacheKey);
 
     if (cachedPosts && subject === "All" && username === null) {
-        console.log("returning from cache");
-        // sort by date
+        // Return cached posts sorted by date
         cachedPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         return res.formatResponse(cachedPosts, 200);
     }
@@ -96,10 +117,9 @@ router.get('/posts', async (req, res) => {
                 result = await executeQuery('SELECT * FROM posts WHERE username = $1 AND subject = $2', [username, subject]);
             }
         } else if (subject && subject !== "All") {
-            console.log(subject);
             result = await executeQuery('SELECT * FROM posts WHERE subject = $1', [subject]);
         } else {
-            console.log("updating cache");
+            // Fetch all posts and cache them
             result = await executeQuery('SELECT * FROM posts');
             result.rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             myCache.set(cacheKey, result.rows);
@@ -112,12 +132,16 @@ router.get('/posts', async (req, res) => {
     }
 });
 
+/**
+ * @route PATCH /:postId
+ * @desc Update a specific post
+ * @param {string} postId - The ID of the post to update
+ * @returns {object} message - Success or error message
+ */
 router.patch('/:postId', authenticateToken, upload.none(), async (req, res) => {
     const { postId } = req.params;
     const { username } = req.user;  // Extracted from token in `authenticateToken` middleware
     const updates = req.body;
-
-    console.log('Received updates:', updates);
 
     // Prepare updates, checking for profanity and adjusting fields as necessary
     const fieldsToUpdate = {};
@@ -136,15 +160,11 @@ router.patch('/:postId', authenticateToken, upload.none(), async (req, res) => {
         fieldsToUpdate.content = modifiedContent;
     }
 
-    console.log('Fields to update:', fieldsToUpdate);
-
     // Generate SQL based on fields provided
     const setClause = Object.keys(fieldsToUpdate)
         .map((key, index) => `${key} = $${index + 1}`)
         .join(', ');
     const values = [...Object.values(fieldsToUpdate), postId, username];
-
-    console.log('Query:', `UPDATE posts SET ${setClause} WHERE id = $${Object.keys(fieldsToUpdate).length + 1} AND username = $${Object.keys(fieldsToUpdate).length + 2}`, 'Values:', values);
 
     if (Object.keys(fieldsToUpdate).length > 0) {
         try {
@@ -160,9 +180,14 @@ router.patch('/:postId', authenticateToken, upload.none(), async (req, res) => {
     }
 });
 
+/**
+ * @route GET /:postId
+ * @desc Fetch a specific post by ID
+ * @param {string} postId - The ID of the post to fetch
+ * @returns {object} post - The post object
+ */
 router.get('/:postId', async (req, res) => {
     const postId = req.params.postId;
-    console.log(postId);
 
     try {
         const result = await executeQuery('SELECT * FROM posts WHERE id = $1', [postId]);

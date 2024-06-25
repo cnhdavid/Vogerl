@@ -7,6 +7,12 @@ const myCache = require("../cache");
 
 const { containsProfanity } = require("../public/js/modules/moderate");
 
+/**
+ * @route GET /:postId
+ * @desc Fetch comments for a specific post, using cache if available
+ * @param {string} postId - The ID of the post to fetch comments for
+ * @returns {object} comments - Array of comments for the specified post
+ */
 router.get("/:postId", async (req, res) => {
   const postId = req.params.postId;
   const cacheKey = `comments_${postId}`;
@@ -29,6 +35,12 @@ router.get("/:postId", async (req, res) => {
   }
 });
 
+/**
+ * @route POST /commentCounts
+ * @desc Fetch comment counts for multiple posts
+ * @param {array} postIds - Array of post IDs to fetch comment counts for
+ * @returns {object} commentCounts - Object with post IDs as keys and comment counts as values
+ */
 router.post('/commentCounts', async (req, res) => {
     const { postIds } = req.body; // Expecting an array of postIds in the request body
 
@@ -39,7 +51,7 @@ router.post('/commentCounts', async (req, res) => {
     try {
         const query = `
             SELECT post_id, COUNT(*) AS comment_count
-            FROM Comments
+            FROM comments
             WHERE post_id = ANY($1::int[])
             GROUP BY post_id
         `;
@@ -58,6 +70,15 @@ router.post('/commentCounts', async (req, res) => {
     }
 });
 
+/**
+ * @route POST /:postId/create
+ * @desc Create a new comment for a specific post
+ * @param {string} postId - The ID of the post to add a comment to
+ * @param {string} content - The content of the comment
+ * @param {string} parentId - Optional parent ID if the comment is a reply
+ * @param {string} username - The username of the user adding the comment (extracted from token)
+ * @returns {object} comment - The created comment
+ */
 router.post("/:postId/create", authenticateToken, async (req, res) => {
   const { postId } = req.params;
   let { content, parentId } = req.body; // Include parentId in the request body
@@ -83,6 +104,13 @@ router.post("/:postId/create", authenticateToken, async (req, res) => {
   }
 });
 
+/**
+ * @route POST /:commentId/answer
+ * @desc Mark a comment as the answer for a specific post
+ * @param {string} commentId - The ID of the comment to mark as the answer
+ * @param {string} postId - The ID of the post to which the comment belongs
+ * @returns {object} message - Success or error message
+ */
 router.post("/:commentId/answer", authenticateToken, async (req, res) => {
   const commentId = req.params;
   const postId = req.body;
@@ -110,6 +138,10 @@ router.post("/:commentId/answer", authenticateToken, async (req, res) => {
   }
 });
 
+/**
+ * Marks a post as answered by updating its status in the database
+ * @param {string} postId - The ID of the post to mark as answered
+ */
 async function markPostAsAnswered(postId) {
   console.log("Marking post as answered:", postId);
   let client;
@@ -125,6 +157,12 @@ async function markPostAsAnswered(postId) {
   }
 }
 
+/**
+ * @route DELETE /:commentId
+ * @desc Delete a specific comment
+ * @param {string} commentId - The ID of the comment to delete
+ * @returns {object} message - Success or error message
+ */
 router.delete("/:commentId", authenticateToken, async (req, res) => {
   const commentId = req.params.commentId;
 

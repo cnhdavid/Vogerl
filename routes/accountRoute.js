@@ -3,14 +3,25 @@ const router = express.Router();
 const { executeQuery } = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
 const authenticateToken = require('../authenticate');
 const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // Define routes for the /account endpoint
-router.post('/signup', async(req, res) => {
+
+/**
+ * @route POST /account/signup
+ * @desc Register a new user
+ * @param {string} username - The username of the new user
+ * @param {string} email - The email of the new user
+ * @param {string} password - The password of the new user
+ * @param {string} date_of_birth - The date of birth of the new user in YYYY-MM-DD format
+ * @param {string} first_name - The first name of the new user
+ * @param {string} last_name - The last name of the new user
+ * @returns {object} message - Success or error message
+ */
+router.post('/signup', async (req, res) => {
     const { username, email, password, date_of_birth, first_name, last_name } = req.body;
 
     const dob = new Date(date_of_birth);
@@ -18,7 +29,6 @@ router.post('/signup', async(req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    
     try {
         const userCheckQuery = 'SELECT * FROM users WHERE email = $1';
         const userCheckResult = await executeQuery(userCheckQuery, [email]);
@@ -37,7 +47,16 @@ router.post('/signup', async(req, res) => {
     }
 });
 
-router.post('/login', async(req, res) => {
+/**
+ * @route POST /account/login
+ * @desc Login a user and return a JWT token
+ * @param {string} email - The email of the user
+ * @param {string} password - The password of the user
+ * @param {string} recaptchaResponse - The reCAPTCHA response token
+ * @returns {object} token - JWT token
+ * @returns {string} role - The role of the user (admin/user)
+ */
+router.post('/login', async (req, res) => {
     const { email, password, recaptchaResponse } = req.body;
 
     // Verify reCAPTCHA
@@ -67,7 +86,7 @@ router.post('/login', async(req, res) => {
         }
 
         const jwtSecretKey = process.env.JWT_SECRET_KEY;
-        const token = jwt.sign({ userId: user.id, username: user.username, role: user.user_role}, jwtSecretKey, { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user.id, username: user.username, role: user.user_role }, jwtSecretKey, { expiresIn: '1h' });
 
         if (user.user_role === 'admin') {
             console.log('Admin login successful');
@@ -82,7 +101,15 @@ router.post('/login', async(req, res) => {
     }
 });
 
-router.put('/editProfile', authenticateToken, upload.single('image'), async(req, res) => {
+/**
+ * @route PUT /account/editProfile
+ * @desc Edit user profile
+ * @param {string} about - About text of the user
+ * @param {string} username - The username of the user
+ * @param {file} [image] - Optional profile picture file
+ * @returns {object} message - Success or error message
+ */
+router.put('/editProfile', authenticateToken, upload.single('image'), async (req, res) => {
     let { about, username } = req.body;
     let image = null;
     console.log(about, username);
@@ -91,7 +118,6 @@ router.put('/editProfile', authenticateToken, upload.single('image'), async(req,
         image = req.file.buffer.toString('base64');
     }
 
-    
     try {
         let updateQuery;
         if (image === null) {
