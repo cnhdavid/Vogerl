@@ -26,7 +26,7 @@ router.post('/create', authenticateToken, upload.single('image'), async (req, re
         image = req.file.buffer.toString('base64');
     }
     let modifiedTitle = await filterProfanity(title);
-    const modifiedContent = await filterProfanity(content);
+    let modifiedContent = await filterProfanity(content);
     const titleHasProfanity = await containsProfanity(title);
     const contentHasProfanity = await containsProfanity(content);
 
