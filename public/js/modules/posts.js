@@ -219,12 +219,21 @@ export async function fetchAndDisplayPosts(subject = null, username = null, sear
 
       const postIds = posts.map(post => post.id);
 
-      // Fetch votes, comment counts, and user votes concurrently
-      const [votes, commentCounts, userVotes] = await Promise.all([
+      // Fetch votes and comment counts concurrently
+      const [votes, commentCounts] = await Promise.all([
           fetchVotesForPosts(postIds),
           fetchCommentCountsForPosts(postIds),
-          fetchUserVotesForPosts(postIds)
       ]);
+
+      let userVotes = {};
+      const token = localStorage.getItem('token');
+      if (token) {
+          try {
+              userVotes = await fetchUserVotesForPosts(postIds);
+          } catch (error) {
+              console.error('Error fetching user votes:', error);
+          }
+      }
 
       await Promise.all(posts.map(async (post) => {
           const postElement = await createPostElement(post, votes, commentCounts, userVotes);
@@ -287,11 +296,14 @@ export async function createPostElement(post, voteData, commentCounts, userVotes
   const truncatedTitle = truncateText(post.title, 50); // Limit title to 50 characters
   const truncatedContent = truncateText(post.content, 150); // Limit content to 200 characters
 
+  const token = localStorage.getItem('token');
+  const role = token ? getRoleFromToken(token) : null;
+
   postElement.innerHTML = `
-      <article class="media ">
+      <article class="media">
           <div class="media-content">
               <div class="content">
-                  <div class="post-content ">
+                  <div class="post-content">
                       <p>
                           <strong>${truncatedTitle}</strong> <small>@${post.username}</small>
                           ${post.isanswered ? '<span class="tag is-success is-pulled-right">Answered</span>' : ''}
@@ -299,28 +311,25 @@ export async function createPostElement(post, voteData, commentCounts, userVotes
                           <em>${post.subject}</em>
                           <br>
                           ${truncatedContent}
-                          ${post.image ? `<figure class="image is-128x128 hvr-grow is-pulled-right is-pulled-right-mobile"><img src="${imageData}" alt="Post Image"  /> </figure>` : ''}
+                          ${post.image ? `<figure class="image is-128x128 hvr-grow is-pulled-right is-pulled-right-mobile"><img src="${imageData}" alt="Post Image" /></figure>` : ''}
                           <small>${formattedDate}</small>
                       </p>
                       <div>
-                      <i class="fa-solid fa-arrow-up is-fluid hvr-float" id="upvote-${post.id}"></i>
-                      <span id="upvote-count-${post.id}" class="upvote-count mx-3">${voteData[post.id] || 0}</span>
-                      <i class="fa-solid fa-arrow-down is-fluid hvr-sink" id="downvote-${post.id}"></i>
-                      <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment mx-3"></i></span>
-                      <span id="comment-count-${post.id}">${commentCounts[post.id] || 0}</span>
+                          <i class="fa-solid fa-arrow-up is-fluid hvr-float" id="upvote-${post.id}"></i>
+                          <span id="upvote-count-${post.id}" class="upvote-count mx-3">${voteData[post.id] || 0}</span>
+                          <i class="fa-solid fa-arrow-down is-fluid hvr-sink" id="downvote-${post.id}"></i>
+                          <span id="commentIcon-${post.id}"><i class="fa-solid fa-comment mx-3"></i></span>
+                          <span id="comment-count-${post.id}">${commentCounts[post.id] || 0}</span>
                       </div>
-                      
-                      ${localStorage.getItem('token') && getRoleFromToken(localStorage.getItem('token')) === 'admin' ? `<button class="button is-danger is-small is-pulled-right" id="deletePost-${post.id}">Delete Post</button>` : ''}
+                      ${role === 'admin' ? `<button class="button is-danger is-small is-pulled-right" id="deletePost-${post.id}">Delete Post</button>` : ''}
                   </div>
-                   
               </div>
           </div>
-         
       </article>
   `;
   postElement.classList.add('fade-in-slide-up');
 
-  if (localStorage.getItem('token') && getRoleFromToken(localStorage.getItem('token')) === 'admin') {
+  if (role === 'admin') {
       const deleteButton = postElement.querySelector(`#deletePost-${post.id}`);
       deleteButton.addEventListener('click', (event) => {
           event.stopPropagation();
@@ -328,23 +337,25 @@ export async function createPostElement(post, voteData, commentCounts, userVotes
       });
   }
 
-  const upvoteButton = postElement.querySelector('.fa-arrow-up');
-  const downvoteButton = postElement.querySelector('.fa-arrow-down');
-  upvoteButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      upvotePost(post.id);
-  });
+  if (token) {
+      const upvoteButton = postElement.querySelector('.fa-arrow-up');
+      const downvoteButton = postElement.querySelector('.fa-arrow-down');
+      upvoteButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          upvotePost(post.id);
+      });
 
-  downvoteButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      downvotePost(post.id);
-  });
+      downvoteButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          downvotePost(post.id);
+      });
 
-  // Apply vote colors based on user votes
-  if (userVotes[post.id] === 1) {
-      upvoteButton.classList.add('upvoted'); // Add a class to indicate upvoted
-  } else if (userVotes[post.id] === -1) {
-      downvoteButton.classList.add('downvoted'); // Add a class to indicate downvoted
+      // Apply vote colors based on user votes
+      if (userVotes[post.id] === 1) {
+          upvoteButton.classList.add('upvoted'); // Add a class to indicate upvoted
+      } else if (userVotes[post.id] === -1) {
+          downvoteButton.classList.add('downvoted'); // Add a class to indicate downvoted
+      }
   }
 
   if (imageData) {
