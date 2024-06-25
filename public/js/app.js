@@ -198,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
   socket.addEventListener("message", (event) => {
     console.log("Message from server:", event.data);
     if (event.data === "Server is shutting down") {
-      localStorage.removeItem("token");
+      
       window.location.reload();
       socket.close();
     }

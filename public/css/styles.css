@@ -151,5 +151,9 @@
     #logout-button {
         margin-block: 10px;
     }
+
+    #post-container {
+        margin-top: 20%;
+    }
     
 }
