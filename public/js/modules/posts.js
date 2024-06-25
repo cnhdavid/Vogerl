@@ -147,6 +147,8 @@ export async function populatePostsSidebar(postsPromise) {
       listItem.classList.add('my-3', 'hvr-grow');
       const postElement = document.createElement('div');
       postElement.classList.add('box', 'is-clickable', 'my-3', 'fade-in-slide-up');
+      const truncatedTitle = truncateText(post.title, 50); // Limit title to 50 characters
+  const truncatedContent = truncateText(post.content, 50); // Limit content to 200 characters
       postElement.innerHTML = `
         <article class="media is-clickable">
           <div class="media-content">
@@ -154,10 +156,9 @@ export async function populatePostsSidebar(postsPromise) {
               ${post.isanswered ? '<span class="tag is-success is-pulled-right">Answered</span>' : ''}
               <br>
               <p>
-                <strong>${post.title}</strong> 
+                <strong>${truncatedTitle}</strong> 
                 <br>
-                <content class="is-pulled-right my-3"><em>${post.subject}</em></content>
-                ${post.content}
+                ${truncatedContent}
               </p>
             </div>
           </div>
