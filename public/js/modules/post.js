@@ -49,70 +49,73 @@ function displayPost(postId) {
 
       // Generate HTML content for the post
       postContainer.innerHTML = `
+      ${
+        token && post.username === getUserIdFromToken(token)
+          ? `<i id="editPostButton" class="fa-solid fa-pen-to-square is-pulled-right"></i>`
+          : ""
+      }
+      <figure class="image is-128x128 is-pulled-left mb-6"><img id="profilePic" class="" src="https://bulma.io/assets/images/placeholders/256x256.png" alt="Author's Profile Image" class="profile-image" /></figure>
+      <div class="is-flex is-justify-content-flex-start mb-3 is-align-items-flex-start is-flex-direction-column ">
+        <h1 class="title">${post.title}</h1>
         ${
-          token && post.username === getUserIdFromToken(token)
-            ? `<i id="editPostButton" class="fa-solid fa-pen-to-square is-pulled-right"></i>`
+          post.isanswered
+            ? '<span class="tag is-success">Answered</span>'
             : ""
         }
-        <figure class="image is-128x128 is-pulled-left mb-6"><img id="profilePic" class="" src="https://bulma.io/assets/images/placeholders/256x256.png" alt="Author's Profile Image" class="profile-image" /></figure>
-        <div class="is-flex is-justify-content-flex-start mb-3 is-align-items-flex-start is-flex-direction-column ">
-          <h1 class="title">${post.title}</h1>
+      </div>
+      <div class="columns">
+        <p class="subtitle column">posted by <strong>${
+          post.username
+        }</strong></p>
+        <p class="subtitle is-pull-right">posted on ${formattedDate}</p>
+      </div>
+      <p class="subtitle">Subject: ${post.subject}</p>
+      ${
+        post.image
+          ? `<figure class="image is-pulled-right mb-6"><img src="data:image/jpeg;base64,${post.image}" alt="Post Image" class="post-image " /></figure>`
+          : ""
+      }
+      <div class="content">
+        <p><strong>${post.content}</strong></p>
+      </div>
+      ${
+        token
+          ? `<i id="upvote-${post.id}" class="fa-solid fa-arrow-up mx-2"></i>`
+          : ""
+      }
+      <span id="upvote-count-${
+        post.id
+      }" class="upvote-count"> Loading...</span>
+      ${
+        token
+          ? `<i id="downvote-${post.id}" class="fa-solid fa-arrow-down ml-2"></i>`
+          : ""
+      }
+      <span id="commentIcon-${
+        post.id
+      }"><i class="fa-solid fa-comment mx-3"></i></span>
+      <span id="comment-count-${post.id}"> Loading...</span>
+      ${
+        token
+          ? ` 
+        <textarea id="commentInput" class="textarea my-4" placeholder="Add a comment"></textarea>
+        <div class="buttons">
+          <button id="submitComment" class="button is-primary my-2"><i class="fa-solid fa-check mx-2"></i>Submit</button>
           ${
-            post.isanswered
-              ? '<span class="tag is-success">Answered</span>'
+            token && post.username === getUserIdFromToken(token)
+              ? `<button id="deletePostButton" class="button is-danger my-2">Delete Post</button>`
               : ""
           }
         </div>
-        <div class="columns">
-          <p class="subtitle column">posted by <strong>${
-            post.username
-          }</strong></p>
-          <p class="subtitle is-pull-right">posted on ${formattedDate}</p>
-        </div>
-        <p class="subtitle">Subject: ${post.subject}</p>
-        ${
-          post.image
-            ? `<figure class="image is-pulled-right mb-6"><img src="data:image/jpeg;base64,${post.image}" alt="Post Image" class="post-image " /></figure>`
-            : ""
-        }
-        <div class="content">
-          <p><strong>${post.content}</strong></p>
-        </div>
-        ${
-          token
-            ? `<i id="upvote-${post.id}" class="fa-solid fa-arrow-up mx-2"></i>`
-            : ""
-        }
-        <span id="upvote-count-${
-          post.id
-        }" class="upvote-count"> Loading...</span>
-        ${
-          token
-            ? `<i id="downvote-${post.id}" class="fa-solid fa-arrow-down ml-2"></i>`
-            : ""
-        }
-        <span id="commentIcon-${
-          post.id
-        }"><i class="fa-solid fa-comment mx-3"></i></span>
-        <span id="comment-count-${post.id}"> Loading...</span>
-        <div class="comments-container" id="comments-container"></div>
-        ${
-          token
-            ? ` 
-          <textarea id="commentInput" class="textarea my-4" placeholder="Add a comment"></textarea>
-          <button id="submitComment" class="button is-primary my-2"><i class="fa-solid fa-check mx-2"></i>Submit</button>
-        `
-            : `
-          <p>Please log in to add a comment.</p>
-          <button id="loginButton" class="button is-primary">Log In</button>
-        `
-        }
-        ${
-          token && post.username === getUserIdFromToken(token)
-            ? `<button id="deletePostButton" class="button is-danger my-2 is-pulled-right">Delete Post</button>`
-            : ""
-        }
-      `;
+      `
+          : `
+        <p>Please log in to add a comment.</p>
+        <button id="loginButton" class="button is-primary">Log In</button>
+      `
+      }
+      <div class="comments-container" id="comments-container"></div>
+    `;
+
       postContainer.classList.add("fade-in-slide-up");
       displayProfilePicture(post.username);
 
