@@ -46,7 +46,10 @@ export function editPost(postId, title, content) {
   })
     .then(response => response.json())
     .then(post => {
-      openPost(postId);
+      // Update the post on the page
+      document.getElementById('postTitle').textContent = title;
+      document.getElementById('postContent').textContent = content;
     })
     .catch(error => console.error('Error editing post:', error));
+    
 }

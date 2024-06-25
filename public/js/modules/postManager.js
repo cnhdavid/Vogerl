@@ -1,7 +1,7 @@
 // js/modules/comment.js
 
 // Import necessary functions from other modules
-import { getUserIdFromToken } from './auth.js';
+import { getUserIdFromToken } from "./auth.js";
 
 /**
  * Fetch comments for a specific post.
@@ -9,16 +9,16 @@ import { getUserIdFromToken } from './auth.js';
  * @returns {Promise<Array>} - A promise that resolves to an array of comments.
  */
 export async function fetchComments(postId) {
-    try {
-        const response = await fetch(`http://localhost:3000/comments/${postId}`);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch comments for post ${postId}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error(`Error fetching comments for post ${postId}:`, error);
-        return [];
+  try {
+    const response = await fetch(`http://localhost:3000/comments/${postId}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch comments for post ${postId}`);
     }
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching comments for post ${postId}:`, error);
+    return [];
+  }
 }
 
 /**
@@ -27,22 +27,22 @@ export async function fetchComments(postId) {
  * @returns {Array} - An array of organized comments.
  */
 export function organizeComments(comments) {
-    const commentMap = {};
-    comments.forEach(comment => {
-        comment.replies = [];
-        commentMap[comment.id] = comment;
-    });
+  const commentMap = {};
+  comments.forEach((comment) => {
+    comment.replies = [];
+    commentMap[comment.id] = comment;
+  });
 
-    const organizedComments = [];
-    comments.forEach(comment => {
-        if (comment.parent_id) {
-            commentMap[comment.parent_id].replies.push(comment);
-        } else {
-            organizedComments.push(comment);
-        }
-    });
+  const organizedComments = [];
+  comments.forEach((comment) => {
+    if (comment.parent_id) {
+      commentMap[comment.parent_id].replies.push(comment);
+    } else {
+      organizedComments.push(comment);
+    }
+  });
 
-    return organizedComments;
+  return organizedComments;
 }
 
 /**
@@ -50,18 +50,25 @@ export function organizeComments(comments) {
  * @param {string} postId - The ID of the post to load comments for.
  */
 export async function loadComments(postId) {
-    try {
-        const comments = await fetchComments(postId);
-        const commentsContainer = document.getElementById('commentsContainer');
-        commentsContainer.innerHTML = '';
+  try {
+    const comments = await fetchComments(postId);
+    const commentsContainer = document.getElementById("commentsContainer");
+    commentsContainer.innerHTML = "";
 
-        const renderComments = (comments, parentElement, level = 0, replyTo = null) => {
-            comments.forEach(comment => {
-                const commentElement = document.createElement('div');
-                commentElement.classList.add('comment');
-                commentElement.style.marginLeft = `${level * 20}px`;
-                const replyText = replyTo ? `<span class="replying-to-text">Replying to ${replyTo}</span>` : '';
-                commentElement.innerHTML = `
+    const renderComments = (
+      comments,
+      parentElement,
+      level = 0,
+      replyTo = null
+    ) => {
+      comments.forEach((comment) => {
+        const commentElement = document.createElement("div");
+        commentElement.classList.add("comment");
+        commentElement.style.marginLeft = `${level * 20}px`;
+        const replyText = replyTo
+          ? `<span class="replying-to-text">Replying to ${replyTo}</span>`
+          : "";
+        commentElement.innerHTML = `
           <p>
             <strong>${comment.username}</strong> ${replyText}
             <br>
@@ -76,35 +83,40 @@ export async function loadComments(postId) {
           </div>
         `;
 
-                const replyButton = commentElement.querySelector('.reply-button');
-                const replyInput = commentElement.querySelector('.reply-input');
-                const submitReplyButton = commentElement.querySelector('.submit-reply');
-                const submitCloseButton = commentElement.querySelector('.submit-close');
+        const replyButton = commentElement.querySelector(".reply-button");
+        const replyInput = commentElement.querySelector(".reply-input");
+        const submitReplyButton = commentElement.querySelector(".submit-reply");
+        const submitCloseButton = commentElement.querySelector(".submit-close");
 
-                replyButton.addEventListener('click', () => {
-                    replyInput.style.display = 'block';
-                });
+        replyButton.addEventListener("click", () => {
+          replyInput.style.display = "block";
+        });
 
-                submitReplyButton.addEventListener('click', () => {
-                    const replyContent = replyInput.querySelector('textarea').value;
-                    submitComment(postId, replyContent, comment.id);
-                });
-                submitCloseButton.addEventListener('click', () => {
-                    replyInput.style.display = 'none';
-                });
+        submitReplyButton.addEventListener("click", () => {
+          const replyContent = replyInput.querySelector("textarea").value;
+          submitComment(postId, replyContent, comment.id);
+        });
+        submitCloseButton.addEventListener("click", () => {
+          replyInput.style.display = "none";
+        });
 
-                parentElement.appendChild(commentElement);
+        parentElement.appendChild(commentElement);
 
-                if (comment.replies) {
-                    renderComments(comment.replies, parentElement, level + 1, comment.username);
-                }
-            });
-        };
+        if (comment.replies) {
+          renderComments(
+            comment.replies,
+            parentElement,
+            level + 1,
+            comment.username
+          );
+        }
+      });
+    };
 
-        renderComments(organizeComments(comments), commentsContainer);
-    } catch (error) {
-        console.error('Error fetching comments:', error);
-    }
+    renderComments(organizeComments(comments), commentsContainer);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+  }
 }
 
 /**
@@ -114,37 +126,35 @@ export async function loadComments(postId) {
  * @param {string|null} parentId - The ID of the parent comment if replying to a comment.
  */
 export function submitComment(postId, content, parentId = null) {
-    const authToken = localStorage.getItem('token');
+  const authToken = localStorage.getItem("token");
 
-    fetch(`http://localhost:3000/api/posts/${postId}/comments`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ content, parentId })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to submit comment: ${response.statusText}`);
-            }
-            if (response.status === 403) {
-                
-                window.location.href = '/login.html';
-            }
-            return response.json();
-        })
-        .then(comment => {
-            if (!parentId) {
-                document.getElementById('commentInput').value = '';
-            }
-            loadComments(postId);
-            
-        })
-        .catch(error => {
-            console.error('Error submitting comment:', error.message);
-            // Handle the error, display an error message, etc.
-        });
+  fetch(`http://localhost:3000/api/posts/${postId}/comments`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
+    },
+    body: JSON.stringify({ content, parentId }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to submit comment: ${response.statusText}`);
+      }
+      if (response.status === 403) {
+        window.location.href = "/login.html";
+      }
+      return response.json();
+    })
+    .then((comment) => {
+      if (!parentId) {
+        document.getElementById("commentInput").value = "";
+      }
+      loadComments(postId);
+    })
+    .catch((error) => {
+      console.error("Error submitting comment:", error.message);
+      // Handle the error, display an error message, etc.
+    });
 }
 
 /**
@@ -152,8 +162,8 @@ export function submitComment(postId, content, parentId = null) {
  * @param {HTMLElement} button - The button element to reset.
  */
 function resetVoteAnimation(button) {
-    button.classList.remove('upvoted', 'downvoted');
-    button.classList.add('normal');
+  button.classList.remove("upvoted", "downvoted");
+  button.classList.add("normal");
 }
 
 /**
@@ -161,37 +171,36 @@ function resetVoteAnimation(button) {
  * @param {string} postId - The ID of the post to upvote.
  */
 export function upvotePost(postId) {
-    const authToken = localStorage.getItem('token');
+  const authToken = localStorage.getItem("token");
 
-    fetch(`http://localhost:3000/vote/${postId}/upvote`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const upvoteButton = document.querySelector(`#upvote-${postId}`);
-            applyVoteAnimation(upvoteButton, 'upvote');
+  fetch(`http://localhost:3000/vote/${postId}/upvote`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      const upvoteButton = document.querySelector(`#upvote-${postId}`);
+      applyVoteAnimation(upvoteButton, "upvote");
 
-            // Reset the downvote button state
-            const downvoteButton = document.querySelector(`#downvote-${postId}`);
-            resetVoteAnimation(downvoteButton);
+      // Reset the downvote button state
+      const downvoteButton = document.querySelector(`#downvote-${postId}`);
+      resetVoteAnimation(downvoteButton);
 
-            try {
-                getPostVotes(postId)
-                    .then(upvotes => {
-                        const upvoteCount = document.getElementById(`upvote-count-${postId}`);
-                        upvoteCount.textContent = upvotes;
-                    });
-            } catch (error) {
-                console.error('Error fetching votes:', error);
-            }
-        })
-        .catch(error => {
-            console.error('Error upvoting post:', error);
+      try {
+        getPostVotes(postId).then((upvotes) => {
+          const upvoteCount = document.getElementById(`upvote-count-${postId}`);
+          upvoteCount.textContent = upvotes;
         });
+      } catch (error) {
+        console.error("Error fetching votes:", error);
+      }
+    })
+    .catch((error) => {
+      console.error("Error upvoting post:", error);
+    });
 }
 
 /**
@@ -199,37 +208,36 @@ export function upvotePost(postId) {
  * @param {string} postId - The ID of the post to downvote.
  */
 export function downvotePost(postId) {
-    const authToken = localStorage.getItem('token');
+  const authToken = localStorage.getItem("token");
 
-    fetch(`http://localhost:3000/vote/${postId}/downvote`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const downvoteButton = document.querySelector(`#downvote-${postId}`);
-            applyVoteAnimation(downvoteButton, 'downvote');
+  fetch(`http://localhost:3000/vote/${postId}/downvote`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      const downvoteButton = document.querySelector(`#downvote-${postId}`);
+      applyVoteAnimation(downvoteButton, "downvote");
 
-            // Reset the upvote button state
-            const upvoteButton = document.querySelector(`#upvote-${postId}`);
-            resetVoteAnimation(upvoteButton);
+      // Reset the upvote button state
+      const upvoteButton = document.querySelector(`#upvote-${postId}`);
+      resetVoteAnimation(upvoteButton);
 
-            try {
-                getPostVotes(postId)
-                    .then(upvotes => {
-                        const upvoteCount = document.getElementById(`upvote-count-${postId}`);
-                        upvoteCount.textContent = upvotes;
-                    });
-            } catch (error) {
-                console.error('Error fetching votes:', error);
-            }
-        })
-        .catch(error => {
-            console.error('Error downvoting post:', error);
+      try {
+        getPostVotes(postId).then((upvotes) => {
+          const upvoteCount = document.getElementById(`upvote-count-${postId}`);
+          upvoteCount.textContent = upvotes;
         });
+      } catch (error) {
+        console.error("Error fetching votes:", error);
+      }
+    })
+    .catch((error) => {
+      console.error("Error downvoting post:", error);
+    });
 }
 
 /**
@@ -238,22 +246,21 @@ export function downvotePost(postId) {
  * @returns {Promise<number>} - A promise that resolves to the total votes count.
  */
 export async function getPostVotes(postId) {
-    try {
-        const response = await fetch(`http://localhost:3000/vote/${postId}/votes`);
-        if (response.status === 403 || response.status === 401) {
-            
-            return;
-        }
-        if (!response.ok) {
-            console.log('Error fetching upvotes:', response.statusText);
-            throw new Error('Failed to fetch upvotes');
-        }
-        const data = await response.json();
-        return data.totalVotes;
-    } catch (error) {
-        console.error('Error fetching upvotes:', error);
-        return 0;
+  try {
+    const response = await fetch(`http://localhost:3000/vote/${postId}/votes`);
+    if (response.status === 403 || response.status === 401) {
+      return;
     }
+    if (!response.ok) {
+      console.log("Error fetching upvotes:", response.statusText);
+      throw new Error("Failed to fetch upvotes");
+    }
+    const data = await response.json();
+    return data.totalVotes;
+  } catch (error) {
+    console.error("Error fetching upvotes:", error);
+    return 0;
+  }
 }
 
 /**
@@ -263,33 +270,35 @@ export async function getPostVotes(postId) {
  * @returns {Promise<boolean>} - A promise that resolves to a boolean indicating if the user has voted.
  */
 export async function hasUserVoted(postId, userId) {
-    const authToken = localStorage.getItem('token');
+  const authToken = localStorage.getItem("token");
 
-    getUserIdFromToken(authToken);
-    try {
-        const response = await fetch(`http://localhost:3000/user/${postId}/hasUserLiked/${userId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            }
-        });
+  getUserIdFromToken(authToken);
+  try {
+    const response = await fetch(
+      `http://localhost:3000/user/${postId}/hasUserLiked/${userId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      }
+    );
 
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                
-                window.location.href = 'login.html';
-            }
-            console.log('Error fetching upvotes:', response.statusText);
-            throw new Error('Failed to fetch upvotes');
-        }
-
-        const data = await response.json();
-
-        return data.hasUserLiked;
-    } catch (error) {
-        console.error('Error fetching upvotes:', error);
-        return false;
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        window.location.href = "login.html";
+      }
+      console.log("Error fetching upvotes:", response.statusText);
+      throw new Error("Failed to fetch upvotes");
     }
+
+    const data = await response.json();
+
+    return data.hasUserLiked;
+  } catch (error) {
+    console.error("Error fetching upvotes:", error);
+    return false;
+  }
 }
 
 /**
@@ -298,68 +307,72 @@ export async function hasUserVoted(postId, userId) {
  * @param {string} type - The type of vote ('upvote' or 'downvote').
  */
 export function applyVoteAnimation(button, type) {
-    button.classList.remove('upvoted', 'downvoted', 'normal');
+  button.classList.remove("upvoted", "downvoted", "normal");
 
-    if (type === 'upvote') {
-        button.classList.add('upvoted');
-    } else if (type === 'downvote') {
-        button.classList.add('downvoted');
-    }
+  if (type === "upvote") {
+    button.classList.add("upvoted");
+  } else if (type === "downvote") {
+    button.classList.add("downvoted");
+  }
 }
 
 // Mark Comment as answer and Post as answered
 
 export async function markCommentAsAnswer(commentId, postId) {
-    const authToken = localStorage.getItem('token');
-    try {
-        const response = await fetch(`http://localhost:3000/comments/${commentId}/answer`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ postId })
-        });
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                
-                window.location.href = 'login.html';
-            }
-            console.log('Error fetching upvotes:', response.statusText);
-            throw new Error('Failed to fetch upvotes');
-        } else {
-            const data = await response.json();
-            window.location.reload();
-            return data;
-        } 
-    } catch (error) {
-        console.error('Error fetching upvotes:', error);
+  const authToken = localStorage.getItem("token");
+  try {
+    const response = await fetch(
+      `http://localhost:3000/comments/${commentId}/answer`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ postId }),
+      }
+    );
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        window.location.href = "login.html";
+      }
+      console.log("Error fetching upvotes:", response.statusText);
+      throw new Error("Failed to fetch upvotes");
+    } else {
+      const data = await response.json();
+      window.location.reload();
+      return data;
     }
+  } catch (error) {
+    console.error("Error fetching upvotes:", error);
+  }
 }
 
 export async function deleteComment(commentId) {
-    const authToken = localStorage.getItem('token');
-    try {
-        const response = await fetch(`http://localhost:3000/comments/${commentId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            }
-        });
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                
-                window.location.href = 'login.html';
-            }
-            console.log('Error fetching upvotes:', response.statusText);
-            throw new Error('Failed to fetch upvotes');
-        } else {
-            const data = await response.json();
-            window.location.reload();
-            return data;
-        }
-    } catch (error) {
-        console.error('Error fetching upvotes:', error);
+  const authToken = localStorage.getItem("token");
+  try {
+    const response = await fetch(
+      `http://localhost:3000/comments/${commentId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        window.location.href = "login.html";
+      }
+      console.log("Error fetching upvotes:", response.statusText);
+      throw new Error("Failed to fetch upvotes");
+    } else {
+      const data = await response.json();
+      window.location.reload();
+      return data;
     }
+  } catch (error) {
+    console.error("Error fetching upvotes:", error);
+  }
 }
