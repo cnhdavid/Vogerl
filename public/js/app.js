@@ -42,8 +42,11 @@ export function populateNavbar(user) {
     logoutButton.textContent = "Logout";
     logoutButton.style.color = "#000000";
     logoutButton.addEventListener("click", logout);
-
+    const buttonContainer = document.createElement("div");
+    buttonContainer.classList.add("navbar-item");
+    console.log(getRoleFromToken(localStorage.getItem("token")));
     if (getRoleFromToken(localStorage.getItem("token")) !== "admin") {
+    
       const profileButton = document.createElement("button");
       profileButton.setAttribute("id", "profile-button");
       profileButton.classList.add(
@@ -58,11 +61,11 @@ export function populateNavbar(user) {
       profileButton.addEventListener("click", () => {
         window.location.href = "profile.html";
       });
+      buttonContainer.appendChild(profileButton);
     }
 
-    const buttonContainer = document.createElement("div");
-    buttonContainer.classList.add("navbar-item");
-    buttonContainer.appendChild(profileButton);
+    
+   
     buttonContainer.appendChild(logoutButton);
 
     navbarEnd.innerHTML = "";

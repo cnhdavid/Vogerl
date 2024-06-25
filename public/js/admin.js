@@ -16,12 +16,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
 
     // Check if the user has the 'admin' role
+    console.log(getRoleFromToken(token))
     if (getRoleFromToken(token) !== 'admin') {
         // If not an admin, log the user out
         logout();
     }
-    
     fetchAndDisplayPosts()
+
+    const profileButton = document.getElementById('profile-button')
+    if (profileButton) {
+        profileButton.remove()
+    }
+    // remove profile button
+     
 
     // remove upvote elements
    

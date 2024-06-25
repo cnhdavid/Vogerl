@@ -1,5 +1,6 @@
 // js/modules/modal.js
 
+import { response } from 'express';
 import { loadComments, submitComment } from './postManager.js';
 
 /**
@@ -47,8 +48,11 @@ export function editPost(postId, title, content) {
     .then(response => response.json())
     .then(post => {
       // Update the post on the page
-      document.getElementById('postTitle').textContent = title;
-      document.getElementById('postContent').textContent = content;
+      if (response.ok) {
+        console.log('Post updated:', post);
+      } else {
+        console.error('Error updating post:', post);
+      }
     })
     .catch(error => console.error('Error editing post:', error));
     
