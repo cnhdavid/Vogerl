@@ -1,20 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Include Bulma CSS framework and custom styles -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
-    />
-    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+    <link rel="stylesheet" href="css/styles.css">
     <title>Vogerl</title>
     <!-- Include Font Awesome for icons -->
-    <script
-      src="https://kit.fontawesome.com/0dde1341bf.js"
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://kit.fontawesome.com/0dde1341bf.js" crossorigin="anonymous"></script>
   </head>
 
   <body>
@@ -23,17 +17,12 @@
       <nav class="navbar is-fixed-top" aria-label="main navigation">
         <div class="navbar-brand">
           <a class="navbar-item" href="/">
-            <img src="/images/Vogerl.png" alt="Vogerl Logo" height="100" />
+            <img src="/images/Vogerl.png" alt="Vogerl Logo" height="100">
           </a>
           <div class="navbar-item">
             <div class="dropdown is-hidden-desktop" id="filterDropdownMenu">
               <div class="dropdown-trigger">
-                <button
-                  class="button"
-                  id="filterDropdownButton"
-                  aria-haspopup="true"
-                  aria-controls="filterDropdown"
-                >
+                <button class="button" id="filterDropdownButton" aria-haspopup="true" aria-controls="filterDropdown">
                   <span>All</span>
                   <span class="icon is-small">
                     <i class="fas fa-angle-down" aria-hidden="true"></i>
@@ -47,13 +36,7 @@
               </div>
             </div>
           </div>
-          <a
-            role="button"
-            class="navbar-burger"
-            aria-label="menu"
-            aria-expanded="false"
-            data-target="navbarBasicExample"
-          >
+          <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
@@ -62,33 +45,17 @@
         <div id="navbarBasicExample" class="navbar-menu">
           <div class="navbar-start">
             <a class="navbar-item" href="dashboard.html">Home</a>
-            <a class="navbar-item" href="news.html"
-              >World News (a free service from Vogerl)</a
-            >
+            <a class="navbar-item" href="news.html">World News (a free service from Vogerl)</a>
             <div class="navbar-item">
-              <input
-                class="input is-normal"
-                id="searchInput"
-                type="text"
-                placeholder="Search..."
-              />
+              <input class="input is-normal" id="searchInput" type="text" placeholder="Search...">
             </div>
-            <a class="navbar-item" id="searchButton"
-              ><i class="fa-solid fa-magnifying-glass"></i
-            ></a>
+            <a class="navbar-item" id="searchButton"><i class="fa-solid fa-magnifying-glass"></i></a>
           </div>
           <div id="navbar-end" class="navbar-end">
             <div class="navbar-item" id="auth-buttons">
               <div class="buttons">
-                <a class="button is-light" href="login.html" id="login-button"
-                  >Log in</a
-                >
-                <a
-                  class="button is-primary"
-                  href="signup.html"
-                  id="signup-button"
-                  ><strong>Sign up</strong></a
-                >
+                <a class="button is-light" href="login.html" id="login-button">Log in</a>
+                <a class="button is-primary" href="signup.html" id="signup-button"><strong>Sign up</strong></a>
               </div>
             </div>
           </div>
@@ -114,10 +81,7 @@
             <!-- Main content -->
             <div class="column">
               <div id="postsDisplay">
-                <button
-                  id="toggleFormButton"
-                  class="button column is-2 create-post mt-3 mr-3 is-primary is-pulled-right is-inline-flex"
-                >
+                <button id="toggleFormButton" class="button column is-2 create-post mt-3 mr-3 is-primary is-pulled-right is-inline-flex">
                   Ask a Question
                 </button>
                 <div class="columns">
@@ -129,35 +93,19 @@
                     <div class="field">
                       <label class="label">Title</label>
                       <div class="control">
-                        <input
-                          class="input"
-                          type="text"
-                          id="postTitle"
-                          placeholder="Title"
-                          required
-                        />
+                        <input class="input" type="text" id="postTitle" placeholder="Title" required>
                       </div>
                     </div>
                     <div class="field">
                       <label class="label">Image</label>
                       <div class="control">
-                        <input
-                          class="input"
-                          type="file"
-                          id="postImage"
-                          accept="image/*"
-                        />
+                        <input class="input" type="file" id="postImage" accept="image/*">
                       </div>
                     </div>
                     <div class="field">
                       <label class="label">Content</label>
                       <div class="control">
-                        <textarea
-                          class="textarea"
-                          id="postContent"
-                          placeholder="Content"
-                          required
-                        ></textarea>
+                        <textarea class="textarea" id="postContent" placeholder="Content" required></textarea>
                       </div>
                     </div>
                     <div class="container">
@@ -173,9 +121,7 @@
                       </div>
                     </div>
                     <div class="control">
-                      <button class="button is-primary mt-4" type="submit">
-                        Post
-                      </button>
+                      <button class="button is-primary mt-4" type="submit">Post</button>
                     </div>
                   </form>
                 </section>
